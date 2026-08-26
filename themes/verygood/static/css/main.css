@@ -255,9 +255,9 @@ button { font-family: inherit; }
 .page-head .hero__desc { margin-bottom: 0; }
 
 /* ---------- 文章列表（横向卡片） ---------- */
-/* v1.4.0：压缩列表底部留白，让首页内容与 footer 之间不再空一大段 */
-.post-list { padding: 34px 22px 40px; }
-.post-grid { display: flex; flex-direction: column; gap: 18px; margin-bottom: 26px; }
+/* v1.4.1：再次压缩列表底部留白，让首页内容与 footer 之间极度紧凑 */
+.post-list { padding: 34px 22px 0px; }
+.post-grid { display: flex; flex-direction: column; gap: 18px; margin-bottom: 0px; }
 .post-grid__cell { min-width: 0; }
 .post-grid--3 { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 18px; }
 
@@ -275,10 +275,10 @@ button { font-family: inherit; }
 }
 .post-card__cover img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1); }
 .post-card:hover .post-card__cover img { transform: scale(1.05); }
-/* v1.4.0：首页卡片封面底部渐变（向卡片底色柔化过渡），悬停时加深 */
+/* v1.4.0：首页卡片封面底部渐变（黑色透明度淡化，不染色） */
 .post-list .post-card__cover::after {
   content: ""; position: absolute; inset: 0; pointer-events: none;
-  background: linear-gradient(180deg, rgba(42, 24, 32, 0) 52%, rgba(42, 24, 32, 0.30) 100%);
+  background: linear-gradient(180deg, rgba(0,0,0,0) 62%, rgba(0,0,0,0.35) 100%);
   opacity: 0.55; transition: opacity 0.3s ease;
 }
 .post-list .post-card:hover .post-card__cover::after { opacity: 1; }
@@ -340,6 +340,11 @@ button { font-family: inherit; }
   border-radius: var(--radius-pill); font-size: 13px; font-weight: 600;
 }
 .post__cat:hover { background: var(--rose-500); color: #fff; }
+
+/* v1.4.1：封面下方的分类标签（白色药丸，从封面底部向下延伸） */
+.post__cat-wrap { text-align: center; margin: -18px auto 24px; position: relative; z-index: 2; }
+.post__cat-wrap .post__cat { display: inline-flex; background: var(--surface); color: var(--rose-600); border: 1px solid var(--rose-200); padding: 4px 14px; border-radius: 20px; font-size: 12.5px; font-weight: 600; box-shadow: var(--shadow-sm); transition: background .2s, border-color .2s; }
+.post__cat-wrap .post__cat:hover { background: var(--rose-500); color: #fff; border-color: var(--rose-500); }
 .post__title { font-size: clamp(26px, 4.4vw, 40px); letter-spacing: -0.4px; margin: 0 0 16px; }
 .post__head .meta-line { justify-content: center; margin-bottom: 0; }
 /* v1.4.0：封面与标题融合——图片铺底、底部深色渐变、标题覆于其上（向下渐隐） */
@@ -351,9 +356,13 @@ button { font-family: inherit; }
 .post__hero::after {
   content: ""; display: block; aspect-ratio: 1200 / 630;
 }
+/* v1.4.1：封面底部渐变——只暗化封面最底端 40% 区域以保证文字可读，
+   上部 60% 完全透明，图片亮度/色彩不受影响 */
 .post__hero-shade {
   position: absolute; inset: 0; pointer-events: none;
-  background: linear-gradient(180deg, rgba(42, 24, 32, 0.12) 0%, rgba(42, 24, 32, 0.26) 42%, rgba(42, 24, 32, 0.82) 100%);
+  background: linear-gradient(180deg,
+    rgba(0,0,0,0) 0%, rgba(0,0,0,0) 60%,
+    rgba(0,0,0,0.25) 78%, rgba(0,0,0,0.55) 100%);
 }
 .post__hero-body {
   position: absolute; inset: auto 0 0 0;
@@ -416,7 +425,7 @@ button { font-family: inherit; }
   border-left: 2px solid transparent; margin-left: -1px;
 }
 .post-toc__list a:hover { color: var(--rose-600); background: var(--bg-soft); }
-.post-toc__list a.is-active { color: var(--rose-600); border-left-color: var(--rose-500); font-weight: 600; }
+.post-toc__list a.is-active { color: var(--ink-soft); background: transparent; border-left-color: var(--rose-500); }
 .post-toc__list ul ul a { padding-left: 20px; font-size: 13px; }
 
 /* ---------- 正文排版 md-body ---------- */
@@ -693,8 +702,8 @@ mark { background: color-mix(in srgb, var(--rose-300) 45%, transparent); color: 
 .not-found__actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
 
 /* ---------- 页脚 ---------- */
-.site-footer { border-top: 1px solid var(--line); background: var(--surface-2); margin-top: 40px; }
-.site-footer__inner { display: flex; justify-content: space-between; align-items: center; gap: 24px; padding-top: 40px; padding-bottom: 28px; flex-wrap: wrap; }
+.site-footer { border-top: 1px solid var(--line); background: var(--surface-2); margin-top: 10px; }
+.site-footer__inner { display: flex; justify-content: space-between; align-items: center; gap: 24px; padding-top: 28px; padding-bottom: 18px; flex-wrap: wrap; }
 .site-footer__brand p { margin: 4px 0 0; color: var(--ink-faint); font-size: 15px; }
 .site-footer__links { display: flex; gap: 18px; flex-wrap: wrap; }
 .site-footer__links a { color: var(--ink-soft); font-size: 15px; }
