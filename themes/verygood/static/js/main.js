@@ -33,23 +33,30 @@
     });
   }
 
-  /* ---------- 公告条：关闭后记忆（v1.1） ---------- */
+/* ---------- 公告弹窗：进入页面弹出，关闭后记忆（v1.1.6） ---------- */
   var ann = doc.getElementById('announcement');
   var annClose = doc.getElementById('announcement-close');
   if (ann && annClose) {
-    try {
-      if (localStorage.getItem('vg-ann-close') === '1') ann.remove();
-    } catch (e) { ann.remove(); }
-    annClose.addEventListener('click', function () {
+    var annDismissed = false;
+    try { annDismissed = localStorage.getItem('vg-ann-close') === '1'; } catch (e) {}
+    if (!annDismissed) {
+      setTimeout(function () { ann.hidden = false; }, 900);
+    }
+    var annLeaving = false;
+    function dismissAnn() {
+      if (annLeaving) return;
+      annLeaving = true;
       try { localStorage.setItem('vg-ann-close', '1'); } catch (e) {}
-      ann.style.height = ann.offsetHeight + 'px';
-      ann.style.overflow = 'hidden';
-      requestAnimationFrame(function () {
-        ann.style.height = '0px';
-        ann.style.padding = '0';
-        ann.style.transition = 'height 0.3s ease, padding 0.3s ease';
-      });
-      setTimeout(function () { ann.remove(); }, 320);
+      ann.classList.add('is-leaving');
+      setTimeout(function () { ann.hidden = true; }, 280);
+    }
+    annClose.addEventListener('click', dismissAnn);
+    ann.addEventListener('click', function (e) {
+      if (e.target.closest('.announcement-modal__card')) return;
+      dismissAnn();
+    });
+    doc.addEventListener('keydown', function (ev) {
+      if (ev.key === 'Escape' && !ann.hidden) dismissAnn();
     });
   }
 

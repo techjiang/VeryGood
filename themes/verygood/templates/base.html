@@ -71,15 +71,18 @@
 <a class="skip-link" href="#main">跳到主要内容</a>
 
 {% if site.announcement.enabled and site.announcement.text %}
-<div class="announcement announcement--{{ site.announcement.type }}" id="announcement" role="status">
-  <div class="announcement__inner container">
-    <span class="announcement__icon">{{ m.icon('megaphone', 15) }}</span>
+<div class="announcement-modal" id="announcement" role="dialog" aria-modal="true"{% if site.announcement.title %} aria-labelledby="announcement-title"{% endif %} hidden>
+  <div class="announcement-modal__backdrop" data-ann-close></div>
+  <div class="announcement-modal__card announcement-modal--{{ site.announcement.type }}">
+    <button class="announcement-modal__close" id="announcement-close" type="button" aria-label="关闭公告">{{ m.icon('close', 16) }}</button>
+    <div class="announcement-modal__icon" aria-hidden="true">{{ m.icon('megaphone', 22) }}</div>
+    {% if site.announcement.title %}<h3 class="announcement-modal__title" id="announcement-title">{{ site.announcement.title }}</h3>{% endif %}
+    <div class="announcement-modal__text">
+      {% if site.announcement.link %}<a href="{{ site.announcement.link }}" rel="noopener">{{ site.announcement.text | safe }}</a>{% else %}{{ site.announcement.text | safe }}{% endif %}
+    </div>
     {% if site.announcement.link %}
-    <a class="announcement__text" href="{{ site.announcement.link }}">{{ site.announcement.text | safe }}</a>
-    {% else %}
-    <span class="announcement__text">{{ site.announcement.text | safe }}</span>
+    <a class="announcement-modal__btn" href="{{ site.announcement.link }}" rel="noopener">{{ site.announcement.btn_text or '了解更多' }}</a>
     {% endif %}
-    <button class="announcement__close" id="announcement-close" type="button" aria-label="关闭公告">{{ m.icon('close', 14) }}</button>
   </div>
 </div>
 {% endif %}

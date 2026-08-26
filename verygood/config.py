@@ -21,11 +21,13 @@ DEFAULTS = {
         "nav": [],
         "footer_text": "",
         "sidebar_recent": 5,
-        # 顶部公告条（v1.1）
+        # 公告弹窗（v1.1.6 起为弹窗样式，此前为顶部横幅）
         "announcement": {
             "enabled": False,
             "text": "",
+            "title": "",             # 弹窗标题（留空则不显示标题）
             "link": "",
+            "btn_text": "",          # 链接按钮文案（留空默认「了解更多」）
             "type": "info",          # info / tip / warn
         },
         # 右侧栏（v1.1，≥1366px 宽屏显示，330px 宽）
@@ -146,11 +148,13 @@ def normalize(cfg: dict, root: Path) -> None:
     if not isinstance(sb["custom"], list):
         sb["custom"] = []
 
-    # v1.1：公告条规整
+    # v1.1.6：公告弹窗规整
     ann = s.setdefault("announcement", {})
     ann.setdefault("enabled", False)
     ann.setdefault("text", "")
+    ann.setdefault("title", "")
     ann.setdefault("link", "")
+    ann.setdefault("btn_text", "")
     ann.setdefault("type", "info" if ann.get("type") not in ("info", "tip", "warn") else ann["type"])
 
     # v1.1：右侧栏规整
