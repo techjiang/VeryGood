@@ -1,0 +1,157 @@
+# ============================================================
+# VeryGood - 站点配置文件
+# 所有带 '#' 的行都是注释，按需修改即可。
+# 完整字段说明见 README.md 的「配置速查表」与 docs/使用文档.md、docs/开发文档.md。
+# ============================================================
+
+site:
+  title: VeryGood
+  subtitle: 粉色 · 极简 · 属于 GitHub Pages 的博客
+  description: VeryGood 是一个粉色系、轻量、SEO 友好、可玩性极高的开源博客主题，构建于 GitHub Pages 与 GitHub Actions 之上。
+  keywords:
+    - 博客
+    - 主题
+    - GitHub Pages
+    - 开源
+  url: https://yourname.github.io        # 必填：你的站点地址（不带末尾斜杠）
+  basePath: ""                            # 若部署在子路径 /repo 下，填仓库名，如 "my-blog"
+  language: zh-CN
+  timezone: Asia/Shanghai
+  nav:                                    # 追加自定义导航项（左侧栏顶部的站点导航）
+    - label: 友链
+      url: /links/
+  sidebar_recent: 5                       # 向下兼容字段：侧栏「最近更新」条数（新配置用 site.sidebar.recent_count）
+  footer_text: 用 VeryGood 构建 - 保持热爱，记录生活
+
+  # ---------- 顶部公告条（v1.1） ----------
+  # 显示在站点最顶部的一行公告，可带链接、可被访客关闭（关闭状态存 localStorage）。
+  announcement:
+    enabled: true                         # true 时显示公告
+    text: "🎉 VeryGood v1.1.5：SEO 加固 · 页脚更稳 · 文档齐备"  # 公告文案（支持少量 HTML）
+    link: "/board/"                       # 点击跳转地址，留空则整条不可点
+    type: info                            # 样式：info / tip / warn
+
+  # ---------- 右侧栏（v1.1） ----------
+  # ≥1366px 宽屏显示文章目录 / 近期文章 / 标签云 / 分类 / 友链缩略（330px 宽）。
+  rightbar:
+    enabled: true
+    show_toc: true                        # 文章页目录（宽屏固定在右栏，不再挤压正文）
+    show_recent: true                     # 近期文章
+    recent_count: 5                       # 近期文章条数（默认跟随 sidebar.recent_count）
+    show_tags: true                       # 标签云
+    tags_max: 24                          # 标签云最多展示数量
+    show_categories: true                 # 分类列表
+    show_links: true                      # 友链缩略（读取下方 links 配置）
+    links_max: 8
+
+  # ---------- 左侧栏（v1.1） ----------
+  # 左侧栏由「站点信息 + 最近更新 + 导航 + 自定义模块」组成，模块可设置默认折叠。
+  sidebar:
+    recent_count: 5                       # 覆盖上方 sidebar_recent，留空则用顶层值
+    collapse: false                       # true 时「最近更新」默认折叠，访客可点击展开
+    custom:                               # 追加自定义模块（放在最近更新下方）
+      # - title: 我的项目
+      #   icon: "✨"
+      #   html: "<p>这里可以写任意 HTML，比如项目列表、小程序码、留言按钮等。</p>"
+
+author:
+  name: 你的名字
+  email: you@example.com
+  avatar: ""                              # 头像 URL，留空则不显示（侧栏显示为圆形头像）
+  bio: 一个喜欢记录生活与思考的人
+  social:
+    github: yourname
+    twitter: ""
+    weibo: ""
+    rss: ""                               # 留空自动指向 /rss.xml
+
+# ---------- 分类 / 标签元数据（v1.1） ----------
+# 为分类 / 标签添加描述与置顶，会在标签云页 / 归档页展示。
+# 格式：taxonomies.categories.<分类名>  或  taxonomies.tags.<标签名>
+taxonomies:
+  categories:
+    # 技术:
+    #   desc: 技术相关的文章
+    #   pin: true                          # 置顶，排在分类列表前部
+    # 生活:
+    #   desc: 记录生活的碎片
+  tags:
+    # verygood:
+    #   desc: 关于 VeryGood 主题的更新日志
+    #   pin: true
+
+# ---------- 朋友圈动态页（v1.1.2） ----------
+# 独立页面 /board/：站长/站点管理者的动态时间线（朋友圈式），内容由 GitHub Issue 推送：
+#   1. 在仓库新建 Issue，写下动态正文（Markdown，支持图片）；
+#   2. 给 Issue 打上「Moment」标签（见下方 issues.moment_label）；
+#   3. Actions 自动同步为 source/moments/*.md 并部署，页面即时更新；
+#   4. 关闭该 Issue = 下线这条动态。
+board:
+  enabled: true                           # 生成 /board/ 页面
+  title: 朋友圈动态
+  desc: 站长的碎碎念与站点动态 —— 用 Issue 打上 Moment 标签即可发布，关闭 Issue 即下线。
+  per_page: 30                            # 时间线最多展示条数
+  repo: ""                                # 形如 "owner/repo"：动态卡片跳转到对应 GitHub Issue，留空则不显示
+  giscus: false                          # 是否同步挂 giscus 评论区（需先配置下方 comments.giscus）
+
+seo:
+  image: /assets/og-default.png           # 默认社交分享图（1200x630 最佳）
+  twitter_handle: ""                       # 形如 @handle
+  google_site_verification: ""            # Google Search Console 验证码
+  baidu_site_verification: ""            # 百度站长平台验证码
+  baidu_push: false                        # 百度收录自动推送
+  sitemap: true                            # 生成 sitemap.xml（含首页/文章/页面/标签/分类/归档/留言板 + 图片 sitemap）
+  rss: true                                # 生成 rss.xml
+  robots: true                             # 生成 robots.txt + humans.txt
+  noindex_page_2plus: true                 # 分页第 2+ 页对搜索引擎 noindex
+
+theme:
+  name: verygood                           # 想自定义主题？复制 themes/verygood 为 themes/你的名字 并改这里
+
+issues:
+  publish_label: Article                   # 带此标签的 Issue 会被发布为文章（Gmeek 式写作）
+  draft_label: Draft                       # 带此标签的 Issue 作为草稿，仅本地预览可见
+  page_label: Page                         # 带此标签的 Issue 生成独立页面（/issue-{编号}/，正文顶部可写 front matter 自定义 slug）
+  moment_label: Moment                     # 带此标签的 Issue 生成朋友圈动态（/board/ 时间线）
+  slug_prefix: issue                       # 生成 source/posts|pages|moments/issue-{编号}.md
+
+posts:
+  per_page: 8                              # 首页每页文章数
+  excerpt_length: 150                      # 摘要字数
+  toc: true                                # 文章目录
+  toc_depth: 2-3                           # 目录层级
+  related: 3                               # 相关推荐条数
+  date_format: "%Y-%m-%d"
+  cover_default: ""                       # 无封面时的默认封面图
+
+comments:                                  # 文章页评论：none / giscus / utterances
+  provider: none
+  giscus:
+    repo: ""                              # 如 user/comment-repo
+    repo_id: ""
+    category: ""
+    category_id: ""
+    mapping: pathname
+    lang: zh-CN
+    light_theme: light
+    dark_theme: dark
+  utterances:
+    repo: ""
+
+links:                                      # 友链（/links/ 页 + 右栏缩略使用）
+  - name: GitHub
+    url: https://github.com
+    desc: 全球最大的代码托管平台
+    avatar: "https://github.com/github.png"    # v1.1：头像图 URL，留空则显示首字母彩球
+  # - name: 你的博客
+  #   url: https://example.com
+  #   desc: 一句话介绍
+  #   avatar: https://example.com/avatar.png
+
+plugins: []                                  # 用户插件目录（相对仓库根），如 plugins/my-plugin
+
+build:
+  source_dir: source
+  output_dir: dist                           # 构建输出目录（已加入 .gitignore）
+  minify: true                               # 压缩 CSS
+  include_drafts: false                      # true 时本地构建会包含草稿

@@ -1,0 +1,31 @@
+{% extends "base.html" -%}
+{% import "partials/_macros.html" as m -%}
+
+{% set is_cat = current_path and '/category/' in current_path %}
+{% set meta = site.taxonomies['categories'].get(tag, {}) if is_cat else site.taxonomies['tags'].get(tag, {}) %}
+{% set post_list = site.categories[tag] if is_cat else site.tags[tag] %}
+
+{% block title %}{{ tag }} · {{ '分类' if is_cat else '标签' }} · {{ cfg.site.title }}{% endblock %}
+{% block description %}{{ (meta.desc or ('关于「' + tag + '」的文章合集')) + ' · ' + cfg.site.description }}{% endblock %}
+{% set keywords = tag ~ ', ' ~ (post_list | map(attribute='title') | join(', ')) %}
+{% block canonical %}{{ abs_url(tax_path('category', tag)) if is_cat else abs_url(tax_path('tag', tag)) }}{% endblock %}
+
+{% block content %}
+<section class="page-head container reveal">
+  <p class="hero__eyebrow">{{ '分类' if is_cat else '标签' }}</p>
+  <h1 class="hero__title hero__title--sm">「{{ tag }}」</h1>
+  <p class="hero__desc">
+    {%- if meta.desc %}{{ meta.desc }} · {% endif -%}
+    共 {{ post_list | length }} 篇文章
+  </p>
+</section>
+
+<section class="post-list container">
+  <div class="post-grid">
+    {% for post in posts_page %}
+    <div class="post-grid__cell reveal">{% include "partials/_card.html" %}</div>
+    {% endfor %}
+  </div>
+  {% include "partials/_pager.html" %}
+</section>
+{% endblock %}

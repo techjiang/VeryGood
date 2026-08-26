@@ -1,0 +1,41 @@
+{% extends "base.html" -%}
+{% import "partials/_macros.html" as m -%}
+
+{% block title %}标签云 · {{ cfg.site.title }}{% endblock %}
+{% block canonical %}{{ abs_url('/tags/') }}{% endblock %}
+
+{% block content %}
+<section class="page-head container reveal">
+  <p class="hero__eyebrow">Tags</p>
+  <h1 class="hero__title hero__title--sm">标签云</h1>
+  <p class="hero__desc">共 {{ site.tags | length }} 个标签 · {{ site.posts | length }} 篇文章</p>
+</section>
+
+<section class="tag-cloud container reveal">
+  {# 置顶标签（taxonomies.tags.<名>.pin: true）优先 #}
+  {% set pinned = [] %}
+  {% set normal = [] %}
+  {% for name, posts in site.tags.items() %}
+  {% if site.taxonomies.tags.get(name, {}).get('pin') %}
+    {% set _ = pinned.append(name) %}
+  {% else %}
+    {% set _ = normal.append(name) %}
+  {% endif %}
+  {% endfor %}
+  {% for name in pinned + normal %}
+  {% set posts = site.tags[name] %}
+  {% set n = [posts | length, 5] | min %}
+  <div class="tag-cloud__wrap">
+    <a class="tag-cloud__item tag-cloud__item--{{ n }}{% if site.taxonomies.tags.get(name, {}).get('pin') %} is-pinned{% endif %}" href="{{ url_for(tax_path('tag', name)) }}">
+      <span class="chip chip--lg">{{ m.icon('tag', 13) }}{{ name }}{% if site.taxonomies.tags.get(name, {}).get('pin') %} {{ m.icon('fire', 12) }}{% endif %}</span>
+      <span class="tag-cloud__count">{{ posts | length }}</span>
+    </a>
+    {% if site.taxonomies.tags.get(name, {}).get('desc') %}
+    <p class="tag-cloud__desc">{{ site.taxonomies.tags.get(name, {}).get('desc') }}</p>
+    {% endif %}
+  </div>
+  {% endfor %}
+</section>
+
+{{ injections.get('tags_extra', []) | join('\n') | safe }}
+{% endblock %}

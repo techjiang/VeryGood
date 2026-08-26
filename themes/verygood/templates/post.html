@@ -1,0 +1,112 @@
+{% extends "base.html" -%}
+{% import "partials/_macros.html" as m -%}
+
+{% block title %}{{ post.title }} · {{ cfg.site.title }}{% endblock %}
+{% block description %}{{ post.summary }}{% endblock %}
+{% block canonical %}{{ abs_url(post.url) }}{% endblock %}
+{% set keywords = post.tags | join(', ') %}
+{% block og_type %}article{% endblock %}
+{% block og_image %}{{ abs_url(post.cover_url) if post.cover_url else abs_url(cfg.seo.image) }}{% endblock %}
+{% block twitter_card %}summary_large_image{% endblock %}
+{% block jsonld %}
+{{ m.jsonld({
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": post.title,
+  "description": post.summary,
+  "datePublished": post.date.isoformat(),
+  "dateModified": post.updated.isoformat(),
+  "mainEntityOfPage": {"@type": "WebPage", "@id": abs_url(post.url)},
+  "url": abs_url(post.url),
+  "image": (abs_url(post.cover_url) if post.cover_url else abs_url(cfg.seo.image)),
+  "keywords": post.tags | join(", "),
+  "articleSection": post.category or None,
+  "wordCount": post.word_count,
+  "author": {"@type": "Person", "name": cfg.author.name, "url": cfg.site.url},
+  "publisher": {"@type": "Organization", "name": cfg.site.title, "url": abs_url('/'), "logo": {"@type": "ImageObject", "url": abs_url(cfg.seo.image)}},
+  "inLanguage": cfg.site.language
+}) }}
+{{ m.jsonld({
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": cfg.site.title, "item": abs_url('/')},
+    {"@type": "ListItem", "position": 2, "name": post.category or "归档", "item": (abs_url(tax_path('category', post.category)) if post.category else abs_url('/archive/'))},
+    {"@type": "ListItem", "position": 3, "name": post.title, "item": abs_url(post.url)}
+  ]
+}) }}
+{% endblock %}
+
+{% block rightbar %}
+  {% if cfg.site.rightbar.show_toc and post.toc_html %}
+  <section class="side-widget side-widget--toc">
+    <h3 class="side-widget__title">{{ m.icon('list', 13) }} 目录</h3>
+    <nav class="post-toc__list">{{ post.toc_html | safe }}</nav>
+  </section>
+  {% endif %}
+  {{ super() }}
+{% endblock %}
+
+{% block content %}
+<article class="post container">
+  <header class="post__head">
+    {% if post.category %}<a class="post__cat" href="{{ url_for(tax_path('category', post.category)) }}">{{ post.category }}</a>{% endif %}
+    <h1 class="post__title">{{ post.title }}</h1>
+    {{ m.meta_line(post) }}
+  </header>
+
+  {% if post.cover_url %}
+  <figure class="post__cover">
+    <img src="{{ post.cover_url }}" alt="{{ post.cover_alt }}" loading="eager" decoding="async" width="1200" height="630">
+  </figure>
+  {% endif %}
+
+  {# ---- 窄屏（<1366px）折叠目录，不挤压正文；宽屏时此块被 CSS 隐藏，目录移入右栏 ---- #}
+  {% if post.toc_html %}
+  <details class="post-toc post-toc--inline" {% if post.toc_html and post.toc_html.count('<li') <= 5 %}open{% endif %}>
+    <summary class="post-toc__title">目录 <span class="post-toc__hint">点击展开</span></summary>
+    <nav class="post-toc__list">{{ post.toc_html | safe }}</nav>
+  </details>
+  {% endif %}
+
+  <div class="post__body md-body">
+    {{ post.body_html | safe }}
+  </div>
+
+  <footer class="post__foot">
+    <div class="post-tags">
+      {% for t in post.tags %}<a class="chip chip--lg" href="{{ url_for(tax_path('tag', t)) }}">{{ m.icon('tag', 13) }}{{ t }}</a>{% endfor %}
+    </div>
+
+    {% if post.prev or post.next %}
+    <nav class="post-nav" aria-label="上下篇文章">
+      {% if post.prev %}
+      <a class="post-nav__item" href="{{ url_for(post.prev.url) }}" rel="prev">
+        <span class="post-nav__label">{{ m.icon('arrow-left') }} 上一篇</span>
+        <span class="post-nav__title">{{ post.prev.title }}</span>
+      </a>
+      {% else %}<span class="post-nav__item is-empty"></span>{% endif %}
+      {% if post.next %}
+      <a class="post-nav__item post-nav__item--next" href="{{ url_for(post.next.url) }}" rel="next">
+        <span class="post-nav__label">下一篇 {{ m.icon('arrow-right') }}</span>
+        <span class="post-nav__title">{{ post.next.title }}</span>
+      </a>
+      {% else %}<span class="post-nav__item is-empty"></span>{% endif %}
+    </nav>
+    {% endif %}
+
+    {% if post.related %}
+    <section class="post-related" aria-label="相关推荐">
+      <h2 class="post-related__title">相关推荐</h2>
+      <div class="post-grid post-grid--3">
+        {% for r in post.related[:3] %}
+        {% with post = r %}<div class="post-grid__cell">{% include "partials/_card.html" %}</div>{% endwith %}
+        {% endfor %}
+      </div>
+    </section>
+    {% endif %}
+
+    {% include "partials/_comments.html" %}
+  </footer>
+</article>
+{% endblock %}

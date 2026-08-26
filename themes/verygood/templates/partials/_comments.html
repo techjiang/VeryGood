@@ -1,0 +1,30 @@
+{# 评论系统：none / giscus / utterances #}
+{% if cfg.comments.provider == 'giscus' and cfg.comments.giscus.repo %}
+<section class="comments" id="comments" aria-label="评论">
+  <h2 class="comments__title">评论</h2>
+  <div class="giscus" data-repo="{{ cfg.comments.giscus.repo }}"
+    data-repo-id="{{ cfg.comments.giscus.repo_id }}"
+    data-category="{{ cfg.comments.giscus.category }}"
+    data-category-id="{{ cfg.comments.giscus.category_id }}"
+    data-mapping="{{ cfg.comments.giscus.mapping or 'pathname' }}"
+    data-strict="0"
+    data-reactions-enabled="1"
+    data-emit-metadata="0"
+    data-input-position="top"
+    data-theme="{{ cfg.comments.giscus.light_theme or 'light' }}"
+    data-lang="{{ cfg.comments.giscus.lang or 'zh-CN' }}"
+    data-loading="lazy"
+    crossorigin="anonymous"></div>
+  <script src="https://giscus.app/client.js" async defer></script>
+</section>
+{% elif cfg.comments.provider == 'utterances' and cfg.comments.utterances.repo %}
+<section class="comments" id="comments" aria-label="评论">
+  <h2 class="comments__title">评论</h2>
+  <script src="https://utteranc.es/client.js"
+    repo="{{ cfg.comments.utterances.repo }}"
+    issue-term="pathname"
+    theme="github-light"
+    crossorigin="anonymous"
+    async></script>
+</section>
+{% endif %}

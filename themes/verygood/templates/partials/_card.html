@@ -1,0 +1,17 @@
+{% import "partials/_macros.html" as m -%}
+<article class="post-card{% if not post.cover_url %} post-card--plain{% endif %}">
+  {% if post.cover_url %}
+  <a class="post-card__cover" href="{{ url_for(post.url) }}" tabindex="-1" aria-hidden="true">
+    <img src="{{ post.cover_url }}" alt="{{ post.cover_alt }}" loading="lazy" decoding="async" width="1200" height="630">
+  </a>
+  {% endif %}
+  <div class="post-card__body">
+    <div class="post-card__top">
+      {% if post.category %}<a class="post-card__cat" href="{{ url_for(tax_path('category', post.category)) }}">{{ post.category }}</a>{% endif %}
+      <h2 class="post-card__title"><a href="{{ url_for(post.url) }}">{{ post.title }}</a></h2>
+    </div>
+    {{ m.meta_line(post, show_tags=False) }}
+    <p class="post-card__excerpt">{{ post.summary }}</p>
+    <a class="post-card__more" href="{{ url_for(post.url) }}">阅读全文 <span aria-hidden="true">&rarr;</span></a>
+  </div>
+</article>

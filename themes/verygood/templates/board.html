@@ -1,0 +1,66 @@
+{% extends "base.html" -%}
+{% import "partials/_macros.html" as m -%}
+
+{% block title %}{{ site.board.title or '朋友圈动态' }} · {{ cfg.site.title }}{% endblock %}
+{% block description %}{{ site.board.desc }}{% endblock %}
+{% block canonical %}{{ abs_url('/board/') }}{% endblock %}
+
+{% block content %}
+<section class="board">
+  <header class="board__head reveal">
+    <p class="hero__eyebrow">Moments</p>
+    <h1 class="hero__title hero__title--sm">{{ site.board.title or '朋友圈动态' }}</h1>
+    <p class="hero__desc">{{ site.board.desc }}</p>
+  </header>
+
+  {% if cfg.board.repo %}
+  <p class="board__hint reveal">
+    {{ m.icon('pen', 13) }} 发布动态：新建 Issue 写下内容并打上
+    <code>{{ cfg.issues.moment_label }}</code> 标签，Actions 自动推送到这里；关闭该 Issue 即下线。
+  </p>
+  {% endif %}
+
+  {% if site.moments %}
+  <div class="board-timeline" id="board-timeline">
+    {% for item in site.moments[:site.cfg.board.per_page] %}
+    <article class="moment reveal">
+      <div class="moment__avatar-wrap">
+        {% if cfg.author.avatar %}
+        <img class="moment__avatar" src="{{ cfg.author.avatar }}" alt="{{ (cfg.author.name or site.cfg.site.title) }}的头像" width="44" height="44" loading="lazy" decoding="async">
+        {% else %}
+        <span class="moment__avatar moment__avatar--fallback" aria-hidden="true">{{ (cfg.author.name or site.cfg.site.title)[0] }}</span>
+        {% endif %}
+      </div>
+      <div class="moment__card">
+        <header class="moment__head">
+          <span class="moment__name">{{ cfg.author.name or site.cfg.site.title }}</span>
+          <time class="moment__time" datetime="{{ item.date.strftime('%Y-%m-%dT%H:%M:%S') }}">{{ item.date_str }}</time>
+        </header>
+        <div class="moment__body">{{ item.body_html | safe }}</div>
+        <footer class="moment__foot">
+          {% if item.issue and cfg.board.repo %}
+          <a class="moment__issue" href="https://github.com/{{ cfg.board.repo }}/issues/{{ item.issue }}" target="_blank" rel="noopener nofollow">
+            {{ m.icon('link', 12) }} Issue #{{ item.issue }}
+          </a>
+          {% endif %}
+        </footer>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="board-empty reveal">
+    <p>还没有动态 ✨</p>
+    <p class="board-empty__sub">在仓库新建 Issue 并打上「{{ cfg.issues.moment_label }}」标签，内容就会出现在这里。</p>
+  </div>
+  {% endif %}
+
+  {% if site.board.giscus %}
+  <section class="board-giscus reveal">
+    {% include "partials/_comments.html" %}
+  </section>
+  {% endif %}
+</section>
+
+{{ injections.get('board_extra', []) | join('\n') | safe }}
+{% endblock %}

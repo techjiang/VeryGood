@@ -1,0 +1,13 @@
+{% extends "base.html" -%}
+{% block content %}
+<section class="post-list container">
+  <div class="post-grid">
+    {% for post in posts_page %}
+    <div class="post-grid__cell reveal">{% include "partials/_card.html" %}</div>
+    {% else %}
+    <p class="empty-tip">还没有文章。用 Issue 写作并打上「{{ cfg.issues.publish_label }}」标签，或直接推送 Markdown 到 source/posts 目录。</p>
+    {% endfor %}
+  </div>
+  {% include "partials/_pager.html" %}
+</section>
+{% endblock %}

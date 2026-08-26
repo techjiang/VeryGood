@@ -1,0 +1,28 @@
+{% import "partials/_macros.html" as m -%}
+{% if pager and pager.total > 1 %}
+<nav class="pager" aria-label="分页导航">
+  {% if pager.prev_url %}
+  <a class="pager__btn" href="{{ url_for(pager.prev_url) }}" rel="prev">{{ m.icon('arrow-left') }}上一页</a>
+  {% else %}
+  <span class="pager__btn is-disabled" aria-disabled="true">{{ m.icon('arrow-left') }}上一页</span>
+  {% endif %}
+
+  <ul class="pager__nums">
+    {% for n in range(1, pager.total + 1) %}
+    <li>
+      {% if n == pager.current %}
+      <span class="pager__num is-current" aria-current="page">{{ n }}</span>
+      {% else %}
+      <a class="pager__num" href="{{ url_for(pager.page_url(n)) }}">{{ n }}</a>
+      {% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+
+  {% if pager.next_url %}
+  <a class="pager__btn" href="{{ url_for(pager.next_url) }}" rel="next">下一页{{ m.icon('arrow-right') }}</a>
+  {% else %}
+  <span class="pager__btn is-disabled" aria-disabled="true">下一页{{ m.icon('arrow-right') }}</span>
+  {% endif %}
+</nav>
+{% endif %}

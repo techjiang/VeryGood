@@ -1,0 +1,29 @@
+---
+# ============================================================
+# VeryGood 主题元数据
+# 想自定义主题：复制本目录为 themes/你的主题名，改 name 即可
+# ============================================================
+
+name: verygood
+title: VeryGood
+description: 粉色系 · 极简 · SEO 顶级 · 超高可玩性的 GitHub Pages 博客主题
+author: VeryGood Team
+version: 1.0.0
+license: MIT
+demo: https://yourname.github.io
+tags:
+  - pink
+  - minimal
+  - seo
+  - github-pages
+  - gmeek-style
+features:
+  - Gmeek 式 Issue 写作（GitHub Actions 自动发布）
+  - 深浅双主题（跟随系统 + 手动切换并记忆）
+  - 顶级 SEO（结构化数据、Sitemap、RSS、Open Graph、Twitter Card、百度推送）
+  - 全站客户端搜索
+  - 标签 / 分类 / 年归档 / 相关推荐 / 上下篇
+  - giscus / utterances 评论
+  - 友链页
+  - 插件系统（短代码、钩子、模板注入）
+---

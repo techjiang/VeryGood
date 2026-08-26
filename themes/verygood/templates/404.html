@@ -1,0 +1,21 @@
+{% extends "base.html" -%}
+{% import "partials/_macros.html" as m -%}
+
+{% block title %}页面不存在 · {{ cfg.site.title }}{% endblock %}
+{% block body_class %}page-404{% endblock %}
+
+{% block content %}
+<section class="not-found container reveal">
+  <div class="not-found__art" aria-hidden="true">
+    <span class="not-found__dot not-found__dot--1"></span>
+    <span class="not-found__dot not-found__dot--2"></span>
+    <span class="not-found__heart">{{ m.icon('heart', 44) }}</span>
+  </div>
+  <h1 class="not-found__code">404</h1>
+  <p class="not-found__text">这个页面可能已被移动、删除，或者从未存在过。</p>
+  <div class="not-found__actions">
+    <a class="btn btn--primary" href="{{ url_for('/') }}">回到首页</a>
+    <a class="btn" href="{{ url_for('/search/') }}">站内搜索</a>
+  </div>
+</section>
+{% endblock %}

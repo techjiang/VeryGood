@@ -1,0 +1,37 @@
+{% extends "base.html" -%}
+{% import "partials/_macros.html" as m -%}
+
+{% block title %}友链 · {{ cfg.site.title }}{% endblock %}
+{% block description %}友情链接 · {{ cfg.site.description }}{% endblock %}
+{% block canonical %}{{ abs_url('/links/') }}{% endblock %}
+
+{% block content %}
+<article class="post container">
+  <header class="post__head post__head--page">
+    <h1 class="post__title">友情链接</h1>
+    {% if site.links %}<p class="hero__desc">交换友链：在 config.yml 的 <code>links</code> 中加入你朋友的站点即可。</p>{% endif %}
+  </header>
+
+  <div class="post__body">
+    {% if site.links %}
+    <div class="friend-grid">
+      {% for link in site.links %}
+      <a class="friend-card" href="{{ link.url }}" target="_blank" rel="noopener nofollow">
+        {% if link.avatar %}
+        <img class="friend-card__avatar" src="{% if '://' in link.avatar %}{{ link.avatar }}{% else %}{{ url_for(link.avatar) }}{% endif %}" alt="{{ link.name }} 的头像" width="58" height="58" loading="lazy" decoding="async">
+        {% else %}
+        <span class="friend-card__avatar friend-card__avatar--text" aria-hidden="true">{{ link.name[:1] }}</span>
+        {% endif %}
+        <span class="friend-card__info">
+          <span class="friend-card__name">{{ link.name }}</span>
+          {% if link.desc %}<span class="friend-card__desc">{{ link.desc }}</span>{% endif %}
+        </span>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="empty-tip">还没有友链。编辑 <code>config.yml</code> 中的 <code>links:</code> 字段即可添加（支持 <code>avatar</code> 头像图）。</p>
+    {% endif %}
+  </div>
+</article>
+{% endblock %}

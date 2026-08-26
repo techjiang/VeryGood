@@ -1,0 +1,19 @@
+# 构建产物
+dist/
+
+# 验收截图
+.shots/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# 系统
+.DS_Store
+Thumbs.db
+
+# 日志 / 临时
+*.log# 版本归档（根目录各历史 zip，不入库）
+verygood-*.zip
