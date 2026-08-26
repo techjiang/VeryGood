@@ -156,6 +156,37 @@ def fm_value(text: str) -> str:
     return text
 
 
+def extract_front_matter(body: str) -> tuple[dict, str]:
+    """从 Issue 正文顶部提取用户 front matter（用于封面等指令）。
+
+    格式（写在 Issue 正文最开头）：
+        ---
+        cover: https://example.com/cover.png
+        cover_alt: 封面描述
+        summary: 自定义摘要
+        ---
+    返回 (fm, 剥离指令后的正文)。没有指令块时返回 ({}, body)。
+    """
+    stripped = body.lstrip("\ufeff\r\n")
+    if not stripped.startswith("---"):
+        return {}, body
+    end = stripped.find("\n---", 3)
+    if end < 0:
+        return {}, body
+    block = stripped[3:end].strip()
+    rest = stripped[end + 4:].lstrip("\r\n")
+    try:
+        fm = yaml.safe_load(block) or {}
+        if not isinstance(fm, dict):
+            fm = {}
+    except Exception:
+        return {}, body
+    # 只保留构建器认识的字段，其余忽略
+    allowed = {"cover", "cover_alt", "slug", "summary", "excerpt"}
+    fm = {k: v for k, v in fm.items() if k in allowed and v not in (None, "")}
+    return fm, rest
+
+
 def render_front_matter(title: str, tags: list[str], category: str,
                         date: str, updated: str, issue: int, draft: bool,
                         extra: dict | None = None) -> str:
@@ -165,6 +196,12 @@ def render_front_matter(title: str, tags: list[str], category: str,
     lines.append(f"updated: {updated}")
     lines.append(f"issue: {issue}")
     lines.append(f"excerpt: {fm_value(extra.get('excerpt', '')) if extra else ''}")
+    if extra and extra.get("cover"):
+        lines.append(f"cover: {fm_value(extra['cover'])}")
+    if extra and extra.get("cover_alt"):
+        lines.append(f"cover_alt: {fm_value(extra['cover_alt'])}")
+    if extra and extra.get("slug"):
+        lines.append(f"slug: {fm_value(extra['slug'])}")
     if category:
         lines.append(f"category: {fm_value(category)}")
     if tags:
@@ -280,6 +317,8 @@ def main() -> int:
             log(f"[sync] 动态 #{number} <- {title!r}")
             continue
 
+        # v1.1.7：正文顶部 front matter 指令（封面 / 摘要 / slug）
+        user_fm, body_rest = extract_front_matter(body)
         fm = render_front_matter(
             title=title,
             tags=tags,
@@ -288,9 +327,10 @@ def main() -> int:
             updated=updated,
             issue=number,
             draft=kind == "draft",
+            extra=user_fm,
         )
         target = file_page if kind == "page" else file_post
-        target.write_text(fm + body + "\n", encoding="utf-8")
+        target.write_text(fm + body_rest + "\n", encoding="utf-8")
         file_moment.unlink(missing_ok=True)
         (file_post if kind == "page" else file_page).unlink(missing_ok=True)
         if kind == "page":

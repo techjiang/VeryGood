@@ -96,6 +96,8 @@ def build_site_model(cfg: dict, ctx, posts: list, pages: list, log) -> dict:
         p["prev"] = posts[i + 1] if i + 1 < len(posts) else None
         p["next"] = posts[i - 1] if i > 0 else None
         p["cover_url"] = _cfg.url_for(cfg, p["cover"]) if p["cover"] else ""
+        p["updated_str"] = p["updated"].strftime(cfg["posts"]["date_format"])
+        p["is_updated"] = p["updated"] > p["date"]
 
     rb = cfg["site"]["rightbar"]
     # 右侧栏数据：近期文章 / 标签云 / 分类列表 / 友链缩略

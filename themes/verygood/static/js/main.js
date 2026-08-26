@@ -266,8 +266,35 @@ function spy() {
         spy();
       });
     }
-    window.addEventListener('scroll', requestSpy, { passive: true });
+window.addEventListener('scroll', requestSpy, { passive: true });
     spy();
   }
+
+  /* ---------- v1.1.7：文章分享 - 复制链接 ---------- */
+  var copyBtns = doc.querySelectorAll('.post-share__copy');
+  copyBtns.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var url = btn.getAttribute('data-copy-url') || location.href;
+      function done() {
+        btn.classList.add('is-copied');
+        setTimeout(function () { btn.classList.remove('is-copied'); }, 1600);
+      }
+      function fallbackCopy() {
+        var ta = doc.createElement('textarea');
+        ta.value = url;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        doc.body.appendChild(ta);
+        ta.select();
+        try { doc.execCommand('copy'); done(); } catch (e) { /* 忽略 */ }
+        doc.body.removeChild(ta);
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(url).then(done, fallbackCopy);
+      } else {
+        fallbackCopy();
+      }
+    });
+  });
 
 })();

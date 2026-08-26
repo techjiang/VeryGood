@@ -78,6 +78,27 @@
       {% for t in post.tags %}<a class="chip chip--lg" href="{{ url_for(tax_path('tag', t)) }}">{{ m.icon('tag', 13) }}{{ t }}</a>{% endfor %}
     </div>
 
+    {% set pe = cfg.site.post_extra %}
+    {% if (pe.show_copyright or pe.show_share) %}
+    <div class="post-extra">
+      {% if pe.show_copyright %}
+      <p class="post-copy">
+        {% if pe.license %}<span class="post-copy__license">{{ pe.license }}</span>{% endif %}
+        <span class="post-copy__meta">本文作者：{{ cfg.author.name or cfg.site.title }} · 原文链接：<a href="{{ abs_url(post.url) }}" rel="bookmark">{{ abs_url(post.url) }}</a></span>
+      </p>
+      {% endif %}
+      {% if pe.show_share %}
+      <div class="post-share">
+        <span class="post-share__label">分享到：</span>
+        <a class="post-share__btn" href="https://service.weibo.com/share/share.php?url={{ abs_url(post.url) | urlencode }}&amp;title={{ post.title | urlencode }}" target="_blank" rel="noopener nofollow" aria-label="分享到微博" title="微博">{{ m.icon('weibo', 15) }}</a>
+        <a class="post-share__btn" href="https://twitter.com/intent/tweet?url={{ abs_url(post.url) | urlencode }}&amp;text={{ post.title | urlencode }}" target="_blank" rel="noopener nofollow" aria-label="分享到 X (Twitter)" title="X (Twitter)">{{ m.icon('x', 15) }}</a>
+        <a class="post-share__btn" href="https://www.linkedin.com/sharing/share-offsite/?url={{ abs_url(post.url) | urlencode }}" target="_blank" rel="noopener nofollow" aria-label="分享到 LinkedIn" title="LinkedIn">{{ m.icon('linkedin', 15) }}</a>
+        <button class="post-share__btn post-share__copy" type="button" data-copy-url="{{ abs_url(post.url) }}" aria-label="复制链接" title="复制链接">{{ m.icon('copy', 15) }}<span class="post-share__copied">已复制</span></button>
+      </div>
+      {% endif %}
+    </div>
+    {% endif %}
+
     {% if post.prev or post.next %}
     <nav class="post-nav" aria-label="上下篇文章">
       {% if post.prev %}

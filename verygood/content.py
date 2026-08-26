@@ -107,7 +107,7 @@ def parse_post_file(
         "date_str": date.strftime(cfg["posts"]["date_format"]),
         "tags": [t for t in _to_list(fm.get("tags"))],
         "category": (_to_list(fm.get("category")) or [""])[0],
-        "summary": str(fm.get("summary") or "").strip() or make_excerpt(body_html, cfg["posts"]["excerpt_length"]),
+        "summary": str(fm.get("summary") or fm.get("excerpt") or "").strip() or make_excerpt(body_html, cfg["posts"]["excerpt_length"]),
         "body_html": body_html,
         "rawbody": body,
         "cover": str(fm.get("cover") or "").strip() or cfg["posts"]["cover_default"] or "",

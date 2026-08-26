@@ -46,7 +46,7 @@
     "Noto Sans Mono CJK SC", monospace;
 
   --content-w: 1120px;
-  --article-w: 760px;
+  --article-w: 920px;
   --header-h: 64px;
   --sidebar-w: 240px;
 }
@@ -455,6 +455,37 @@ button { font-family: inherit; }
 .post__foot { max-width: var(--article-w); margin: 46px auto 0; border-top: 1px solid var(--line); padding-top: 30px; }
 .post-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 30px; }
 
+/* v1.1.7：文章底部 版权行 + 分享（可在 config.yml site.post_extra 开关） */
+.post-extra {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px;
+  margin-bottom: 30px; padding: 16px 18px;
+  border: 1px dashed var(--line); border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--bg-soft) 60%, var(--bg));
+}
+.post-copy { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--ink-faint); line-height: 1.7; margin: 0; }
+.post-copy__license { font-weight: 600; color: var(--rose-500); }
+.post-copy a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+.post-copy a:hover { color: var(--rose-500); }
+.post-share { display: inline-flex; align-items: center; gap: 8px; }
+.post-share__label { font-size: 13px; color: var(--ink-faint); }
+.post-share__btn {
+  position: relative;
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px; border-radius: 50%;
+  border: 1px solid var(--line); background: var(--surface);
+  color: var(--ink-soft); cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease, transform 0.2s ease, background 0.2s ease;
+}
+.post-share__btn:hover { color: var(--rose-500); border-color: var(--rose-300); transform: translateY(-2px); }
+.post-share__btn.post-share__copy { font-size: 15px; }
+.post-share__copied {
+  position: absolute; left: 50%; bottom: calc(100% + 8px); transform: translateX(-50%) translateY(4px);
+  padding: 4px 10px; border-radius: 8px; background: var(--ink); color: var(--bg);
+  font-size: 12px; white-space: nowrap; opacity: 0; pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.post-share__btn.is-copied .post-share__copied { opacity: 1; transform: translateX(-50%) translateY(0); }
+
 .post-nav { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 40px; }
 .post-nav__item {
   display: flex; flex-direction: column; gap: 6px;
@@ -679,7 +710,7 @@ html.no-js .reveal { opacity: 1; transform: none; }
 /* 布局变量微调：内容区放宽，右栏加宽，文章行距更透氣 */
 :root {
   --content-w: 1300px;
-  --article-w: 780px;
+  --article-w: 920px;
   --rightbar-w: 330px;
 }
 

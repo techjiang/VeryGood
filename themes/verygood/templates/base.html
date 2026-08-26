@@ -78,10 +78,14 @@
     <div class="announcement-modal__icon" aria-hidden="true">{{ m.icon('megaphone', 22) }}</div>
     {% if site.announcement.title %}<h3 class="announcement-modal__title" id="announcement-title">{{ site.announcement.title }}</h3>{% endif %}
     <div class="announcement-modal__text">
-      {% if site.announcement.link %}<a href="{{ site.announcement.link }}" rel="noopener">{{ site.announcement.text | safe }}</a>{% else %}{{ site.announcement.text | safe }}{% endif %}
+      {% if site.announcement.link %}
+        {% set ann_ext = site.announcement.link.startswith('http') or site.announcement.link.startswith('//') %}
+        <a href="{% if ann_ext %}{{ site.announcement.link }}{% else %}{{ url_for(site.announcement.link) }}{% endif %}" rel="noopener"{% if ann_ext %} target="_blank"{% endif %}>{{ site.announcement.text | safe }}</a>
+      {% else %}{{ site.announcement.text | safe }}{% endif %}
     </div>
     {% if site.announcement.link %}
-    <a class="announcement-modal__btn" href="{{ site.announcement.link }}" rel="noopener">{{ site.announcement.btn_text or '了解更多' }}</a>
+    {% set ann_ext = site.announcement.link.startswith('http') or site.announcement.link.startswith('//') %}
+    <a class="announcement-modal__btn" href="{% if ann_ext %}{{ site.announcement.link }}{% else %}{{ url_for(site.announcement.link) }}{% endif %}" rel="noopener"{% if ann_ext %} target="_blank"{% endif %}>{{ site.announcement.btn_text or '了解更多' }}</a>
     {% endif %}
   </div>
 </div>

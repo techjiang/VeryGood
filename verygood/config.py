@@ -157,6 +157,13 @@ def normalize(cfg: dict, root: Path) -> None:
     ann.setdefault("btn_text", "")
     ann.setdefault("type", "info" if ann.get("type") not in ("info", "tip", "warn") else ann["type"])
 
+    # v1.1.7：文章页底部信息（更新于 / 版权行 / 分享）规整
+    pe = s.setdefault("post_extra", {})
+    pe.setdefault("show_updated", True)
+    pe.setdefault("show_copyright", True)
+    pe.setdefault("show_share", True)
+    pe.setdefault("license", "")
+
     # v1.1：右侧栏规整
     rb = s.setdefault("rightbar", {})
     rb.setdefault("enabled", True)
@@ -204,13 +211,34 @@ def base_path(cfg: dict) -> str:
     return "/" + bp if bp else ""
 
 
+def _is_external(p: str) -> bool:
+    """http(s):// 或 // 协议相对链接视为外部，不再拼接 basePath。"""
+    return p.startswith(("http://", "https://", "//"))
+
+
+def _has_base(cfg: dict, p: str) -> bool:
+    """p 是否已含 basePath 前缀（防重复拼接）。"""
+    bp = base_path(cfg)
+    return bool(bp) and (p == bp or p.startswith(bp + "/"))
+
+
 def url_for(cfg: dict, path: str) -> str:
-    """站内相对 URL（含 basePath 前缀）。path 形如 /foo/ 或 foo/。"""
+    """站内相对 URL（含 basePath 前缀）。path 形如 /foo/ 或 foo/；外部链接原样返回；
+    已含前缀时幂等返回。"""
+    if _is_external(path):
+        return path
     p = path if path.startswith("/") else "/" + path
+    if _has_base(cfg, p):
+        return p
     return (base_path(cfg) + p) or "/"
 
 
 def abs_url(cfg: dict, path: str) -> str:
-    """绝对 URL（用于 canonical / OG / sitemap / RSS / JSON-LD）。"""
+    """绝对 URL（用于 canonical / OG / sitemap / RSS / JSON-LD）；外部链接原样返回；
+    已含前缀时幂等返回。"""
+    if _is_external(path):
+        return path
     p = path if path.startswith("/") else "/" + path
+    if _has_base(cfg, p):
+        return cfg["site"]["url"] + p
     return cfg["site"]["url"] + base_path(cfg) + p

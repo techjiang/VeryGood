@@ -4,7 +4,7 @@
 
 VeryGood 是一个为 GitHub Pages 量身定制的开源博客主题。它追随 Gmeek 的优雅理念：**写作发生在 GitHub Issue 里**，标签即状态机，关闭 Issue 即下线文章——你只需要专注内容，剩下的交给自动化。
 
-**当前版本：v1.1.6** —— 标签/分类 URL 空格修复（SEO 加固）· 页脚不再被遮挡（移入布局容器）· 回顶按钮近底自动上浮 · 滚动监听直连（去 rAF 包装）· 去掉毛玻璃模糊（性能优化）· 左右侧栏绝对固定 · 页脚署名放大 · 朋友圈动态（站长 Issue 推送）· 全站内容 Actions 一键更新 · 页脚署名防删除双保险 · 三栏布局 · 公告弹窗（v1.1.6）· 图片/视频灯箱 · 环形回顶进度 · 友链头像 · 可折叠侧栏。
+**当前版本：v1.1.7** —— 文章页升级（更大正文宽度 920px · 更新于时间 · 版权行 · 微博/X/LinkedIn/复制链接分享，均可配置开关）· 封面写法支持 Issue 正文 front matter 指令 · 公告/导航链接自动补子路径前缀（彻底消灭 404）· 外链封面图不再被错误拼接前缀 · 全面适配移动端 · 评论接入说明文档化。此前：标签/分类 URL 空格修复 · 公告弹窗 v1.1.6 · 朋友圈动态 · 全站内容 Actions · 页脚署名双保险 · 三栏布局 · 灯箱 · 环形回顶 · 友链头像。
 
 ## ✨ 特性一览
 
@@ -40,6 +40,34 @@ VeryGood 是一个为 GitHub Pages 量身定制的开源博客主题。它追随
 1. 打开仓库 **Issues → New issue**，看到模板后直接清空，写下文章 Markdown 正文；
 2. 给 Issue 打标签 **`Article`**（发布）；
 3. 点 Create → 等 Actions 跑完 → 打开 `https://你的用户名.github.io` 看效果。
+
+### 给文章加封面（v1.1.7）
+
+封面会自动出现在首页文章卡片、文章页顶部、社交分享图（og:image）与 sitemap 图片里。两种写法：
+
+**写法 A：Issue 正文顶部写 front matter 指令**（最方便，Issue 即文章时用）：
+
+```markdown
+---
+cover: https://example.com/cover.png   # 封面图 URL（外链或站内路径均可）
+cover_alt: 封面描述                     # 可选，无障碍/分享用
+summary: 自定义摘要                     # 可选，覆盖自动截取
+---
+
+这里是你真正的文章正文……
+```
+
+**写法 B：推送 Markdown 时在文件头部写 front matter**：
+
+```markdown
+---
+title: 我的文章
+cover: /assets/my-cover.png    # 放 source/assets/ 下的图会发布到 /assets/
+cover_alt: 封面描述
+---
+```
+
+规则：`cover` 填外链 URL 或站内相对路径都行；不填则用 `config.yml` 的 `posts.cover_default`（可为空，空就不显示封面）。图片建议 1200×630 比例（16:9），压缩到 ≤300KB，加载更快。
 
 ### 标签即状态机
 
@@ -187,8 +215,14 @@ posts:
   date_format: "%Y-%m-%d"
   cover_default: ""             # 无封面时的默认封面
 
+post_extra:                     # v1.1.7：文章页底部信息，全部可开关
+  show_updated: true            # 显示「更新于」时间（有更新时）
+  show_copyright: true          # 显示版权行（作者 + 原文链接）
+  show_share: true              # 显示分享栏（微博 / X / LinkedIn / 复制链接）
+  license: ""                   # 自定义版权协议文案（如 "CC BY-NC-SA 4.0"），留空不显示
+
 comments:                       # none / giscus / utterances
-  provider: none
+  provider: none                # ← 想要评论就改成 giscus 或 utterances 并填下方仓库参数
   giscus:
     repo: ""                    # user/comment-repo
     repo_id: ""
