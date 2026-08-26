@@ -2,8 +2,8 @@
 
 All in GitHub：GitHub Pages 托管 + GitHub Issues 写作 + GitHub Actions 发布。
 """
-__version__ = "1.1.8"
+__version__ = "1.2.0"
 
 VERSION = __version__
 NAME = "VeryGood"
-HOMEPAGE = "https://github.com/yourname/verygood"
+HOMEPAGE = "https://github.com/techjiang/VeryGood"

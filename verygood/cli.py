@@ -116,6 +116,16 @@ def cmd_serve(args) -> int:
     return 0
 
 
+def cmd_plugins(args) -> int:
+    from .plugins import list_plugins
+
+    cfg = _cfg.load_config(args.config, BASE_DIR)
+    log("[plugins] VeryGood 插件清单（不执行插件代码）：")
+    list_plugins(cfg, log=log)
+    log("[hint] 插件开发见 docs/插件开发文档.md；把插件目录放进仓库根 plugins/ 即自动启用。")
+    return 0
+
+
 def _walk(d: Path):
     return [p for p in d.rglob("*") if p.is_file() and p.suffix in (".md", ".yml", ".yaml", ".css", ".js")]
 
@@ -139,6 +149,8 @@ def main(argv=None) -> int:
     ps.add_argument("--drafts", action="store_true")
 
     sub.add_parser("version", help="版本号")
+    log_jobs = sub.add_parser("plugins", help="列出内置/自动发现/显式配置的插件")
+    log_jobs.add_argument("--config", default=None, help="config.yml 路径")
 
     args = parser.parse_args(argv)
     if args.cmd == "build":
@@ -148,6 +160,8 @@ def main(argv=None) -> int:
     if args.cmd == "version":
         log(f"VeryGood v{__version__}")
         return 0
+    if args.cmd == "plugins":
+        return cmd_plugins(args)
     parser.print_help()
     return 0
 

@@ -87,6 +87,8 @@
 html { -webkit-text-size-adjust: 100%; scroll-behavior: auto; }
 body {
   margin: 0;
+  /* v1.2.0：移动端顶栏固定吸顶，正文用变量占位（JS 实测后覆盖） */
+  padding-top: var(--vg-header-h, var(--header-h));
   font-family: var(--font-sans);
   font-size: 16px;
   line-height: 1.75;
@@ -121,7 +123,8 @@ button { font-family: inherit; }
 
 /* ---------- 头部（桌面端为信息卡式侧栏） ---------- */
 .site-header {
-  position: sticky; top: 0; z-index: 100;
+  /* v1.2.0：全站锁定不随滚动移动——移动端固定吸顶；桌面端由下方 media 覆盖为固定左栏 */
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
   background: color-mix(in srgb, var(--bg) 97%, transparent);
   border-bottom: 1px solid var(--line);
   transition: border-color 0.3s ease;
@@ -197,8 +200,9 @@ button { font-family: inherit; }
 
 /* ---------- 桌面端左侧固定侧栏 ---------- */
 @media (min-width: 861px) {
+  body { padding-top: 0; }  /* 桌面端左侧栏 fixed，正文不再需要顶栏占位 */
   .site-header {
-    position: fixed; top: 0; bottom: 0; left: 0;
+    position: fixed; top: 0; bottom: 0; left: 0; right: auto;
     width: var(--sidebar-w);
     border-bottom: 0; border-right: 1px solid var(--line);
     padding: 36px 22px 24px;
@@ -372,9 +376,9 @@ button { font-family: inherit; }
 .md-body h2 {
   font-size: 25px; margin: 2.2em 0 0.8em; padding-bottom: 0.4em;
   border-bottom: 1px solid var(--line);
-  scroll-margin-top: calc(var(--header-h) + 20px);
+  scroll-margin-top: calc(var(--vg-header-h, var(--header-h)) + 20px);
 }
-.md-body h3 { font-size: 20px; margin: 1.9em 0 0.7em; scroll-margin-top: calc(var(--header-h) + 20px); }
+.md-body h3 { font-size: 20px; margin: 1.9em 0 0.7em; scroll-margin-top: calc(var(--vg-header-h, var(--header-h)) + 20px); }
 .md-body h4 { font-size: 17px; margin: 1.6em 0 0.6em; }
 .md-body h2::before, .md-body h3::before, .md-body h4::before {
   content: ""; display: inline-block; width: 5px; height: 0.95em;
@@ -563,9 +567,14 @@ a.pager__num:hover { background: var(--rose-100); color: var(--rose-600); }
 .friend-card:hover { transform: translateY(-3px); border-color: var(--rose-300); box-shadow: var(--shadow); color: var(--ink); }
 .friend-card__avatar {
   display: inline-flex; align-items: center; justify-content: center;
-  flex: 0 0 58px; height: 58px; border-radius: 18px;
-  background: var(--grad); color: #fff; font-weight: 700; font-size: 24px;
+  flex: 0 0 58px; height: 58px;
+  /* v1.2.0：圆形头像；底色白/透明色，兼容无背景的透明 PNG 头像；图裁切居中 */
+  border-radius: 50%;
+  background: #fff;
+  color: var(--rose-600); font-weight: 700; font-size: 24px;
+  overflow: hidden;
 }
+[data-theme="dark"] .friend-card__avatar { background: #2a2a33; }
 .friend-card__info { display: flex; flex-direction: column; min-width: 0; gap: 3px; }
 .friend-card__name { font-weight: 700; color: var(--ink); font-size: 18px; }
 .friend-card__desc {

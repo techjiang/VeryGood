@@ -1,9 +1,25 @@
 /* VeryGood Theme · main.js (v1.1) */
 (function () {
   'use strict';
-  var doc = document;
+var doc = document;
   var root = doc.documentElement;
   root.classList.add('js');
+
+  /* ---------- 顶栏高度实测（v1.2.0：移动端 fixed 顶栏占位） ---------- */
+  var headerEl = doc.querySelector('.site-header');
+  var mqMobile = window.matchMedia ? window.matchMedia('(max-width: 860px)') : null;
+  function syncHeaderH() {
+    if (!headerEl || !mqMobile || !mqMobile.matches) return;
+    root.style.setProperty('--vg-header-h', (headerEl.offsetHeight || 64) + 'px');
+  }
+  if (headerEl && mqMobile) {
+    syncHeaderH();
+    var hTimer = null;
+    function hSchedule() { clearTimeout(hTimer); hTimer = setTimeout(syncHeaderH, 60); }
+    if (mqMobile.addEventListener) { mqMobile.addEventListener('change', hSchedule); }
+    else if (mqMobile.addListener) { mqMobile.addListener(hSchedule); }
+    window.addEventListener('resize', hSchedule);
+  }
 
   /* ---------- 深浅色切换 ---------- */
   var themeBtn = doc.getElementById('theme-toggle');

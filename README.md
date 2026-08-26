@@ -4,20 +4,20 @@
 
 VeryGood 是一个为 GitHub Pages 量身定制的开源博客主题。它追随 Gmeek 的优雅理念：**写作发生在 GitHub Issue 里**，标签即状态机，关闭 Issue 即下线文章——你只需要专注内容，剩下的交给自动化。
 
-**当前版本：v1.1.8** —— 品牌署名 `Powered by TechSauce & VeryGood` 字符级锁定（改字/偷换链接构建即失败、站点立即不可用）· 底部栏可自定义（简介 + 导航）· 媒体灯箱放大全屏（缩放/旋转/下载/全屏）· 正文加宽至 1360px（≤1760px 屏保持满宽不被右栏挤压）· 右栏断点 1600→1760px。此前：文章页升级（更新于时间 · 版权行 · 分享栏）· 公告弹窗 v1.1.6 · 朋友圈动态 · 全站内容 Actions · 页脚署名双保险 · 三栏布局 · 灯箱 · 环形回顶 · 友链头像。
+**当前版本：v1.2.0** —— 移动端顶栏锁定不动 · 分类独立页（`/categories/`）· 文章访问路径可定制（`path` / `dir` / `article_dir`）· 友链头像圆形化（透明/白底兼容）· 品牌署名双层防护（构建字符级校验 + 运行时守卫，分毫不能改）· 插件生态上线（全局变量 / Jinja 过滤器 / 短代码 / 钩子 / 模板注入五类能力 + `verygood plugins` 命令）。此前：品牌署名字符级锁定 v1.1.8 · 媒体灯箱放大全屏 · 正文 1360px 满宽 · 公告弹窗 v1.1.6 · 朋友圈动态 · 全站内容 Actions · 三栏布局 · 环形回顶。
 
 ## ✨ 特性一览
 
 | 维度 | 能力 |
 | --- | --- |
-| 🌸 颜值 | 低饱和玫瑰灰配色（莫兰迪粉，不甜腻、不过气），深浅双主题跟随系统 + 手动切换并记忆 |
-| 🧱 布局 | 桌面三栏：左侧固定信息栏 / 中间正文 / 右侧 Widget（目录、近期文章、标签云、分类、友链），窄屏优雅降级 |
-| ✍️ 写作 | Gmeek 式 Issue 写作；也支持直接写 Markdown 推到 `source/posts/`；两种方式可混用 |
+| 🌸 颜值 | 低饱和玫瑰灰配色（莫兰迪粉，不甜腻、不过气），深浅双主题跟随系统 + 手动切换并记忆；友链头像圆形化（透明/白底 logo 兼容） |
+| 🧱 布局 | 桌面三栏：左侧固定信息栏 / 中间正文 / 右侧 Widget（目录、近期文章、标签云、分类、友链）；**移动端顶栏锁定不随滚动**，窄屏优雅降级 |
+| ✍️ 写作 | Gmeek 式 Issue 写作；也支持直接写 Markdown 推到 `source/posts/`；两种方式可混用；**文章访问路径可定制**（`path: /abc` → 域名/abc） |
 | 🚀 部署 | 一条 GitHub Actions 工作流：Issue 事件 → 同步 Markdown → 构建 → 部署 Pages |
-| 🔍 SEO | 结构化数据（BlogPosting / BreadcrumbList / WebSite+SearchAction）、Sitemap（含图片）、RSS、robots、humans、Open Graph、Twitter Card、canonical、noindex 分页、百度收录推送钩子 |
+| 🔍 SEO | 结构化数据（BlogPosting / BreadcrumbList / WebSite+SearchAction）、Sitemap（含图片）、分类独立页、RSS、robots、humans、Open Graph、Twitter Card、canonical、noindex 分页、百度收录推送钩子 |
 | ⚡ 性能 | 纯静态零框架、图片懒加载、CSS 构建压缩、环形回顶进度、轻量交互、插件钩子错误隔离 |
 | 💬 互动 | 公告条（可关闭记忆）、朋友圈动态（站长/站点管理者用 Issue + Actions 推送，非访客留言）、giscus / utterances 评论、相关推荐、上下篇 |
-| 🔌 可玩性 | 插件系统（短代码 / 5 类生命周期钩子 / 模板注入）、主题整套可复制改写、前端实时搜索、标签/分类/归档、友链页（支持图片头像）、分类/标签可自定义描述与置顶 |
+| 🔌 可玩性 | **插件生态**（`python -m verygood plugins` 查看清单；短代码 / 钩子 / 模板注入 / 全局变量 / Jinja 过滤器五类 API）、主题整套可复制改写、前端实时搜索、标签/分类/归档、友链页、分类/标签自定义描述与置顶 |
 
 ## 🚀 快速开始（GitHub Pages + Issue 写作）
 
@@ -40,6 +40,18 @@ VeryGood 是一个为 GitHub Pages 量身定制的开源博客主题。它追随
 1. 打开仓库 **Issues → New issue**，看到模板后直接清空，写下文章 Markdown 正文；
 2. 给 Issue 打标签 **`Article`**（发布）；
 3. 点 Create → 等 Actions 跑完 → 打开 `https://你的用户名.github.io` 看效果。
+
+### 给文章设置自定义访问路径（v1.2.0）
+
+文章默认在 `/article/{标题}/`，可在 front matter 加 `path` 改**访问地址**（优先级最高，直达）：
+
+```markdown
+---
+path: /abc        # 文章变成 域名/abc；同理 path: /wz/abc → 域名/wz/abc
+---
+```
+
+也可用 `dir: /notes`（只换目录前缀，保留标题）或全局配置 `posts.article_dir: blog`（所有文章默认 `/blog/{标题}/`）。
 
 ### 给文章加封面（v1.1.7）
 
@@ -91,6 +103,7 @@ pip install -r requirements.txt
 python -m verygood build          # 构建到 dist/
 python -m verygood build --drafts # 构建（含草稿）
 python -m verygood serve --port 8000   # 本地预览（文件变更自动重建）
+python -m verygood plugins        # 查看插件清单（内置 / 自动发现 / 显式配置）
 ```
 
 ## 📁 目录结构
@@ -100,16 +113,19 @@ VeryGood/
 ├── config.yml                    # 站点配置（唯一需要经常改的文件）
 ├── requirements.txt
 ├── verygood/                     # 构建引擎（纯 Python + Jinja2）
-│   ├── builder.py                # 构建器：分页/标签/分类/归档/搜索/SEO/动态路由
+│   ├── builder.py                # 构建器：分页/标签/分类/归档/搜索/SEO/动态路由/署名校验
 │   ├── config.py                 # 配置加载与默认值/规整
-│   ├── content.py                # Markdown / front matter 解析
+│   ├── content.py                # Markdown / front matter 解析 / 文章路径定制
 │   ├── mdrender.py               # 渲染扩展：TOC、懒加载、短代码
 │   ├── seo.py                    # sitemap / rss / robots / humans
-│   ├── cli.py                    # build / serve / version 命令
+│   ├── cli.py                    # build / serve / version / plugins 命令
 │   └── plugins/                  # 插件系统 + 内置插件
+├── plugins/                      # 用户插件自动发现目录（v1.2.0 生态入口）
+│   ├── footer-note/              # 示例：页脚留言
+│   └── post-stats/               # 示例：文章字数统计
 ├── themes/verygood/              # 主题（整套可复制自定义）
 │   ├── theme.yml                 # 主题元数据
-│   ├── templates/                # 11 个 Jinja2 模板 + 4 个 partials
+│   ├── templates/                # 12 个 Jinja2 模板 + 4 个 partials
 │   └── static/                   # css / js（main.js + search.js）/ img
 ├── source/                       # 本地内容源
 │   ├── posts/                    # 文章目录（issue-*.md 由 Actions 生成）
@@ -119,7 +135,7 @@ VeryGood/
 ├── scripts/
 │   ├── sync_issues.py            # Issue → Markdown（工作流调用，分页拉取防截断）
 │   └── gen_assets.py             # 示例封面生成器（可选）
-├── docs/                         # 使用文档 + 开发文档
+├── docs/                         # 使用文档 / 开发文档 / 插件开发文档
 └── .github/workflows/build.yml   # 页面部署工作流（核心）
 ```
 
@@ -214,6 +230,7 @@ posts:
   related: 3                    # 相关推荐条数
   date_format: "%Y-%m-%d"
   cover_default: ""             # 无封面时的默认封面
+  article_dir: article          # v1.2.0：文章默认目录前缀（front matter path > dir > 此项）
 
 post_extra:                     # v1.1.7：文章页底部信息，全部可开关
   show_updated: true            # 显示「更新于」时间（有更新时）
@@ -237,7 +254,7 @@ links:                          # 友链（/links/ + 右栏缩略）
   - name: GitHub
     url: https://github.com
     desc: 全球最大代码托管平台
-    avatar: "https://github.com/github.png"   # v1.1：头像图，留空显示首字母彩球
+    avatar: "https://github.com/github.png"   # v1.1：头像图，v1.2.0 起圆形展示；留空显示首字母彩球
 
 issues:                         # Issue 写作配置
   publish_label: Article
@@ -246,7 +263,7 @@ issues:                         # Issue 写作配置
   moment_label: Moment          # Moment 标签 → 朋友圈动态（/board/）
   slug_prefix: issue
 
-plugins: []                     # 用户插件目录（也自动发现仓库根 plugins/）
+plugins: ["plugins/my-plugin"]  # 显式声明用户插件；仓库根 plugins/ 下目录自动发现（v1.2.0）
 ```
 
 完整配置请看 [docs/使用文档.md](./docs/使用文档.md) 与 `config.yml` 内的中文注释。
@@ -271,7 +288,7 @@ VeryGood 的主题 = 一套可整体复制的 `themes/` 目录：
 
 ## 🔌 插件开发（可玩性的尽头）
 
-插件 = 仓库根 `plugins/` 下的一个目录（含 `plugin.py`）或单文件 `xxx.py`，**即装即用**，无需改 config。也可在 `config.plugins` 里显式声明目录路径。
+插件 = 仓库根 `plugins/` 下的一个目录（含 `plugin.py`）或单文件 `xxx.py`，**即装即用**，无需改 config。也可在 `config.plugins` 里显式声明目录路径。**完整 API / 钩子清单 / 示例 / 发布规范见 [插件开发文档](./docs/插件开发文档.md)。**
 
 ```python
 # plugins/my-plugin/plugin.py
@@ -286,6 +303,10 @@ def setup(ctx):                 # 必须实现 setup(ctx)
 
     # 3) 模板注入
     ctx.inject("head", '<meta name="x-custom" content="1">')
+
+    # 4) v1.2.0：向全部模板暴露能力
+    ctx.add_global("build_year", 2026)        # 模板里 {{ build_year }}
+    ctx.add_filter("wc", lambda s: len(s))    # 模板里 {{ text | wc }}
 ```
 
 可用的钩子（事件均为可选）：
@@ -309,7 +330,7 @@ def setup(ctx):                 # 必须实现 setup(ctx)
 
 内置插件：`shortcodes`（视频嵌入）、`reading_time`（阅读时长，`post.reading_time` 自动注入卡片/文章头部）、`random_post`（/random/ 随机文章跳转）。
 
-更完整的插件示例请见 [docs/开发文档.md](./docs/开发文档.md)。
+仓库自带两个示例插件（即装即用 + 现成代码参考）：`plugins/footer-note`（页脚留言）、`plugins/post-stats`（字数统计 / 阅读时长过滤器）。用 `python -m verygood plugins` 随时核对启用了哪些插件。
 
 ## 🤖 与 Gmeek 的对照
 
@@ -347,13 +368,19 @@ Actions 每次自动同步生成，无需手提交。
 `seo.baidu_push` 为 true 时会在构建产物里输出推送钩子脚本（需结合站长平台主动推送 token 使用，见模板注释）。
 
 **Q：友链头像不显示？**
-在 `links` 条目里填 `avatar` 为图片 URL 即可；留空会显示首字母彩球。
+在 `links` 条目里填 `avatar` 为图片 URL 即可；留空会显示首字母彩球。v1.2.0 起头像统一圆形展示（`object-fit: cover` 自动裁剪居中），透明底 / 白底 logo 都兼容，无需提前抠图。
+
+**Q：文章想放到自定义路径（比如 域名/abc）？**
+在文章 front matter 写 `path: /abc`（直达，支持任意层级如 `/wz/abc`）；`dir: /notes` 只换前缀保留标题；或用 `posts.article_dir` 改全站默认前缀。详见 README「自定义访问路径」一节。
 
 **Q：公告条/侧栏折叠状态忘了怎么开？**
 公告与折叠状态存在浏览器 localStorage（`vg-ann-close`、`vg-side-block:*`），换浏览器或清缓存即恢复默认。
 
 **Q：页脚的「Powered by TechSauce & VeryGood」可以删掉吗？**
-不可以。这是主题的强制署名：构建时会校验页脚署名（`vg-power-51f3a8` 标记），删除后**构建直接失败、站点立即无法部署/无法使用**；即使绕过构建直接部署，页面运行时守卫也会在检出署名缺失后立即停止渲染。请保留署名行。
+不可以。这是主题的强制署名：**构建时会做字符级校验**（`vg-power-51f3a8` 标记 + 可见文本逐字符比对 + 链接白名单精确匹配，先剥离零宽/双向控制字符再比），删除、改名、改字、偷换链接或混入隐藏字符都会让**构建直接失败、站点无法部署**；即使绕过构建层直接部署，**页面运行时守卫**（6 秒周期自检 + DOM 变化监听 + 可见性检查）也会检出署名缺失后让整页立即不可用。请保留署名行。
+
+**Q：分类页和归档页什么关系？**
+归档 `/archive/` 是时间线（分类云 + 按年归档）；v1.2.0 起分类有独立的 `/categories/` 页面（聚合所有分类卡片，页脚默认导航自带入口），每个分类的文章在 `/category/{分类名}/`。
 
 **Q：朋友圈动态怎么发？**
 新建 Issue → 写下正文（Markdown，支持图片、视频）→ 打上 `Moment` 标签 → Actions 自动同步到 `/board/` 时间线；想下线哪条就关闭对应 Issue。也可把 `board.repo` 配成 `owner/repo`，动态卡片会带「Issue #编号」跳转链接，方便观众查看原始内容。

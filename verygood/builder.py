@@ -7,6 +7,7 @@ import json
 import re
 import shutil
 from pathlib import Path
+from urllib.parse import urlsplit as _urlsplit
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
@@ -231,6 +232,11 @@ def build(cfg: dict, log=print, include_drafts: bool | None = None) -> dict:
     log(f"  · 文章 {len(posts)} 篇，页面 {len(pages)} 个，动态 {len(moments)} 条，标签 {len(site['tags'])} 个")
 
     env = _env(cfg, cfg["theme"]["root"])
+    # v1.2.0：插件注册的全局变量与 Jinja 过滤器注入模板环境（插件可接管同名内置能力）
+    for gname, gval in ctx.globals.items():
+        env.globals[gname] = gval
+    for fname, fval in ctx.filters.items():
+        env.filters[fname] = fval
     extra = {"injections": ctx.template_injections}
     # 百度收录自动推送（主动推送 JS 钩子，配置 seo.baidu_push: true 时注入每个页面）
     if cfg["seo"].get("baidu_push"):
@@ -303,8 +309,9 @@ def build(cfg: dict, log=print, include_drafts: bool | None = None) -> dict:
             ow.write(f"category/{slug}/index.html", html) if idx == 1 else ow.write(
                 f"category/{slug}/page/{idx}/index.html", html)
 
-    # ---------- 归档 / 留言板 / 搜索 / 404 ----------
+    # ---------- 归档 / 分类云 / 留言板 / 搜索 / 404 ----------
     ow.write("archive/index.html", render("archive.html", current_path=cur("/archive/"), **extra))
+    ow.write("categories/index.html", render("categories.html", current_path=cur("/categories/"), **extra))
     if cfg["board"].get("enabled", True):
         ow.write("board/index.html", render("board.html", current_path=cur("/board/"), **extra))
     search_index = [
@@ -343,6 +350,7 @@ def build(cfg: dict, log=print, include_drafts: bool | None = None) -> dict:
         for name in site["categories"]:
             sitemap_urls.append({"loc_abs": absf(tax_path("category", name)), "freq": "weekly", "priority": "0.5"})
         sitemap_urls.append({"loc_abs": absf("/archive/"), "freq": "weekly", "priority": "0.4"})
+        sitemap_urls.append({"loc_abs": absf("/categories/"), "freq": "weekly", "priority": "0.5"})
         if cfg["board"].get("enabled", True):
             sitemap_urls.append({"loc_abs": absf("/board/"), "freq": "weekly", "priority": "0.4"})
         # 标签云 / 友链 收录入口
@@ -376,25 +384,46 @@ def build(cfg: dict, log=print, include_drafts: bool | None = None) -> dict:
             if len(mini) < len(raw):
                 f.write_text(mini, encoding="utf-8")
 
-    # ---------- 品牌署名防护（v1.1.8 加强：字符级校验，杜绝门缝过关） ----------
+    # ---------- 品牌署名防护（v1.2.0：字符级 + 域名精确 + 链接属性 + 控制字符剥离） ----------
     # 页脚署名行「Powered by TechSauce & VeryGood」是品牌护栏，分毫不能修改：
     #   · 模板 marker（vg-power-51f3a8）缺失 → 构建失败
-    #   · 署名可见文本与标准逐字符比对（仅允许 HTML 空白折叠），任何改动/顺序调换/增删字符 → 构建失败
-    #   · 两个署名链接 href 必须分别指向 docs.asoe.cn 与 github.com/techjiang/VeryGood（防「换个链接」过关）
-    # 三层校验杜绝「删行过关 / 改名过关 / 改字过关 / 偷换链接」等一切绕过方式。
+    #   · 署名可见文本逐字符比对（对比前剥离零宽/双向控制字符，防「看不见的字」混入）
+    #   · 两个链接必须精确指向 docs.asoe.cn 与 github.com/techjiang/VeryGood（netloc 精确匹配，
+    #     防 docs.asoe.cn.evil.com 之类的子串绕过），且均须 target="_blank" + rel 含 noopener
+    #   · 一切改动/顺序调换/增删字符 → 构建失败
+    # 与主题内置运行时防线（逐字符比对 + 可见性探测 + 周期性再校验）构成双保险，杜绝门缝过关。
     _POWER_MARKER = "vg-power-51f3a8"
     _POWER_EXPECTED = "Powered by TechSauce & VeryGood"   # 标准署名可见文本（唯一允许的形态）
     _POWER_PAT = re.compile(r'<p\s+class="site-footer__powered"[^>]*>(.*?)</p>', re.S)
-    _POWER_A_PAT = re.compile(r'<a\s+[^>]*href="([^"]*)"[^>]*>', re.I)
+    _POWER_A_PAT = re.compile(r'<a\s+([^>]*)>(.*?)</a>', re.S | re.I)
     _POWER_HOST_A = "docs.asoe.cn"
-    _POWER_HOST_B = "github.com/techjiang/VeryGood"
+    _POWER_HOST_B = "github.com"
+    _POWER_PATH_B = "/techjiang/VeryGood"
     _TAG_RE = re.compile(r"<[^>]+>")
+    # 零宽 / 双向文本控制字符：肉眼不可见但能改页面字节，必须剥离后比对
+    _ZERO_W = re.compile(r"[\u200b-\u200f\u202a-\u202e\u2060\ufeff\u00ad]")
 
     def _norm_power_text(s: str) -> str:
-        """去标签 + HTML 实体反转义 + 折叠空白，得到页面署名的可见文本。"""
+        """去标签 + HTML 实体反转义 + 剥离零宽/双向字符 + 折叠空白，得到页面署名的可见文本。"""
         text = _TAG_RE.sub("", s)
         text = _html.unescape(text)
+        text = _ZERO_W.sub("", text)
         return re.sub(r"\s+", " ", text).strip()
+
+    def _power_href_ok(href: str, host: str, path: str | None = None) -> bool:
+        """精确校验署名链接：协议 http/https + netloc 恰好等于目标域名（防子串伪装），
+        path 非空时路径也须以目标路径开头（防 github 路径被偷换）。"""
+        try:
+            p = _urlsplit(href)
+        except Exception:  # noqa: BLE001
+            return False
+        if p.scheme not in ("http", "https"):
+            return False
+        if (p.netloc or "").lower() != host:
+            return False
+        if path is not None and not (p.path or "").lower().startswith(path.lower()):
+            return False
+        return True
 
     missing = []
     # 只校验「模板渲染生成」的页面（ow.files），不校验 source/assets 等静态拷贝的
@@ -423,16 +452,31 @@ def build(cfg: dict, log=print, include_drafts: bool | None = None) -> dict:
                 f"期望 `{_POWER_EXPECTED}`，实际 `{_norm_power_text(m.group(1))}`]"
             )
             continue
-        # 链接校验：恰好两个 a，分别指向两大官方地址
-        hrefs = _POWER_A_PAT.findall(m.group(1))
-        if len(hrefs) != 2 or not any(_POWER_HOST_A in h for h in hrefs) \
-                or not any(_POWER_HOST_B in h for h in hrefs):
-            missing.append(f"{f} [署名链接被篡改: 实际链接 {hrefs}]")
+        # 链接校验：恰好两个 a，分别精确指向两大官方地址；且均 target="_blank" + rel 含 noopener
+        links = _POWER_A_PAT.findall(m.group(1))
+        hrefs, ok_attr = [], True
+        for attrs, _inner in links:
+            hm = re.search(r'href\s*=\s*"([^"]*)"', attrs, re.I)
+            if not hm:
+                ok_attr = False
+                break
+            hrefs.append(hm.group(1))
+            rel_ok = re.search(r'rel\s*=\s*"([^"]*)"', attrs, re.I)
+            rel_txt = (rel_ok.group(1).lower() if rel_ok else "")
+            tgt_ok = re.search(r'target\s*=\s*"([^"]*)"', attrs, re.I)
+            tgt_val = (tgt_ok.group(1).lower() if tgt_ok else "")
+            if tgt_val != "_blank" or "noopener" not in rel_txt:
+                ok_attr = False
+                break
+        href_a_ok = any(_power_href_ok(h, _POWER_HOST_A) for h in hrefs)
+        href_b_ok = any(_power_href_ok(h, _POWER_HOST_B, _POWER_PATH_B) for h in hrefs)
+        if len(links) != 2 or not ok_attr or not href_a_ok or not href_b_ok:
+            missing.append(f"{f} [署名链接被篡改: 链接={links!r} hrefs={hrefs}]")
     if missing:
         raise RuntimeError(
-            "品牌署名保护触发（v1.1.8 字符级校验）：以下页面页脚署名缺失或被篡改，"
+            "品牌署名保护触发（v1.2.0 字符级+域名精确校验）：以下页面页脚署名缺失或被篡改，"
             "构建已终止——「Powered by TechSauce & VeryGood」分毫不能修改，"
-            "删除/改名/改字/偷换链接的后果 = 站点立即无法使用。\n  "
+            "删除/改名/改字/偷换链接/属性缺失的后果 = 站点立即无法使用。\n  "
             + "\n  ".join(missing)
         )
 

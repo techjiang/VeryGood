@@ -1,0 +1,41 @@
+{% extends "base.html" -%}
+{% import "partials/_macros.html" as m -%}
+
+{% block title %}分类 · {{ cfg.site.title }}{% endblock %}
+{% block canonical %}{{ abs_url('/categories/') }}{% endblock %}
+
+{% block content %}
+<section class="page-head container reveal">
+  <p class="hero__eyebrow">Categories</p>
+  <h1 class="hero__title hero__title--sm">全部分类</h1>
+  <p class="hero__desc">共 {{ site.categories | length }} 个分类 · {{ site.posts | length }} 篇文章</p>
+</section>
+
+<section class="tag-cloud container reveal">
+  {# 置顶分类（taxonomies.categories.<名>.pin: true）优先 #}
+  {% set pinned = [] %}
+  {% set normal = [] %}
+  {% for name, posts in site.categories.items() %}
+  {% if site.taxonomies.categories.get(name, {}).get('pin') %}
+    {% set _ = pinned.append(name) %}
+  {% else %}
+    {% set _ = normal.append(name) %}
+  {% endif %}
+  {% endfor %}
+  {% for name in pinned + normal %}
+  {% set posts = site.categories[name] %}
+  {% set n = [posts | length, 5] | min %}
+  <div class="tag-cloud__wrap">
+    <a class="tag-cloud__item tag-cloud__item--{{ n }}{% if site.taxonomies.categories.get(name, {}).get('pin') %} is-pinned{% endif %}" href="{{ url_for(tax_path('category', name)) }}">
+      <span class="chip chip--lg">{{ m.icon('folder', 13) }}{{ name }}{% if site.taxonomies.categories.get(name, {}).get('pin') %} {{ m.icon('fire', 12) }}{% endif %}</span>
+      <span class="tag-cloud__count">{{ posts | length }}</span>
+    </a>
+    {% if site.taxonomies.categories.get(name, {}).get('desc') %}
+    <p class="tag-cloud__desc">{{ site.taxonomies.categories.get(name, {}).get('desc') }}</p>
+    {% endif %}
+  </div>
+  {% endfor %}
+</section>
+
+{{ injections.get('categories_extra', []) | join('\n') | safe }}
+{% endblock %}

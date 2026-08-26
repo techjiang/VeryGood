@@ -92,6 +92,9 @@ DEFAULTS = {
         "related": 3,
         "date_format": "%Y-%m-%d",
         "cover_default": "",
+        # 文章默认目录前缀（v1.2.0）：文章 URL = /{article_dir}/{slug}/。
+        # 单篇可用 Front Matter `dir:` 覆盖前缀、`path:` 完全自定义；置空则保持旧式 /{slug}/。
+        "article_dir": "article",
     },
     "comments": {"provider": "none"},
     "links": [],
@@ -172,6 +175,7 @@ def normalize(cfg: dict, root: Path) -> None:
     _DEFAULT_FOOTER_NAV = [
         {"label": "首页", "url": "/", "external": False},
         {"label": "归档", "url": "/archive/", "external": False},
+        {"label": "分类", "url": "/categories/", "external": False},
         {"label": "标签", "url": "/tags/", "external": False},
         {"label": "动态", "url": "/board/", "if": "board", "external": False},
         {"label": "GitHub", "url": "https://github.com/{github}", "if": "github", "external": True},
@@ -193,6 +197,10 @@ def normalize(cfg: dict, root: Path) -> None:
             for it in _nav
             if isinstance(it, dict) and it.get("label") and it.get("url")
         ]
+
+    # v1.2.0：文章目录前缀规整（允许空字符串回退旧式 /{slug}/ 布局）
+    pd = cfg.get("posts", {})
+    pd["article_dir"] = str(pd.get("article_dir") or "").strip().strip("/")
 
     # v1.1：右侧栏规整
     rb = s.setdefault("rightbar", {})

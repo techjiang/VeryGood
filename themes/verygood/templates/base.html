@@ -133,7 +133,8 @@
 
     <nav class="site-nav" id="site-nav" aria-label="主导航">
       <a href="{{ url_for('/') }}" {% if current_path == url_for('/') %}aria-current="page"{% endif %} class="site-nav__link">首页</a>
-      <a href="{{ url_for('/archive/') }}" {% if current_path == url_for('/archive/') or (current_path and '/category/' in current_path) %}aria-current="page"{% endif %} class="site-nav__link">归档</a>
+      <a href="{{ url_for('/archive/') }}" {% if current_path == url_for('/archive/') %}aria-current="page"{% endif %} class="site-nav__link">归档</a>
+      <a href="{{ url_for('/categories/') }}" {% if current_path == url_for('/categories/') or (current_path and '/category/' in current_path) %}aria-current="page"{% endif %} class="site-nav__link">分类</a>
       <a href="{{ url_for('/tags/') }}" {% if current_path == url_for('/tags/') or (current_path and '/tag/' in current_path) %}aria-current="page"{% endif %} class="site-nav__link">标签</a>
       {% if cfg.board.enabled %}<a href="{{ url_for('/board/') }}" {% if current_path == url_for('/board/') %}aria-current="page"{% endif %} class="site-nav__link">动态</a>{% endif %}
       {% for item in cfg.site.nav %}
@@ -257,29 +258,53 @@
 <noscript><style>.reveal{opacity:1 !important;transform:none !important}</style></noscript>
 {% block scripts %}
 <script>
-// VeryGood 运行时署名防线（v1.1.8 加强为逐字符校验）：
+// VeryGood 运行时署名防线（v1.2.0：逐字符 + 域名精确 + 可见性 + 周期性再校验）：
 // 页脚「Powered by TechSauce & VeryGood」被删除、篡改、隐藏、改名 → 页面立即失效。
 // 与构建层校验（vg-power-51f3a8 + 字符级比对 → 构建报错）构成双保险，杜绝门缝过关。
 (function () {
   var EXPECTED = 'Powered by TechSauce & VeryGood';
   var HOST_A = 'docs.asoe.cn';
   var HOST_B = 'github.com/techjiang/VeryGood';
-  function norm(s) { return (s || '').replace(/\s+/g, ' ').trim(); }
+  // 剥离零宽/双向文本控制字符，防「看不见的字」混入字节
+  var ZW = /[\u200b-\u200f\u202a-\u202e\u2060\ufeff\u00ad]/g;
+  function norm(s) { return (s || '').replace(ZW, '').replace(/\s+/g, ' ').trim(); }
+  function hostOf(href) {
+    try {
+      var a = document.createElement('a');
+      a.href = href;
+      if (a.protocol !== 'http:' && a.protocol !== 'https:') return '';
+      return a.hostname.toLowerCase();
+    } catch (e) { return ''; }
+  }
+  function pathOf(href) {
+    try {
+      var a = document.createElement('a');
+      a.href = href;
+      return a.pathname.toLowerCase();
+    } catch (e) { return ''; }
+  }
   function guard() {
     var el = document.querySelector('.site-footer__powered');
     var ok = !!el && norm(el.textContent) === EXPECTED;
     if (ok) {
       var links = el.querySelectorAll('a');
-      var hrefs = [];
-      for (var i = 0; i < links.length; i++) hrefs.push(links[i].getAttribute('href') || '');
-      ok = links.length === 2 &&
-           hrefs.some(function (h) { return h.indexOf(HOST_A) > -1; }) &&
-           hrefs.some(function (h) { return h.indexOf(HOST_B) > -1; });
+      var okA = false, okB = false;
+      if (links.length === 2) {
+        for (var i = 0; i < links.length; i++) {
+          var href = links[i].getAttribute('href') || '';
+          var h = hostOf(href), p = pathOf(href);
+          if (h === HOST_A) okA = true;
+          if (h === 'github.com' && p.indexOf('/techjiang/verygood') === 0) okB = true;
+        }
+      }
+      ok = okA && okB;
     }
-    /* 检查署名是否被 CSS 隐藏（display:none / visibility:hidden / 移出视口） */
+    /* 检查署名是否被 CSS/内联样式隐藏（display/visibility/opacity/尺寸清零） */
     if (ok) {
       var cs = el && getComputedStyle(el);
-      ok = cs && cs.display !== 'none' && cs.visibility !== 'hidden' && cs.opacity !== '0';
+      ok = cs && cs.display !== 'none' && cs.visibility !== 'hidden' &&
+           cs.opacity !== '0' && cs.fontSize !== '0px' &&
+           cs.clip !== 'rect(0px, 0px, 0px, 0px)' && !/^circle\(0/.test(cs.clipPath || '');
     }
     if (!ok) {
       document.documentElement.innerHTML = '<!doctype html><html><head><meta charset="utf-8"><title>VeryGood</title></head><body style="background:#faf5f6;color:#8d5567;font-family:system-ui,sans-serif;display:flex;min-height:100vh;align-items:center;justify-content:center;text-align:center;padding:24px"><div><h1 style="font-size:20px;margin:0 0 10px">VeryGood 主题不可用</h1><p style="margin:0;font-size:14px;line-height:1.8">站点页脚署名已被移除或篡改，主题已停止渲染。<br/>请恢复「Powered by TechSauce &amp; VeryGood」署名后重新构建部署。</p></div></body></html>';
@@ -287,6 +312,12 @@
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', guard);
   else guard();
+  /* 周期性再校验 + 监控署名元素属性突变：加载后被删/被藏同样立刻失效 */
+  setInterval(guard, 6000);
+  var guardEl = document.querySelector('.site-footer__powered');
+  if (guardEl && typeof MutationObserver !== 'undefined') {
+    new MutationObserver(guard).observe(guardEl, { attributes: true, childList: true, subtree: true, characterData: true });
+  }
 })();
 </script>
 <script src="{{ url_for('/js/main.js') }}" defer></script>

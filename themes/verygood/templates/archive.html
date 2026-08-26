@@ -8,25 +8,12 @@
 <section class="page-head container reveal">
   <p class="hero__eyebrow">Archive</p>
   <h1 class="hero__title hero__title--sm">时光归档</h1>
-  <p class="hero__desc">按年份整理的全部文章 · 共 {{ site.posts | length }} 篇</p>
+  <p class="hero__desc">按年份整理的全部文章 · 共 {{ site.posts | length }} 篇
+    {% if site.categories %} · 全部分类见 <a href="{{ url_for('/categories/') }}">分类页</a>{% endif %}
+  </p>
 </section>
 
 <section class="archive container">
-  {% if site.categories %}
-  <div class="archive__cats reveal">
-    <h2 class="archive__year-title">分类 <span class="archive__year-count">{{ site.categories | length }}</span></h2>
-    <div class="cat-cloud">
-      {% for name, posts in site.categories.items() %}
-      <a class="cat-cloud__item{% if site.taxonomies.categories.get(name, {}).get('pin') %} is-pinned{% endif %}" href="{{ url_for(tax_path('category', name)) }}">
-        <span class="cat-cloud__name">{{ m.icon('folder', 13) }}{{ name }}</span>
-        {% if site.taxonomies.categories.get(name, {}).get('desc') %}<span class="cat-cloud__desc">{{ site.taxonomies.categories.get(name, {}).get('desc') }}</span>{% endif %}
-        <span class="cat-cloud__count">{{ posts | length }}</span>
-      </a>
-      {% endfor %}
-    </div>
-  </div>
-  {% endif %}
-
   {% for year, posts in site.archive.items() %}
   <div class="archive__year reveal">
     <h2 class="archive__year-title">{{ year }} <span class="archive__year-count">{{ posts | length }}</span></h2>

@@ -9,19 +9,31 @@ from pathlib import Path
 
 
 class PluginContext:
-    """插件上下文：注册短代码 / 挂钩子 / 追加模板注入片段。"""
+    """插件上下文：注册短代码 / 挂钩子 / 追加模板注入片段 / 注入全局变量与 Jinja 过滤器。"""
 
     def __init__(self, log):
         self.log = log
         self.shortcodes: dict = {}
         self.hooks: dict[str, list] = {}
         self.template_injections: dict[str, list[str]] = {}  # 位置 -> 注入的 html
+        self.globals: dict = {}   # v1.2.0：模板全局变量（插件 → 模板）
+        self.filters: dict = {}   # v1.2.0：Jinja 过滤器（插件 → 模板）
 
     # ---- 短代码 ----
     def register_shortcode(self, name: str, fn):
         self.shortcodes[name] = fn
 
-# ---- 钩子 ----
+# ---- 全局变量与过滤器（v1.2.0：插件向模板暴露能力） ----
+    def add_global(self, name: str, value):
+        """向全部模板注入一个全局变量：ctx.add_global('build_year', 2026)。
+        模板中直接 {{ build_year }} 使用；覆盖同名内置全局时以插件为准。"""
+        self.globals[name] = value
+
+    def add_filter(self, name: str, fn):
+        """注册一个 Jinja 过滤器：ctx.add_filter('emoji', fn)。模板中 {{ 'x' | emoji }} 使用。"""
+        self.filters[name] = fn
+
+    # ---- 钩子 ----
     def hook(self, name: str):
         """注册钩子处理器（装饰器用法）：@ctx.hook('after_build')"""
         def deco(fn):
@@ -109,3 +121,29 @@ def load_plugins(cfg: dict, log) -> PluginContext:
                 log(f"  [plugin] 未找到用户插件入口: {entry}")
 
     return ctx
+
+
+def list_plugins(cfg: dict, log=print) -> dict:
+    """枚举插件清单（不执行插件代码）：内置插件 + 仓库根 plugins/ 自动发现 + config.plugins 显式配置。"""
+    import verygood.plugins as builtin_pkg
+
+    builtin = sorted(m.name for m in pkgutil.iter_modules(builtin_pkg.__path__))
+    root = cfg["theme"]["root"].parent.parent
+    auto: list[str] = []
+    auto_dir = root / "plugins"
+    if auto_dir.is_dir():
+        for d in sorted(auto_dir.iterdir()):
+            if d.is_dir() and (d / "plugin.py").is_file():
+                auto.append(d.name)
+            elif d.suffix == ".py" and not d.name.startswith("_") and d.name != "plugin.py":
+                auto.append(d.stem)
+    config: list[str] = []
+    for item in cfg["plugins"] or []:
+        p = Path(item)
+        if not p.is_absolute():
+            p = root / p
+        config.append(p.name if (p / "plugin.py").exists() else f"{p.name}（未找到 plugin.py）")
+    log(f"  内置插件 {len(builtin)} 个：{', '.join(builtin) or '—'}")
+    log(f"  自动发现 {len(auto)} 个：{', '.join(auto) or '—'}")
+    log(f"  显式配置 {len(config)} 个：{', '.join(config) or '—'}")
+    return {"builtin": builtin, "auto": auto, "config": config}

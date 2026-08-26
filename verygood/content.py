@@ -119,8 +119,23 @@ def parse_post_file(
     }
 
     if kind == "posts":
-        post["url"] = f"/{slug}/"
-        post["dir"] = "posts"
+        # v1.2.0 文章路径可配置（优先级从高到低）：
+        #   front matter `path: /wz/abc`  → /wz/abc/（完整自定义直达，忽略 slug）
+        #   front matter `dir: wz`        → /wz/{slug}/（文章目录前缀）
+        #   config  posts.article_dir     → /{article_dir}/{slug}/（全局默认，默认 article）
+        #   三者均留空                      → /{slug}/（旧式扁平布局）
+        art_dir = str(cfg["posts"].get("article_dir") or "").strip().strip("/")
+        over_dir = str(fm.get("dir") or "").strip().strip("/")
+        over_path = str(fm.get("path") or "").strip().strip("/")
+        if over_path:
+            post["url"] = "/" + over_path + "/"
+            post["dir"] = over_path
+        elif over_dir:
+            post["url"] = "/" + over_dir + "/" + slug + "/"
+            post["dir"] = over_dir
+        else:
+            post["url"] = "/" + (art_dir + "/" if art_dir else "") + slug + "/"
+            post["dir"] = art_dir or ""
     elif kind == "pages":
         post["url"] = f"/{slug}/"
         post["dir"] = "pages"
