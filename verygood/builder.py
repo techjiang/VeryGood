@@ -320,8 +320,9 @@ def build(cfg: dict, log=print, include_drafts: bool | None = None) -> dict:
     absf = lambda p: _cfg.abs_url(cfg, p)
     sitemap_urls = []
     if seo_cfg["sitemap"]:
-        # 首页（1.0 最高优先级，v1.1 补齐）
-        sitemap_urls.append({"loc_abs": absf("/"), "lastmod": posts[0]["updated"] if posts else now,
+        # 首页（1.0 最高优先级，v1.1 补齐；无文章时用构建时间兜底）
+        lastmod_home = posts[0]["updated"] if posts else _dt.datetime.now()
+        sitemap_urls.append({"loc_abs": absf("/"), "lastmod": lastmod_home,
                              "freq": "daily", "priority": "1.0"})
         # 文章页 + 文章封面图（image sitemap，v1.1 拉到顶）
         for p in posts:

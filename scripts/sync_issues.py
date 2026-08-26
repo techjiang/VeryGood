@@ -211,7 +211,10 @@ def main() -> int:
     log(f"[sync] 拉取仓库 Issue（发布: {cfg['publish_label']} / 草稿: {cfg['draft_label']} / 页面: {cfg['page_label']} / 动态: {cfg['moment_label']}）")
     items = gh_list_issues(cfg)
     if not items:
-        log("[sync] 仓库暂无 Issue")
+        # 仓库暂无任何 Issue：跳过同步并保留现有内容（模板示例可正常构建上线，
+        # 待首个 Issue 创建后即以 GitHub Issues 为准开始同步）。
+        log("[sync] 仓库暂无 Issue，跳过同步（保留现有内容）")
+        return 0
 
     posts_dir = ROOT / "source" / "posts"
     pages_dir = ROOT / "source" / "pages"
