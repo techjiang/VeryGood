@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import datetime as _dt
+import hashlib as _hashlib
 import html as _html
 import json
 import re
@@ -13,6 +14,14 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from . import __version__, config as _cfg, content, mdrender, seo as _seo
 from .plugins import load_plugins
+
+# ---------- 品牌署名指纹（v1.3.0 构建层常量） ----------
+# 与 verygood/plugins 无关；供构建层与运行时守卫两端重算比对。
+_POWER_MARKER = "vg-power-51f3a8"
+_POWER_EXPECTED = "Powered by TechSauce & VeryGood"   # 标准署名可见文本（唯一允许的形态）
+# 指纹 1：绑定署名文本本身（防「改字」）；指纹 2：绑定指纹 1 + footer 容器（防「整段换页脚」）
+_POWER_FP1 = _hashlib.sha256(f"{_POWER_MARKER}|{_POWER_EXPECTED}".encode()).hexdigest()[:12]
+_POWER_FP2 = _hashlib.sha256(f"site-footer|{_POWER_FP1}".encode()).hexdigest()[:12]
 
 _CSS_MIN_RE = re.compile(r"/\*[\s\S]*?\*/")
 _WS_RE = re.compile(r"\s+")
@@ -141,6 +150,11 @@ def _env(cfg: dict, theme_root: Path) -> Environment:
         lstrip_blocks=True,
     )
 
+    # v1.3.0：品牌署名双指纹（data-vg-fp / data-vg-sig），构建层与运行时守卫共同校验。
+    # 指纹与署名文本、marker、站点信息绑定：整段署名被复制到别的站点也会被识别为篡改。
+    env.globals["power_fp1"] = _POWER_FP1
+    env.globals["power_fp2"] = _POWER_FP2
+
     def datefmt(dt, fmt=None):
         return dt.strftime(fmt or cfg["posts"]["date_format"])
 
@@ -238,6 +252,13 @@ def build(cfg: dict, log=print, include_drafts: bool | None = None) -> dict:
     for fname, fval in ctx.filters.items():
         env.filters[fname] = fval
     extra = {"injections": ctx.template_injections}
+    # v1.3.0：注入片段中的 __BASE__ 占位符统一替换为站点 basePath（如 /VeryGood 或空串）
+    _bp = _cfg.base_path(cfg)
+    if _bp and ctx.template_injections:
+        extra["injections"] = {
+            pos: [s.replace("__BASE__", _bp) for s in frags]
+            for pos, frags in ctx.template_injections.items()
+        }
     # 百度收录自动推送（主动推送 JS 钩子，配置 seo.baidu_push: true 时注入每个页面）
     if cfg["seo"].get("baidu_push"):
         ctx.inject(
@@ -249,6 +270,8 @@ def build(cfg: dict, log=print, include_drafts: bool | None = None) -> dict:
     noindex_p2 = seo_cfg["noindex_page_2plus"]
 
     def render(tpl, **kw):
+        # v1.3.0：模板渲染前触发 tpl_context 钩子，插件可向渲染上下文注入键（kw 同一引用）
+        ctx.emit("tpl_context", {"template": tpl, "ctx": kw})
         return _render_page(env, site, tpl, **kw)
 
     def cur(path: str) -> str:
@@ -374,6 +397,12 @@ def build(cfg: dict, log=print, include_drafts: bool | None = None) -> dict:
     if src_assets.is_dir():
         _copy_tree(src_assets, out / "assets")
 
+    # v1.3.0：插件静态资源 → dist/plugins/{插件名}/（插件 inject 时用 __BASE__/plugins/{名}/... 引用）
+    for _pname, _psdir in ctx.static_dirs.items():
+        _dst = out / "plugins" / _pname
+        _copy_tree(_psdir, _dst)
+        log(f"  · 插件静态资源 → plugins/{_pname}/")
+
     # CSS 压缩（仅压缩主题自带 styles.css/markdown.css）
     if b["minify"]:
         for f in list(out.rglob("*.css")):
@@ -384,18 +413,20 @@ def build(cfg: dict, log=print, include_drafts: bool | None = None) -> dict:
             if len(mini) < len(raw):
                 f.write_text(mini, encoding="utf-8")
 
-    # ---------- 品牌署名防护（v1.2.0：字符级 + 域名精确 + 链接属性 + 控制字符剥离） ----------
+# ---------- 品牌署名防护（v1.3.0：字符级 + 域名精确 + 双指纹 + 链接文本 + 控制字符剥离） ----------
     # 页脚署名行「Powered by TechSauce & VeryGood」是品牌护栏，分毫不能修改：
     #   · 模板 marker（vg-power-51f3a8）缺失 → 构建失败
     #   · 署名可见文本逐字符比对（对比前剥离零宽/双向控制字符，防「看不见的字」混入）
     #   · 两个链接必须精确指向 docs.asoe.cn 与 github.com/techjiang/VeryGood（netloc 精确匹配，
     #     防 docs.asoe.cn.evil.com 之类的子串绕过），且均须 target="_blank" + rel 含 noopener
+    #   · 链接可见文本必须恰为 TechSauce / VeryGood（防<a>标签被塞入前缀/伪装文本）
+    #   · 双指纹校验（v1.3.0）：<footer data-vg-sig> 与 <p data-vg-fp> 与署名文本/marker 绑定，
+    #     任何位置互换、整段克隆到其他站点、改容器属性 → 立即识别
     #   · 一切改动/顺序调换/增删字符 → 构建失败
-    # 与主题内置运行时防线（逐字符比对 + 可见性探测 + 周期性再校验）构成双保险，杜绝门缝过关。
-    _POWER_MARKER = "vg-power-51f3a8"
-    _POWER_EXPECTED = "Powered by TechSauce & VeryGood"   # 标准署名可见文本（唯一允许的形态）
-    _POWER_PAT = re.compile(r'<p\s+class="site-footer__powered"[^>]*>(.*?)</p>', re.S)
+    # 与主题内置运行时防线（逐字符比对 + 指纹重算 + 可见性/遮挡探测 + 周期性再校验）构成双保险。
+    _POWER_PAT = re.compile(r'<p\s+(class="site-footer__powered"[^>]*?)>(.*?)</p>', re.S)
     _POWER_A_PAT = re.compile(r'<a\s+([^>]*)>(.*?)</a>', re.S | re.I)
+    _POWER_FOOTER_PAT = re.compile(r'<footer\s+class="site-footer"[^>]*>', re.S)
     _POWER_HOST_A = "docs.asoe.cn"
     _POWER_HOST_B = "github.com"
     _POWER_PATH_B = "/techjiang/VeryGood"
@@ -442,20 +473,33 @@ def build(cfg: dict, log=print, include_drafts: bool | None = None) -> dict:
         if _POWER_MARKER not in txt:
             missing.append(f"{f} [缺失 marker vg-power-51f3a8]")
             continue
+        fm = _POWER_FOOTER_PAT.search(txt)
+        if not (fm and f'data-vg-sig="{_POWER_FP2}"' in fm.group(0)):
+            missing.append(
+                f"{f} [缺失/篡改 footer 签名 data-vg-sig (期望 {_POWER_FP2})]"
+            )
+            continue
         m = _POWER_PAT.search(txt)
         if not m:
             missing.append(f"{f} [缺失 .site-footer__powered 署名行]")
             continue
-        if _norm_power_text(m.group(1)) != _POWER_EXPECTED:
+        p_attrs, p_inner = m.group(1), m.group(2)
+        if f'data-vg-fp="{_POWER_FP1}"' not in p_attrs:
             missing.append(
-                f"{f} [署名文本被篡改: "
-                f"期望 `{_POWER_EXPECTED}`，实际 `{_norm_power_text(m.group(1))}`]"
+                f"{f} [缺失/篡改署名行指纹 data-vg-fp (期望 {_POWER_FP1})]"
             )
             continue
-        # 链接校验：恰好两个 a，分别精确指向两大官方地址；且均 target="_blank" + rel 含 noopener
-        links = _POWER_A_PAT.findall(m.group(1))
-        hrefs, ok_attr = [], True
-        for attrs, _inner in links:
+        if _norm_power_text(p_inner) != _POWER_EXPECTED:
+            missing.append(
+                f"{f} [署名文本被篡改: "
+                f"期望 `{_POWER_EXPECTED}`，实际 `{_norm_power_text(p_inner)}`]"
+            )
+            continue
+        # 链接校验：恰好两个 a，分别精确指向两大官方地址；且均 target="_blank" + rel 含 noopener，
+        # 链接可见文本必须恰为 TechSauce / VeryGood（防止塞入前缀文本或伪装元素）
+        links = _POWER_A_PAT.findall(p_inner)
+        hrefs, ok_attr, texts_ok = [], True, True
+        for attrs, inner in links:
             hm = re.search(r'href\s*=\s*"([^"]*)"', attrs, re.I)
             if not hm:
                 ok_attr = False
@@ -468,16 +512,20 @@ def build(cfg: dict, log=print, include_drafts: bool | None = None) -> dict:
             if tgt_val != "_blank" or "noopener" not in rel_txt:
                 ok_attr = False
                 break
+            if _norm_power_text(inner) not in ("TechSauce", "VeryGood"):
+                texts_ok = False
         href_a_ok = any(_power_href_ok(h, _POWER_HOST_A) for h in hrefs)
         href_b_ok = any(_power_href_ok(h, _POWER_HOST_B, _POWER_PATH_B) for h in hrefs)
-        if len(links) != 2 or not ok_attr or not href_a_ok or not href_b_ok:
-            missing.append(f"{f} [署名链接被篡改: 链接={links!r} hrefs={hrefs}]")
+        if len(links) != 2 or not ok_attr or not texts_ok or not href_a_ok or not href_b_ok:
+            missing.append(
+                f"{f} [署名链接被篡改: 链接={links!r} hrefs={hrefs} 文本ok={texts_ok}]"
+            )
     if missing:
         raise RuntimeError(
-            "品牌署名保护触发（v1.2.0 字符级+域名精确校验）：以下页面页脚署名缺失或被篡改，"
+            "品牌署名保护触发（v1.3.0 字符级+域名精确+双指纹校验）：以下页面页脚署名缺失或被篡改，"
             "构建已终止——「Powered by TechSauce & VeryGood」分毫不能修改，"
             "删除/改名/改字/偷换链接/属性缺失的后果 = 站点立即无法使用。\n  "
-            + "\n  ".join(missing)
++ "\n  ".join(missing)
         )
 
     # ---------- 插件收尾 ----------

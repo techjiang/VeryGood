@@ -20,7 +20,7 @@ site:
   nav:                                    # 追加自定义导航项（左侧栏顶部的站点导航）
     - label: 友链
       url: /links/
-  sidebar_recent: 5                       # 向下兼容字段：侧栏「最近更新」条数（新配置用 site.sidebar.recent_count）
+  sidebar_recent: 0                       # 向下兼容字段：左栏「最近更新」条数（v1.3.0 默认 0：左栏该模块关闭，见 site.sidebar.recent_count）
   footer_text: 用 VeryGood 构建 - 保持热爱，记录生活
 
   # ---------- 底部栏自定义（v1.1.8） ----------
@@ -55,11 +55,12 @@ site:
   # ---------- 右侧栏（v1.1） ----------
   # ≥1760px 超宽屏显示文章目录 / 近期文章 / 标签云 / 分类 / 友链缩略（330px 宽）。
   # 1760px 以下正文始终 1360px 满宽、不被右栏挤压（v1.1.8）。
+  # v1.3.0：左栏「最近更新」已默认关闭（与右栏「近期文章」重复），近期文章以右栏为准。
   rightbar:
     enabled: true
     show_toc: true                        # 文章页目录（宽屏固定在右栏，不再挤压正文）
-    show_recent: true                     # 近期文章
-    recent_count: 5                       # 近期文章条数（默认跟随 sidebar.recent_count）
+    show_recent: true                     # 近期文章（侧栏「近期文章」的唯一出口）
+    recent_count: 5                       # 近期文章条数（v1.3.0 起与左栏解耦，独立默认 5）
     show_tags: true                       # 标签云
     tags_max: 24                          # 标签云最多展示数量
     show_categories: true                 # 分类列表
@@ -67,10 +68,11 @@ site:
     links_max: 8
 
   # ---------- 左侧栏（v1.1） ----------
-  # 左侧栏由「站点信息 + 最近更新 + 导航 + 自定义模块」组成，模块可设置默认折叠。
+  # 左侧栏由「站点信息 + 站点数据 + 导航 + 自定义模块」组成（v1.3.0 起）。
   sidebar:
-    recent_count: 5                       # 覆盖上方 sidebar_recent，留空则用顶层值
-    collapse: false                       # true 时「最近更新」默认折叠，访客可点击展开
+    recent_count: 0                       # 左栏「最近更新」条数（v1.3.0 默认 0 = 关闭；改为数字即可重新开启）
+    site_data: true                       # v1.3.0：站点数据组件（文章/字数/浏览/访客/加载耗时/地区），内置插件 site-stats 提供
+    collapse: false                       # true 时侧栏模块默认折叠，访客可点击展开
     custom:                               # 追加自定义模块（放在最近更新下方）
       # - title: 我的项目
       #   icon: "✨"
@@ -174,6 +176,7 @@ links:                                      # 友链（/links/ 页 + 右栏缩�
   #   avatar: https://example.com/avatar.png
 
 plugins: []                                  # 用户插件目录（相对仓库根），如 plugins/my-plugin
+plugins_disabled: []                          # v1.3.0：禁用插件（内置名/插件目录名），如 ["footer-note"]
 
 build:
   source_dir: source

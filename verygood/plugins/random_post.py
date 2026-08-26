@@ -3,6 +3,8 @@ from __future__ import annotations
 
 import json
 
+from verygood import config as c
+
 _RANDOM_HTML = """<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -33,7 +35,6 @@ def setup(ctx):
     def write_random(payload):
         site = payload["site"]
         out = payload["out"]
-        from .. import config as c
 
         real = [c.abs_url(site["cfg"], p["url"]) for p in site["posts"]]
         home = c.abs_url(site["cfg"], "/")

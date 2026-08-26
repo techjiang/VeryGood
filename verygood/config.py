@@ -20,7 +20,7 @@ DEFAULTS = {
         "timezone": "Asia/Shanghai",
         "nav": [],
         "footer_text": "",
-        "sidebar_recent": 5,
+        "sidebar_recent": 0,          # 左栏「最近更新」条数（v1.3.0 默认 0：左栏该模块默认关闭）
         # 公告弹窗（v1.1.6 起为弹窗样式，此前为顶部横幅）
         "announcement": {
             "enabled": False,
@@ -46,9 +46,12 @@ DEFAULTS = {
         },
         # 左侧栏自定义（v1.1）
         "sidebar": {
-            "recent_count": 5,       # 覆盖顶层 sidebar_recent，留空则用顶层值
-            "collapse": False,       # 模块默认折叠
-            "custom": [],            # 追加自定义模块 [{title, icon, html}]
+            # v1.3.0：默认关闭左栏「最近更新」（与右栏「近期文章」重复）；
+            # None = 跟随顶层 sidebar_recent；显式写 0 同样关闭
+            "recent_count": None,
+            "site_data": True,         # v1.3.0：站点数据组件（内置插件 site-stats 提供）
+            "collapse": False,         # 模块默认折叠
+            "custom": [],              # 追加自定义模块 [{title, icon, html}]
         },
     },
     "author": {
@@ -99,6 +102,7 @@ DEFAULTS = {
     "comments": {"provider": "none"},
     "links": [],
     "plugins": [],
+    "plugins_disabled": [],   # v1.3.0：禁用插件（内置插件名 / 仓库 plugins/ 目录名），构建时跳过
     "build": {
         "source_dir": "source",
         "output_dir": "dist",
@@ -145,9 +149,12 @@ def normalize(cfg: dict, root: Path) -> None:
         cfg["author"]["social"]["rss"] = "/rss.xml"
 
     # v1.1：sidebar.recent_count 向后兼容顶层 site.sidebar_recent
+    # v1.3.0：recent_count 默认 None→跟随顶层（顶层默认 0）；
+    # 用户显式写 0 与写数字都尊重（显式 0 = 关闭左栏「最近更新」）
     sb = s.setdefault("sidebar", {})
-    if not sb.get("recent_count"):
-        sb["recent_count"] = s.get("sidebar_recent", 5)
+    if sb.get("recent_count") is None:
+        sb["recent_count"] = s.get("sidebar_recent", 0)
+    sb.setdefault("site_data", True)   # v1.3.0：站点数据组件开关（内置插件 site-stats）
     sb.setdefault("collapse", False)
     sb.setdefault("custom", [])
     if not isinstance(sb["custom"], list):
@@ -202,12 +209,16 @@ def normalize(cfg: dict, root: Path) -> None:
     pd = cfg.get("posts", {})
     pd["article_dir"] = str(pd.get("article_dir") or "").strip().strip("/")
 
+    # v1.3.0：插件配置规整（plugins_disabled 必须为字符串列表；plugins 为字符串列表）
+    cfg["plugins_disabled"] = [str(x).strip() for x in (cfg.get("plugins_disabled") or []) if str(x).strip()]
+    cfg["plugins"] = [str(x) for x in (cfg.get("plugins") or []) if str(x)]
+
     # v1.1：右侧栏规整
     rb = s.setdefault("rightbar", {})
     rb.setdefault("enabled", True)
     rb.setdefault("show_toc", True)
     rb.setdefault("show_recent", True)
-    rb.setdefault("recent_count", sb["recent_count"])
+    rb.setdefault("recent_count", 5)   # v1.3.0：与左栏解耦，右栏近期文章默认 5 条
     rb.setdefault("show_tags", True)
     rb.setdefault("tags_max", 24)
     rb.setdefault("show_categories", True)

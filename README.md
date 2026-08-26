@@ -4,20 +4,20 @@
 
 VeryGood 是一个为 GitHub Pages 量身定制的开源博客主题。它追随 Gmeek 的优雅理念：**写作发生在 GitHub Issue 里**，标签即状态机，关闭 Issue 即下线文章——你只需要专注内容，剩下的交给自动化。
 
-**当前版本：v1.2.0** —— 移动端顶栏锁定不动 · 分类独立页（`/categories/`）· 文章访问路径可定制（`path` / `dir` / `article_dir`）· 友链头像圆形化（透明/白底兼容）· 品牌署名双层防护（构建字符级校验 + 运行时守卫，分毫不能改）· 插件生态上线（全局变量 / Jinja 过滤器 / 短代码 / 钩子 / 模板注入五类能力 + `verygood plugins` 命令）。此前：品牌署名字符级锁定 v1.1.8 · 媒体灯箱放大全屏 · 正文 1360px 满宽 · 公告弹窗 v1.1.6 · 朋友圈动态 · 全站内容 Actions · 三栏布局 · 环形回顶。
+**当前版本：v1.3.0** —— 左侧栏「最近更新」默认关闭（与右栏「近期文章」去重），改为内置插件 **site-stats** 站点数据组件（文章数/全站字数/浏览量/访客数/页面加载耗时/访客地区）；插件生态大升级：目录式内置插件 + 插件静态资源自动拷贝（`/plugins/{插件名}/`）+ 插件元信息 + `plugins_disabled` 禁用开关 + `sidebar_data`/`content_top` 新注入点 + `__BASE__` 占位符；品牌署名防护升级为**构建层双指纹 + 运行时 SHA-256 指纹重算 + 遮挡/隐藏探测**（`data-vg-fp`/`data-vg-sig`）。此前：插件生态（短代码/钩子/注入/全局变量/Jinja 过滤器）v1.2.0 · 移动端顶栏锁定 · 分类独立页 · 文章路径可定制 · 友链头像圆形化 · 品牌署名字符级锁定 v1.1.8 · 媒体灯箱 · 正文 1360px 满宽 · 公告弹窗 v1.1.6 · 朋友圈动态 · 全站内容 Actions · 三栏布局。
 
 ## ✨ 特性一览
 
 | 维度 | 能力 |
 | --- | --- |
 | 🌸 颜值 | 低饱和玫瑰灰配色（莫兰迪粉，不甜腻、不过气），深浅双主题跟随系统 + 手动切换并记忆；友链头像圆形化（透明/白底 logo 兼容） |
-| 🧱 布局 | 桌面三栏：左侧固定信息栏 / 中间正文 / 右侧 Widget（目录、近期文章、标签云、分类、友链）；**移动端顶栏锁定不随滚动**，窄屏优雅降级 |
+| 🧱 布局 | 桌面三栏：左侧固定信息栏（品牌 + 站点数据 + 导航）/ 中间正文 / 右侧 Widget（近期文章、标签云、分类、友链）；**移动端顶栏锁定不随滚动**，窄屏优雅降级；左栏「最近更新」v1.3.0 起默认关闭（避免与右栏「近期文章」重复） |
 | ✍️ 写作 | Gmeek 式 Issue 写作；也支持直接写 Markdown 推到 `source/posts/`；两种方式可混用；**文章访问路径可定制**（`path: /abc` → 域名/abc） |
 | 🚀 部署 | 一条 GitHub Actions 工作流：Issue 事件 → 同步 Markdown → 构建 → 部署 Pages |
 | 🔍 SEO | 结构化数据（BlogPosting / BreadcrumbList / WebSite+SearchAction）、Sitemap（含图片）、分类独立页、RSS、robots、humans、Open Graph、Twitter Card、canonical、noindex 分页、百度收录推送钩子 |
 | ⚡ 性能 | 纯静态零框架、图片懒加载、CSS 构建压缩、环形回顶进度、轻量交互、插件钩子错误隔离 |
 | 💬 互动 | 公告条（可关闭记忆）、朋友圈动态（站长/站点管理者用 Issue + Actions 推送，非访客留言）、giscus / utterances 评论、相关推荐、上下篇 |
-| 🔌 可玩性 | **插件生态**（`python -m verygood plugins` 查看清单；短代码 / 钩子 / 模板注入 / 全局变量 / Jinja 过滤器五类 API）、主题整套可复制改写、前端实时搜索、标签/分类/归档、友链页、分类/标签自定义描述与置顶 |
+| 🔌 可玩性 | **插件生态**（`python -m verygood plugins` 查看清单；短代码 / 钩子 / 模板注入 / 全局变量 / Jinja 过滤器 API；v1.3.0 起：目录式内置插件、插件静态资源、元信息、`plugins_disabled` 禁用、`sidebar_data`/`content_top` 注入点、`__BASE__` 占位符）、内置 **site-stats 站点数据组件**（浏览量/访客/加载耗时/地区）、主题整套可复制改写、前端实时搜索、标签/分类/归档、友链页、分类/标签自定义描述与置顶 |
 
 ## 🚀 快速开始（GitHub Pages + Issue 写作）
 
@@ -172,8 +172,9 @@ site:
     links_max: 8
 
   sidebar:
-    recent_count: 5             # 左侧栏「最近更新」条数
-    collapse: false             # true 时最近更新默认折叠，访客可展开
+    recent_count: 0             # v1.3.0：左侧栏「最近更新」条数（默认 0 = 关闭，避免与右栏重复；改数字即可开启）
+    site_data: true             # v1.3.0：站点数据组件（文章/字数/浏览/访客/加载耗时/地区，内置插件 site-stats）
+    collapse: false             # true 时侧栏模块默认折叠，访客可展开
     custom:                      # 追加自定义模块（HTML 自由书写）
       # - title: 我的项目
       #   icon: "✨"
@@ -264,6 +265,7 @@ issues:                         # Issue 写作配置
   slug_prefix: issue
 
 plugins: ["plugins/my-plugin"]  # 显式声明用户插件；仓库根 plugins/ 下目录自动发现（v1.2.0）
+plugins_disabled: []            # v1.3.0：禁用插件（内置名/目录名），如 ["site-stats", "footer-note"]
 ```
 
 完整配置请看 [docs/使用文档.md](./docs/使用文档.md) 与 `config.yml` 内的中文注释。
@@ -292,6 +294,12 @@ VeryGood 的主题 = 一套可整体复制的 `themes/` 目录：
 
 ```python
 # plugins/my-plugin/plugin.py
+# v1.3.0：可选元信息（`python -m verygood plugins` 清单会展示）
+__title__ = "我的插件"
+__description__ = "一句话说明"
+__version__ = "1.0.0"
+__author__ = "你"
+
 def setup(ctx):                 # 必须实现 setup(ctx)
     # 1) 注册短代码：正文里写 {{< box >}}...
     ctx.register_shortcode("box", box)
@@ -301,13 +309,16 @@ def setup(ctx):                 # 必须实现 setup(ctx)
     def on_post(post):          # 每篇文章解析后执行
         post["my_field"] = "hi"
 
-    # 3) 模板注入
+    # 3) 模板注入（v1.3.0 新增 sidebar_data / content_top / content_bottom；__BASE__ 占位符自动替换为站点 basePath）
     ctx.inject("head", '<meta name="x-custom" content="1">')
+    ctx.inject("sidebar_data", '<div class="side-block">我的侧栏组件</div>')
 
     # 4) v1.2.0：向全部模板暴露能力
     ctx.add_global("build_year", 2026)        # 模板里 {{ build_year }}
     ctx.add_filter("wc", lambda s: len(s))    # 模板里 {{ text | wc }}
 ```
+
+v1.3.0 还支持**目录式插件 + 静态资源**：把 `plugin.py` 与 `static/` 放进一个目录，构建时静态资源自动拷贝到 `dist/plugins/{插件名}/`，配合 `__BASE__/plugins/{插件名}/xxx.css` 引用（参考内置插件 `verygood/plugins/site-stats/`）。
 
 可用的钩子（事件均为可选）：
 
@@ -317,9 +328,10 @@ def setup(ctx):                 # 必须实现 setup(ctx)
 | `post_parsed` | 每篇文章解析后 | `post`（dict，可加自定义字段） |
 | `page_parsed` | 每个页面解析后 | `page`（dict） |
 | `site_ready` | 站点模型就绪 | `site`（dict） |
+| `tpl_context` | 每个模板渲染前（v1.3.0） | `{"template": 模板名, "ctx": 渲染上下文}`（可注入键） |
 | `finalize` | 构建收尾 | `{"out": 输出目录, "site": site, "cfg": cfg}` |
 
-钩子抛异常不会中断构建（错误隔离），只记日志。
+钩子抛异常不会中断构建（错误隔离），只记日志。禁用某插件：`plugins_disabled: ["插件名"]`（内置名或仓库 `plugins/` 目录名），`python -m verygood plugins` 会标记「已禁用」。
 
 内置短代码开箱即用：
 
@@ -328,7 +340,7 @@ def setup(ctx):                 # 必须实现 setup(ctx)
 {{< bilibili BV1xx411c7mD >}}  # 嵌入 B 站
 ```
 
-内置插件：`shortcodes`（视频嵌入）、`reading_time`（阅读时长，`post.reading_time` 自动注入卡片/文章头部）、`random_post`（/random/ 随机文章跳转）。
+内置插件：`shortcodes`（视频嵌入）、`reading_time`（阅读时长，`post.reading_time` 自动注入卡片/文章头部）、`random_post`（/random/ 随机文章跳转）、`site-stats`（v1.3.0 站点数据组件：文章数/全站字数服务端直出，浏览量/访客数不蒜子统计+本地兜底，加载耗时/访客地区运行时计算；`site.sidebar.site_data: false` 关闭）。
 
 仓库自带两个示例插件（即装即用 + 现成代码参考）：`plugins/footer-note`（页脚留言）、`plugins/post-stats`（字数统计 / 阅读时长过滤器）。用 `python -m verygood plugins` 随时核对启用了哪些插件。
 
@@ -377,7 +389,7 @@ Actions 每次自动同步生成，无需手提交。
 公告与折叠状态存在浏览器 localStorage（`vg-ann-close`、`vg-side-block:*`），换浏览器或清缓存即恢复默认。
 
 **Q：页脚的「Powered by TechSauce & VeryGood」可以删掉吗？**
-不可以。这是主题的强制署名：**构建时会做字符级校验**（`vg-power-51f3a8` 标记 + 可见文本逐字符比对 + 链接白名单精确匹配，先剥离零宽/双向控制字符再比），删除、改名、改字、偷换链接或混入隐藏字符都会让**构建直接失败、站点无法部署**；即使绕过构建层直接部署，**页面运行时守卫**（6 秒周期自检 + DOM 变化监听 + 可见性检查）也会检出署名缺失后让整页立即不可用。请保留署名行。
+不可以。这是主题的强制署名，v1.3.0 起为**构建层 + 运行时双重防线**：构建时先验证 `vg-power-51f3a8` 标记，再对署名可见文本逐字符比对（剥离零宽/双向控制字符）、链接域名精确白名单 + 可见文本必须恰为 TechSauce / VeryGood，最后校验双指纹 `data-vg-fp` / `data-vg-sig`（SHA-256 与署名文本绑定）——任何删除、改名、改字、偷换链接、属性缺失都会让**构建直接失败**；即使绕过构建层，**页面运行时守卫**会重算 SHA-256 指纹、检测隐藏（display/opacity/裁剪/位移）、遮挡（elementFromPoint）并以 3-9 秒随机周期复查 + MutationObserver 监听，一经发现整页立即不可用。请保留署名行。
 
 **Q：分类页和归档页什么关系？**
 归档 `/archive/` 是时间线（分类云 + 按年归档）；v1.2.0 起分类有独立的 `/categories/` 页面（聚合所有分类卡片，页脚默认导航自带入口），每个分类的文章在 `/category/{分类名}/`。
