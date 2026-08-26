@@ -21,6 +21,7 @@ on:
 
 permissions:
   contents: read
+  issues: read          # sync_issues.py 拉取 Issue 列表（gh issue list）必需
   pages: write
   id-token: write
 
