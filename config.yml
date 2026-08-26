@@ -13,8 +13,8 @@ site:
     - 主题
     - GitHub Pages
     - 开源
-  url: https://yourname.github.io        # 必填：你的站点地址（不带末尾斜杠）
-  basePath: ""                            # 若部署在子路径 /repo 下，填仓库名，如 "my-blog"
+  url: https://techjiang.github.io  # 必填：站点域名根（不带末尾斜杠，子路径由下方 basePath 提供）
+  basePath: "VeryGood"                # 子路径部署：填仓库名（部署在 /VeryGood/ 下）；根域名（xxx.github.io）留空
   language: zh-CN
   timezone: Asia/Shanghai
   nav:                                    # 追加自定义导航项（左侧栏顶部的站点导航）
@@ -60,7 +60,7 @@ author:
   avatar: ""                              # 头像 URL，留空则不显示（侧栏显示为圆形头像）
   bio: 一个喜欢记录生活与思考的人
   social:
-    github: yourname
+    github: techjiang
     twitter: ""
     weibo: ""
     rss: ""                               # 留空自动指向 /rss.xml
