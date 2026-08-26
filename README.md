@@ -4,20 +4,20 @@
 
 VeryGood 是一个为 GitHub Pages 量身定制的开源博客主题。它追随 Gmeek 的优雅理念：**写作发生在 GitHub Issue 里**，标签即状态机，关闭 Issue 即下线文章——你只需要专注内容，剩下的交给自动化。
 
-**当前版本：v1.3.0** —— 左侧栏「最近更新」默认关闭（与右栏「近期文章」去重），改为内置插件 **site-stats** 站点数据组件（文章数/全站字数/浏览量/访客数/页面加载耗时/访客地区）；插件生态大升级：目录式内置插件 + 插件静态资源自动拷贝（`/plugins/{插件名}/`）+ 插件元信息 + `plugins_disabled` 禁用开关 + `sidebar_data`/`content_top` 新注入点 + `__BASE__` 占位符；品牌署名防护升级为**构建层双指纹 + 运行时 SHA-256 指纹重算 + 遮挡/隐藏探测**（`data-vg-fp`/`data-vg-sig`）。此前：插件生态（短代码/钩子/注入/全局变量/Jinja 过滤器）v1.2.0 · 移动端顶栏锁定 · 分类独立页 · 文章路径可定制 · 友链头像圆形化 · 品牌署名字符级锁定 v1.1.8 · 媒体灯箱 · 正文 1360px 满宽 · 公告弹窗 v1.1.6 · 朋友圈动态 · 全站内容 Actions · 三栏布局。
+**当前版本：v1.4.0** —— 修复**分类/标签/动态/友链等短内容页底部栏飘起**（flex 布局贴底，实测 `footerBottom == 视口高`）；**文章页封面与标题融合**（封面作背景 + 向下渐变，分类/元信息移入标题下方）、**首页文章卡片封面渐变**；**代码块增强**（语言语法标签 + 纯图标一键复制）；右栏新增**时间卡片（秒级刷新）与打字机微语卡片**（内置 `whisper` 插件）；**站点数据真实统计**（不蒜子 → ibruce → localStorage 三级降级，浏览量/访客/加载耗时/地区全部真实可统计）；首页文章与底部栏间距压缩；运行时署名守卫抗误杀优化（弹窗/灯箱加入遮挡白名单 + 二次确认）。此前：站点数据组件 + 插件目录化 + 署名双指纹 v1.3.0 · 插件生态 v1.2.0 · 移动端顶栏锁定 · 分类独立页 · 文章路径可定制 · 友链头像圆形化 · 品牌署名字符级锁定 v1.1.8 · 媒体灯箱 · 正文 1360px 满宽 · 公告弹窗 v1.1.6 · 朋友圈动态 · 全站内容 Actions · 三栏布局。
 
 ## ✨ 特性一览
 
 | 维度 | 能力 |
 | --- | --- |
-| 🌸 颜值 | 低饱和玫瑰灰配色（莫兰迪粉，不甜腻、不过气），深浅双主题跟随系统 + 手动切换并记忆；友链头像圆形化（透明/白底 logo 兼容） |
-| 🧱 布局 | 桌面三栏：左侧固定信息栏（品牌 + 站点数据 + 导航）/ 中间正文 / 右侧 Widget（近期文章、标签云、分类、友链）；**移动端顶栏锁定不随滚动**，窄屏优雅降级；左栏「最近更新」v1.3.0 起默认关闭（避免与右栏「近期文章」重复） |
+| 🌸 颜值 | 低饱和玫瑰灰配色（莫兰迪粉，不甜腻、不过气），深浅双主题跟随系统 + 手动切换并记忆；友链头像圆形化（透明/白底 logo 兼容）；文章页封面与标题融合渐变、首页卡片封面渐变（v1.4.0） |
+| 🧱 布局 | 桌面三栏：左侧固定信息栏（品牌 + 站点数据 + 导航）/ 中间正文 / 右侧 Widget（近期文章、标签云、分类、友链）；**移动端顶栏锁定不随滚动**，窄屏优雅降级；左栏「最近更新」v1.3.0 起默认关闭（避免与右栏「近期文章」重复）；**footer 全站 flex 贴底**（v1.4.0 修复短内容页飘起） |
 | ✍️ 写作 | Gmeek 式 Issue 写作；也支持直接写 Markdown 推到 `source/posts/`；两种方式可混用；**文章访问路径可定制**（`path: /abc` → 域名/abc） |
 | 🚀 部署 | 一条 GitHub Actions 工作流：Issue 事件 → 同步 Markdown → 构建 → 部署 Pages |
 | 🔍 SEO | 结构化数据（BlogPosting / BreadcrumbList / WebSite+SearchAction）、Sitemap（含图片）、分类独立页、RSS、robots、humans、Open Graph、Twitter Card、canonical、noindex 分页、百度收录推送钩子 |
 | ⚡ 性能 | 纯静态零框架、图片懒加载、CSS 构建压缩、环形回顶进度、轻量交互、插件钩子错误隔离 |
 | 💬 互动 | 公告条（可关闭记忆）、朋友圈动态（站长/站点管理者用 Issue + Actions 推送，非访客留言）、giscus / utterances 评论、相关推荐、上下篇 |
-| 🔌 可玩性 | **插件生态**（`python -m verygood plugins` 查看清单；短代码 / 钩子 / 模板注入 / 全局变量 / Jinja 过滤器 API；v1.3.0 起：目录式内置插件、插件静态资源、元信息、`plugins_disabled` 禁用、`sidebar_data`/`content_top` 注入点、`__BASE__` 占位符）、内置 **site-stats 站点数据组件**（浏览量/访客/加载耗时/地区）、主题整套可复制改写、前端实时搜索、标签/分类/归档、友链页、分类/标签自定义描述与置顶 |
+| 🔌 可玩性 | **插件生态**（`python -m verygood plugins` 查看清单；短代码 / 钩子 / 模板注入 / 全局变量 / Jinja 过滤器 API；v1.3.0 起：目录式内置插件、插件静态资源、元信息、`plugins_disabled` 禁用、`sidebar_data`/`content_top` 注入点、`__BASE__` 占位符；v1.4.0 新增 `rightbar` 注入点）、内置 **site-stats 站点数据组件**（浏览量/访客/加载耗时/地区，三级降级真实统计）、内置 **whisper 时钟与微语组件**（右栏时间卡片 + 打字机轮播）、代码块语言标签 + 纯图标复制、主题整套可复制改写、前端实时搜索、标签/分类/归档、友链页、分类/标签自定义描述与置顶 |
 
 ## 🚀 快速开始（GitHub Pages + Issue 写作）
 
@@ -159,7 +159,7 @@ site:
     btn_text: "去看看"           # 按钮文案，留空默认「了解更多」
     type: info                  # info / tip / warn
 
-  # v1.1：右侧栏（≥1366px 宽屏显示，330px 宽）
+  # v1.1：右侧栏（≥1760px 超宽屏显示，330px 宽；v1.1.8 起 1760px 以下正文仍 1360px 满宽不被挤压）
   rightbar:
     enabled: true
     show_toc: true              # 文章页目录放右栏，不挤正文
@@ -170,6 +170,11 @@ site:
     recent_count: 5
     tags_max: 24
     links_max: 8
+    show_clock: true            # v1.4.0：时间卡片（本地时间，秒级刷新，内置插件 whisper）
+    show_micro: true            # v1.4.0：微语卡片（打字机效果逐条轮播，内置插件 whisper）
+    micro_notes:                # v1.4.0：自定义微语内容（最多建议 12 条，写 [] 用插件内置文案）
+      - "用 Issue 写文章，GitHub Actions 自动构建发布。"
+      - "莫兰迪粉：温柔克制，但也很有态度。"
 
   sidebar:
     recent_count: 0             # v1.3.0：左侧栏「最近更新」条数（默认 0 = 关闭，避免与右栏重复；改数字即可开启）
@@ -265,7 +270,7 @@ issues:                         # Issue 写作配置
   slug_prefix: issue
 
 plugins: ["plugins/my-plugin"]  # 显式声明用户插件；仓库根 plugins/ 下目录自动发现（v1.2.0）
-plugins_disabled: []            # v1.3.0：禁用插件（内置名/目录名），如 ["site-stats", "footer-note"]
+plugins_disabled: []            # v1.3.0：禁用插件（内置名/目录名），如 ["site-stats", "whisper"]
 ```
 
 完整配置请看 [docs/使用文档.md](./docs/使用文档.md) 与 `config.yml` 内的中文注释。
@@ -340,7 +345,7 @@ v1.3.0 还支持**目录式插件 + 静态资源**：把 `plugin.py` 与 `static
 {{< bilibili BV1xx411c7mD >}}  # 嵌入 B 站
 ```
 
-内置插件：`shortcodes`（视频嵌入）、`reading_time`（阅读时长，`post.reading_time` 自动注入卡片/文章头部）、`random_post`（/random/ 随机文章跳转）、`site-stats`（v1.3.0 站点数据组件：文章数/全站字数服务端直出，浏览量/访客数不蒜子统计+本地兜底，加载耗时/访客地区运行时计算；`site.sidebar.site_data: false` 关闭）。
+内置插件：`shortcodes`（视频嵌入）、`reading_time`（阅读时长，`post.reading_time` 自动注入卡片/文章头部）、`random_post`（/random/ 随机文章跳转）、`site-stats`（v1.3.0 站点数据组件：文章数/全站字数服务端直出，浏览量/访客数不蒜子 → ibruce → localStorage **三级降级真实统计**，加载耗时/访客地区运行时计算；`site.sidebar.site_data: false` 关闭）、`whisper`（v1.4.0 右栏时间卡片 + 打字机微语卡片，`site.rightbar.show_clock` / `show_micro` / `micro_notes` 控制）。
 
 仓库自带两个示例插件（即装即用 + 现成代码参考）：`plugins/footer-note`（页脚留言）、`plugins/post-stats`（字数统计 / 阅读时长过滤器）。用 `python -m verygood plugins` 随时核对启用了哪些插件。
 
@@ -389,7 +394,16 @@ Actions 每次自动同步生成，无需手提交。
 公告与折叠状态存在浏览器 localStorage（`vg-ann-close`、`vg-side-block:*`），换浏览器或清缓存即恢复默认。
 
 **Q：页脚的「Powered by TechSauce & VeryGood」可以删掉吗？**
-不可以。这是主题的强制署名，v1.3.0 起为**构建层 + 运行时双重防线**：构建时先验证 `vg-power-51f3a8` 标记，再对署名可见文本逐字符比对（剥离零宽/双向控制字符）、链接域名精确白名单 + 可见文本必须恰为 TechSauce / VeryGood，最后校验双指纹 `data-vg-fp` / `data-vg-sig`（SHA-256 与署名文本绑定）——任何删除、改名、改字、偷换链接、属性缺失都会让**构建直接失败**；即使绕过构建层，**页面运行时守卫**会重算 SHA-256 指纹、检测隐藏（display/opacity/裁剪/位移）、遮挡（elementFromPoint）并以 3-9 秒随机周期复查 + MutationObserver 监听，一经发现整页立即不可用。请保留署名行。
+不可以。这是主题的强制署名，v1.3.0 起为**构建层 + 运行时双重防线**：构建时先验证 `vg-power-51f3a8` 标记，再对署名可见文本逐字符比对（剥离零宽/双向控制字符）、链接域名精确白名单 + 可见文本必须恰为 TechSauce / VeryGood，最后校验双指纹 `data-vg-fp` / `data-vg-sig`（SHA-256 与署名文本绑定）——任何删除、改名、改字、偷换链接、属性缺失都会让**构建直接失败**；即使绕过构建层，**页面运行时守卫**会重算 SHA-256 指纹、检测隐藏（display/opacity/裁剪/位移）、遮挡（elementFromPoint，公告弹窗/灯箱已加入白名单防误杀）并以 3-9 秒随机周期复查 + MutationObserver 监听，一经发现整页立即不可用。请保留署名行。
+
+**Q：短内容页（分类/标签/动态/友链）的底部栏怎么保证贴底不飘起？**
+v1.4.0 起 `.layout` 为 flex 纵向容器（`min-height: 100vh`），`.site-main` 自动伸展（`flex: 1`），footer 天然贴在视口底部；内容高于一屏时照常自然滚动。无需任何配置，全站所有页面统一生效。
+
+**Q：代码块的语言标签和复制按钮怎么来的？**
+v1.4.0 起构建期自动为代码块写入语言名（`data-lang`，如 Bash / Python / YAML），右上角显示语言语法标签 + 纯图标复制按钮，一键复制全文。无需配置。
+
+**Q：右栏的时间卡片和微语卡片是什么？**
+v1.4.0 内置 `whisper` 插件：时间卡片显示本地时间（秒级刷新），微语卡片为打字机效果逐条轮播短句（可暂停/继续）。`site.rightbar.show_clock` / `show_micro` 控制开关，`micro_notes` 自定义文案。
 
 **Q：分类页和归档页什么关系？**
 归档 `/archive/` 是时间线（分类云 + 按年归档）；v1.2.0 起分类有独立的 `/categories/` 页面（聚合所有分类卡片，页脚默认导航自带入口），每个分类的文章在 `/category/{分类名}/`。

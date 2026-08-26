@@ -71,7 +71,7 @@
 <a class="skip-link" href="#main">跳到主要内容</a>
 
 {% if site.announcement.enabled and site.announcement.text %}
-<div class="announcement-modal" id="announcement" role="dialog" aria-modal="true"{% if site.announcement.title %} aria-labelledby="announcement-title"{% endif %} hidden>
+<div class="announcement-modal" id="announcement" role="dialog" aria-modal="true" data-vg-overlay="1"{% if site.announcement.title %} aria-labelledby="announcement-title"{% endif %} hidden>
   <div class="announcement-modal__backdrop" data-ann-close></div>
   <div class="announcement-modal__card announcement-modal--{{ site.announcement.type }}">
     <button class="announcement-modal__close" id="announcement-close" type="button" aria-label="关闭公告">{{ m.icon('close', 16) }}</button>
@@ -207,6 +207,8 @@
       </ul>
     </section>
     {% endif %}
+    {# ---- 右栏插件注入点（v1.4.0：时间卡片 / 微语卡片等） ---- #}
+    {{ injections.get('rightbar', []) | join('\n') | safe }}
   {% endblock %}
 </aside>
 {% endif %}
@@ -247,7 +249,7 @@
   </span>
 </button>
 
-<div class="lightbox" id="lightbox" hidden aria-hidden="true" role="dialog" aria-modal="true" aria-label="媒体预览">
+<div class="lightbox" id="lightbox" hidden aria-hidden="true" role="dialog" aria-modal="true" aria-label="媒体预览" data-vg-overlay="1">
   <button class="lightbox__close" id="lightbox-close" type="button" aria-label="关闭预览">{{ m.icon('close', 18) }}</button>
   <div class="lightbox__stage" id="lightbox-stage"></div>
   <div class="lightbox__toolbar" id="lightbox-toolbar" hidden>
@@ -337,15 +339,20 @@
     return result;
   }
   function fp(salt) { var s = sha256(salt); return s ? s.slice(0, 12) : ''; }
-  var FP1 = fp('vg-power-51f3a8|' + EXPECTED);
+var FP1 = fp('vg-power-51f3a8|' + EXPECTED);
   var FP2 = fp('site-footer|' + FP1);
-  var killed = false;
+  var killed = false, failCount = 0, pending = false;
   function kill() {
     if (killed) return;
     killed = true;
     document.documentElement.innerHTML = '<!doctype html><html><head><meta charset="utf-8"><title>VeryGood</title></head><body style="background:#faf5f6;color:#8d5567;font-family:system-ui,sans-serif;display:flex;min-height:100vh;align-items:center;justify-content:center;text-align:center;padding:24px"><div><h1 style="font-size:20px;margin:0 0 10px">VeryGood 主题不可用</h1><p style="margin:0;font-size:14px;line-height:1.8">站点页脚署名已被移除或篡改，主题已停止渲染。<br/>请恢复「Powered by TechSauce &amp; VeryGood」署名后重新构建部署。</p></div></body></html>';
   }
+  function isOverlay(node) {
+    return !!node && typeof node.closest === 'function' &&
+           !!node.closest('[data-vg-overlay="1"]');
+  }
   function guard() {
+    if (pending) return;               // 二次确认定时器未决时不再重复入队
     var footer = document.querySelector('footer.site-footer');
     var el = document.querySelector('.site-footer__powered');
     var ok = !!el && !!footer && norm(el.textContent) === EXPECTED;
@@ -380,7 +387,8 @@
         if (st && st !== 'none' && (st.indexOf('scale(0') === 0 || /matrix\(0,\s*0/.test(st))) ok = false;
       }
     }
-    /* 遮挡检查：署名中心点在视口内时必须真实可见（防被其他元素盖住） */
+    /* 遮挡检查：署名中心点在视口内时必须真实可见（防被其他元素盖住）。
+       主题自身的 overlay 层（公告弹窗 / 灯箱，均带 data-vg-overlay）不算遮挡。 */
     if (ok) {
       var rect = el.getBoundingClientRect();
       var inView = rect.bottom >= 0 && rect.top <= (window.innerHeight || document.documentElement.clientHeight) &&
@@ -388,12 +396,17 @@
       if (inView && rect.width > 0 && rect.height > 0) {
         var hit = document.elementFromPoint(rect.left + Math.min(rect.width / 2, 24),
                                             rect.top + Math.min(rect.height / 2, 12));
-        ok = !!hit && (hit === el || el.contains(hit));
+        ok = !!hit && (hit === el || el.contains(hit) || isOverlay(hit));
       } else if (!inView) {
         ok = rect.width > 0 && rect.height > 0;   // 不在视口内：仅要求有真实尺寸
       }
     }
-    if (!ok) kill();
+    if (ok) { failCount = 0; return; }
+    /* 连续两次校验失败才判定不可用，避免字体/布局/弹窗等一次性时序误杀 */
+    failCount += 1;
+    if (failCount >= 2) { kill(); return; }
+    pending = true;
+    setTimeout(function () { pending = false; guard(); }, 650);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', guard);
   else guard();

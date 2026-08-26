@@ -49,16 +49,25 @@
 
 {% block content %}
 <article class="post container">
+  {% if post.cover_url %}
+  {# ---- v1.4.0 封面与标题融合：封面作背景，标题/分类/元信息覆于其上并向下渐变 ---- #}
+  <figure class="post__hero">
+    <img class="post__hero-img" src="{{ post.cover_url }}" alt="{{ post.cover_alt }}" loading="eager" decoding="async" width="1200" height="630">
+    <div class="post__hero-shade" aria-hidden="true"></div>
+    <header class="post__hero-body">
+      <h1 class="post__title">{{ post.title }}</h1>
+      <div class="post__hero-meta">
+        {% if post.category %}<a class="post__cat" href="{{ url_for(tax_path('category', post.category)) }}">{{ post.category }}</a>{% endif %}
+        {{ m.meta_line(post) }}
+      </div>
+    </header>
+  </figure>
+  {% else %}
   <header class="post__head">
-    {% if post.category %}<a class="post__cat" href="{{ url_for(tax_path('category', post.category)) }}">{{ post.category }}</a>{% endif %}
     <h1 class="post__title">{{ post.title }}</h1>
+    {% if post.category %}<a class="post__cat" href="{{ url_for(tax_path('category', post.category)) }}">{{ post.category }}</a>{% endif %}
     {{ m.meta_line(post) }}
   </header>
-
-  {% if post.cover_url %}
-  <figure class="post__cover">
-    <img src="{{ post.cover_url }}" alt="{{ post.cover_alt }}" loading="eager" decoding="async" width="1200" height="630">
-  </figure>
   {% endif %}
 
   {# ---- 窄屏（<1366px）折叠目录，不挤压正文；宽屏时此块被 CSS 隐藏，目录移入右栏 ---- #}

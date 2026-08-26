@@ -250,27 +250,44 @@ if (lbClose) lbClose.addEventListener('click', closeLightbox);
     /* 灯箱内图片滚动缩放（省）×：已实现滚轮缩放 */
   }
 
-  /* ---------- 代码块复制按钮 ---------- */
-  var copySvg = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
-  var checkSvg = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>';
+/* ---------- 代码块：语言徽标 + 图标复制按钮（v1.4.0） ---------- */
+  var copySvg = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+  var checkSvg = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>';
   doc.querySelectorAll('.md-body pre').forEach(function (pre) {
     var code = pre.querySelector('code');
     if (!code) return;
+    /* 语言徽标：优先取渲染器输出的 data-lang，JS 兜底从 wrapper 类名提取 */
+    var hl = pre.closest('.highlight');
+    var lang = (hl && hl.getAttribute('data-lang')) || '';
+    if (!lang && hl) {
+      var m = /(?:^|\s)language-([\w-]+)/.exec(hl.className);
+      if (m) lang = m[1];
+    }
+    if (lang) {
+      var badge = doc.createElement('span');
+      badge.className = 'code-lang';
+      badge.textContent = lang;
+      pre.appendChild(badge);
+    }
     var btn = doc.createElement('button');
     btn.type = 'button';
     btn.className = 'code-copy';
     btn.setAttribute('aria-label', '复制代码');
     btn.title = '复制代码';
-    btn.innerHTML = copySvg + '<span>复制</span>';
+    btn.innerHTML = copySvg;
     pre.appendChild(btn);
     btn.addEventListener('click', function () {
       var text = code.innerText;
       function done() {
         btn.classList.add('is-copied');
-        btn.innerHTML = checkSvg + '<span>已复制</span>';
+        btn.setAttribute('aria-label', '已复制');
+        btn.title = '已复制';
+        btn.innerHTML = checkSvg;
         setTimeout(function () {
           btn.classList.remove('is-copied');
-          btn.innerHTML = copySvg + '<span>复制</span>';
+          btn.setAttribute('aria-label', '复制代码');
+          btn.title = '复制代码';
+          btn.innerHTML = copySvg;
         }, 1800);
       }
       function fallbackCopy() {

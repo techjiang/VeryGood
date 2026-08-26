@@ -26,7 +26,8 @@ _SKIP_MODULES = {"__init__", "pycache"}
 #   sidebar_data   左侧栏（站点数据组件位置，v1.3.0）
 #   content_top    主内容区顶部（v1.3.0）
 #   content_bottom 主内容区底部（v1.3.0：base.html 预留，见 base.html）
-_INJECT_POSITIONS = ("head", "header_extra", "footer_extra", "body_end", "sidebar_data", "content_top", "content_bottom")
+#   rightbar       右侧栏（v1.4.0：时间卡片 / 微语等右栏组件）
+_INJECT_POSITIONS = ("head", "header_extra", "footer_extra", "body_end", "sidebar_data", "content_top", "content_bottom", "rightbar")
 
 
 def _collect_meta(mod) -> dict:
@@ -99,7 +100,7 @@ class PluginContext:
     # ---- 模板注入 ----
     def inject(self, position: str, html: str):
         """向指定位置注入 HTML 片段。
-        position（v1.3.0）：head / header_extra / footer_extra / body_end / sidebar_data / content_top / content_bottom
+        position（v1.4.0）：head / header_extra / footer_extra / body_end / sidebar_data / content_top / content_bottom / rightbar
         注入内容中的 __BASE__ 占位符会在渲染时替换为站点 basePath（如 /VeryGood）。
         """
         if position not in _INJECT_POSITIONS:

@@ -1,6 +1,7 @@
-"""Markdown 渲染管线：扩展、代码高亮、图片懒加载、短代码。"""
+"""Markdown 渲染管线：扩展、代码高亮、语言标签、图片懒加载、短代码。"""
 from __future__ import annotations
 
+import html as _html
 import re
 
 import markdown as md
@@ -11,6 +12,69 @@ _LAZY_ATTRS = 'loading="lazy" decoding="async"'
 
 _PRE_RE = re.compile(r"(<pre[\s\S]*?</pre>)", re.I)
 _SC_RE = re.compile(r"\{\{<\s*(\w+)([\s\S]*?)\s*>\}\}")
+
+# ---- 代码块语言标签（v1.4.0）----
+# fence 信息行（```python / ```py title=xxx）取首词作为语言标识；
+# 兼容 blockquote 内 fence（行首可带 > 前缀）。
+_FENCE_RE = re.compile(r"^(?:\s*>\s*)?```([^\n`]*)", re.M)
+_HILITE_RE = re.compile(r'<div class="highlight">')
+
+# 常见别名归一 + 显示名美化（fence 原文小写后查表，查不到则原样展示）
+_LANG_ALIAS = {
+    "js": "javascript", "ts": "typescript", "py": "python",
+    "sh": "bash", "shell": "bash", "zsh": "bash", "yml": "yaml",
+    "c++": "cpp", "md": "markdown", "mjs": "javascript",
+    "cjs": "javascript", "jsx": "jsx", "tsx": "tsx",
+}
+_LANG_DISPLAY = {
+    "javascript": "JavaScript", "typescript": "TypeScript", "python": "Python",
+    "bash": "Bash", "yaml": "YAML", "json": "JSON", "html": "HTML",
+    "css": "CSS", "cpp": "C++", "c": "C", "go": "Go", "rust": "Rust",
+    "sql": "SQL", "xml": "XML", "markdown": "Markdown", "text": "Text",
+    "java": "Java", "kotlin": "Kotlin", "swift": "Swift", "dart": "Dart",
+    "php": "PHP", "ruby": "Ruby", "lua": "Lua", "perl": "Perl",
+    "dockerfile": "Dockerfile", "makefile": "Makefile", "diff": "Diff",
+    "ini": "INI", "toml": "TOML", "nginx": "Nginx", "graphql": "GraphQL",
+    "vue": "Vue", "svelte": "Svelte", "scss": "SCSS", "less": "Less",
+    "jsx": "JSX", "tsx": "TSX", "haskell": "Haskell", "elixir": "Elixir",
+    "erlang": "Erlang", "clojure": "Clojure", "powershell": "PowerShell",
+    "objective-c": "Objective-C", "r": "R", "matlab": "MATLAB",
+    "scala": "Scala", "groovy": "Groovy", "vb": "VB", "csharp": "C#",
+    "fsharp": "F#", "asm": "Assembly", "protobuf": "Protobuf",
+    "plaintext": "Text", "txt": "Text", "log": "Log", "nginx-conf": "Nginx",
+}
+
+
+def _fence_langs(text: str) -> list[str]:
+    """按源码顺序提取所有 fenced code 的语言标识（空串 = 无语言标注）。"""
+    langs: list[str] = []
+    for m in _FENCE_RE.finditer(text):
+        info = m.group(1).strip().split()
+        langs.append(info[0].lower() if info else "")
+    return langs
+
+
+def _display_lang(lang: str) -> str:
+    lang = _LANG_ALIAS.get(lang, lang)
+    return _LANG_DISPLAY.get(lang, lang)
+
+
+def _decorate_code_langs(html: str, langs: list[str]) -> str:
+    """给每个 <div class="highlight"> 依序补上 data-lang 属性（无语言标注的块跳过）。"""
+    if not langs:
+        return html
+    it = iter(langs)
+
+    def repl(m):
+        try:
+            lang = next(it)
+        except StopIteration:
+            return m.group(0)
+        if not lang:
+            return m.group(0)
+        return f'<div class="highlight" data-lang="{_html.escape(_display_lang(lang))}">'
+
+    return _HILITE_RE.sub(repl, html)
 
 
 def build_markdown(toc_depth: str = "2-3") -> "md.Markdown":
@@ -35,8 +99,9 @@ def build_markdown(toc_depth: str = "2-3") -> "md.Markdown":
 
 
 def render(md_: "md.Markdown", text: str, shortcodes: dict | None = None, lazy_images: bool = True) -> str:
-    """渲染 Markdown 文本为 HTML，并做图片懒加载、短代码展开。"""
+    """渲染 Markdown 文本为 HTML，并做代码语言标签、图片懒加载、短代码展开。"""
     html = md_.reset().convert(text)
+    html = _decorate_code_langs(html, _fence_langs(text))
     if shortcodes:
         html = process_shortcodes(html, shortcodes)
     if lazy_images:

@@ -1,5 +1,5 @@
-/* VeryGood 站点数据组件运行时（v1.3.0）—— 内置插件 site-stats。
-   职责：浏览量/访客数（不蒜子 + localStorage 兜底）、页面加载耗时、访客地区。
+/* VeryGood 站点数据组件运行时（v1.4.0）—— 内置插件 site-stats。
+   职责：浏览量/访客数（不蒜子多源 + 本地真实计数兜底）、页面加载耗时、访客地区。
    全部 try/catch 包裹，任何失败静默降级，绝不影响页面主流程。 */
 (function () {
   'use strict';
@@ -17,28 +17,45 @@
     if (el) el.textContent = text;
   }
 
-  /* ---------- 1. 浏览量 / 访客数：不蒜子统计，不可达时本地兜底 ---------- */
-  var PV_EL = 'vg-stats-pv', UV_EL = 'vg-stats-uv', DONE = false;
+  /* ---------- 1. 浏览量 / 访客数 ----------
+     统计源优先级（多级降级，任何一步失败自动切换下一级）：
+       ① 不蒜子 icopyright 域名（script 注入 + 轮询 DOM 回填）
+       ② 不蒜子 ibruce.info 老域名（JSONP 回调）
+       ③ 本地 localStorage 真实计数（PV 每次加载 +1；UV 仅首次访问 +1） */
+  var PV_EL = 'vg-stats-pv', UV_EL = 'vg-stats-uv';
+  var LOCAL_DONE = false;
+
   function applyLocal() {
-    if (DONE) return;
+    if (LOCAL_DONE) return;
+    LOCAL_DONE = true;
     try {
       var today = new Date().toISOString().slice(0, 10);
       var raw = JSON.parse(localStorage.getItem('vg-stats') || '{}');
-      if (raw.day !== today) { raw = { day: today, pv: 0, uv: 1, loaded: false }; }
-      if (!raw.loaded) { raw.pv += 1; raw.loaded = true; localStorage.setItem('vg-stats', JSON.stringify(raw)); }
+      var isNewDay = raw.day !== today;
+      if (isNewDay) raw = { day: today, pv: 0, uv: raw.uvAll || raw.uv || 0, seen: false };
+      /* PV：每次页面加载 +1（真实点击计数） */
+      raw.pv += 1;
+      /* UV：首次访问 +1，当日其他页面不再重复计 */
+      if (!raw.seen) {
+        if (!isNewDay && raw.pv === 1 && raw.uv === 0) raw.uv = 1;
+        else if (isNewDay) raw.uv = (typeof raw.uvAll === 'number' ? raw.uvAll : raw.uv) + 1;
+        raw.seen = true;
+        raw.uvAll = raw.uv;
+      }
+      localStorage.setItem('vg-stats', JSON.stringify(raw));
       setText(PV_EL, '≈' + fmt(raw.pv));
       setText(UV_EL, '≈' + fmt(raw.uv));
     } catch (e) { /* 忽略 */ }
   }
-  function startBusuanzi() {
+
+  /* ① icopyright 域名：脚本注入 + 轮询 busuanzi_value_site_pv/uv */
+  function startBusuanziV1() {
     try {
       var s = document.createElement('script');
       s.src = '//busuanzi.icopyright.com/cn/busuanzi.pg';
       s.async = true;
-      s.onerror = function () { setTimeout(applyLocal, 500); };
+      s.onerror = function () { startBusuanziV2(); };
       document.head.appendChild(s);
-      /* 不蒜子脚本会向 #busuanzi_value_site_pv / #busuanzi_value_site_uv 回填数字，
-         轮询最多 5 秒（10 x 500ms），超时用本地兜底。 */
       var tries = 0;
       var poll = setInterval(function () {
         tries += 1;
@@ -48,13 +65,38 @@
         var uv = uvEl && uvEl.textContent.replace(/,/g, '');
         if (pv && /^\d+$/.test(pv)) {
           clearInterval(poll);
-          DONE = true;
           setText(PV_EL, fmt(parseInt(pv, 10)));
           if (uv && /^\d+$/.test(uv)) setText(UV_EL, fmt(parseInt(uv, 10)));
           return;
         }
-        if (tries >= 10) { clearInterval(poll); applyLocal(); }
+        if (tries >= 10) { clearInterval(poll); startBusuanziV2(); }
       }, 500);
+    } catch (e) { startBusuanziV2(); }
+  }
+
+  /* ② ibruce.info 老域名：JSONP 全局回调 */
+  function startBusuanziV2() {
+    try {
+      var cbName = 'vgBusuanziCb_' + Date.now();
+      window[cbName] = function (data) {
+        try {
+          delete window[cbName];
+          if (data) {
+            var pv = parseInt(String(data.site_pv || data.pv || '').replace(/,/g, ''), 10);
+            var uv = parseInt(String(data.site_uv || data.uv || '').replace(/,/g, ''), 10);
+            if (pv > 0) setText(PV_EL, fmt(pv));
+            if (uv > 0) setText(UV_EL, fmt(uv));
+            return;
+          }
+        } catch (e) { /* 忽略 */ }
+        applyLocal();
+      };
+      var s = document.createElement('script');
+      s.src = '//busuanzi.ibruce.info/busuanzi?jsonpCallback=' + cbName;
+      s.async = true;
+      s.onerror = function () { applyLocal(); };
+      document.head.appendChild(s);
+      setTimeout(function () { if (window[cbName]) { try { delete window[cbName]; } catch (e) { window[cbName] = function () {}; } applyLocal(); } }, 4000);
     } catch (e) { applyLocal(); }
   }
 
@@ -104,9 +146,9 @@
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', function () {
-      startBusuanzi(); fillLoad(); fillRegion();
+      startBusuanziV1(); fillLoad(); fillRegion();
     });
   } else {
-    fillLoad(); fillRegion(); startBusuanzi();
+    fillLoad(); fillRegion(); startBusuanziV1();
   }
 })();
