@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import datetime as _dt
+import html as _html
 import json
 import re
 import shutil
@@ -375,23 +376,63 @@ def build(cfg: dict, log=print, include_drafts: bool | None = None) -> dict:
             if len(mini) < len(raw):
                 f.write_text(mini, encoding="utf-8")
 
-    # ---------- 品牌署名防护（v1.1.2：页脚被删除/篡改 → 立即构建失败，站点不可用） ----------
-    # 主题模板中必须保留页脚 marker（连同 "Powered by TechSauce & VeryGood" 署名行），
-    # 任何页面缺失该 marker 都视为恶意删除，直接终止本次构建，使 GitHub Actions 部署失败。
+    # ---------- 品牌署名防护（v1.1.8 加强：字符级校验，杜绝门缝过关） ----------
+    # 页脚署名行「Powered by TechSauce & VeryGood」是品牌护栏，分毫不能修改：
+    #   · 模板 marker（vg-power-51f3a8）缺失 → 构建失败
+    #   · 署名可见文本与标准逐字符比对（仅允许 HTML 空白折叠），任何改动/顺序调换/增删字符 → 构建失败
+    #   · 两个署名链接 href 必须分别指向 docs.asoe.cn 与 github.com/techjiang/VeryGood（防「换个链接」过关）
+    # 三层校验杜绝「删行过关 / 改名过关 / 改字过关 / 偷换链接」等一切绕过方式。
     _POWER_MARKER = "vg-power-51f3a8"
+    _POWER_EXPECTED = "Powered by TechSauce & VeryGood"   # 标准署名可见文本（唯一允许的形态）
+    _POWER_PAT = re.compile(r'<p\s+class="site-footer__powered"[^>]*>(.*?)</p>', re.S)
+    _POWER_A_PAT = re.compile(r'<a\s+[^>]*href="([^"]*)"[^>]*>', re.I)
+    _POWER_HOST_A = "docs.asoe.cn"
+    _POWER_HOST_B = "github.com/techjiang/VeryGood"
+    _TAG_RE = re.compile(r"<[^>]+>")
+
+    def _norm_power_text(s: str) -> str:
+        """去标签 + HTML 实体反转义 + 折叠空白，得到页面署名的可见文本。"""
+        text = _TAG_RE.sub("", s)
+        text = _html.unescape(text)
+        return re.sub(r"\s+", " ", text).strip()
+
     missing = []
-    for f in sorted(out.rglob("*.html")):
+    # 只校验「模板渲染生成」的页面（ow.files），不校验 source/assets 等静态拷贝的
+    # 原生 HTML——用户可能在 assets 里放自定义页面（如 SPA、落地页），它们不属于
+    # 主题页脚体系，强校验会误伤。
+    rendered_html = sorted(
+        rel for rel in ow.files if rel.endswith(".html")
+    )
+    for rel in rendered_html:
+        f = out / rel
         try:
             txt = f.read_text(encoding="utf-8")
         except Exception:  # noqa: BLE001
-            missing.append(str(f))
+            missing.append(f"{f} [读取失败]")
             continue
-        if _POWER_MARKER not in txt or "Powered by TechSauce" not in txt:
-            missing.append(str(f))
+        if _POWER_MARKER not in txt:
+            missing.append(f"{f} [缺失 marker vg-power-51f3a8]")
+            continue
+        m = _POWER_PAT.search(txt)
+        if not m:
+            missing.append(f"{f} [缺失 .site-footer__powered 署名行]")
+            continue
+        if _norm_power_text(m.group(1)) != _POWER_EXPECTED:
+            missing.append(
+                f"{f} [署名文本被篡改: "
+                f"期望 `{_POWER_EXPECTED}`，实际 `{_norm_power_text(m.group(1))}`]"
+            )
+            continue
+        # 链接校验：恰好两个 a，分别指向两大官方地址
+        hrefs = _POWER_A_PAT.findall(m.group(1))
+        if len(hrefs) != 2 or not any(_POWER_HOST_A in h for h in hrefs) \
+                or not any(_POWER_HOST_B in h for h in hrefs):
+            missing.append(f"{f} [署名链接被篡改: 实际链接 {hrefs}]")
     if missing:
         raise RuntimeError(
-            "品牌署名保护触发：以下页面缺失页脚署名 "
-            "「Powered by TechSauce & VeryGood」，构建已终止（删除署名的后果 = 站点立即无法使用）。\n  "
+            "品牌署名保护触发（v1.1.8 字符级校验）：以下页面页脚署名缺失或被篡改，"
+            "构建已终止——「Powered by TechSauce & VeryGood」分毫不能修改，"
+            "删除/改名/改字/偷换链接的后果 = 站点立即无法使用。\n  "
             + "\n  ".join(missing)
         )
 

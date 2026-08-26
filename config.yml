@@ -23,13 +23,23 @@ site:
   sidebar_recent: 5                       # 向下兼容字段：侧栏「最近更新」条数（新配置用 site.sidebar.recent_count）
   footer_text: 用 VeryGood 构建 - 保持热爱，记录生活
 
+  # ---------- 底部栏自定义（v1.1.8） ----------
+  # 底部站点简介 + 导航菜单均可自由修改/增删；版权行与 "Powered by TechSauce & VeryGood" 为品牌署名，锁定不可改动。
+  footer:
+    about: "VeryGood\n粉色 · 极简 · 属于 GitHub Pages 的博客"   # 底部站点简介（多行用 \n 分隔）
+    nav:                                   # 底部导航菜单（不写则用默认菜单：首页/归档/标签/动态/GitHub/RSS）
+      # - label: 首页                      # 菜单名（自由自定义）
+      #   url: /                           # 站内路径填相对路径（自动拼子路径），外链填 http(s)://
+      #   if: ""                           # 可选条件：board=仅启用动态页时显示；github=仅填了 GitHub 地址时显示
+      #   external: false                  # true 时按外链处理（新窗口打开）
+
   # ---------- 公告弹窗（v1.1.6，进入页面后自动弹出） ----------
   # 居中弹窗样式，可带标题 / 链接按钮，访客关闭后本浏览器不再弹出。
   # 注意：link 填站内相对路径（如 /board/）会自动补子路径前缀；填外链（http…）则原样跳转。
   announcement:
     enabled: true                         # true 时显示公告弹窗
     title: "欢迎来到 VeryGood"              # 弹窗标题（留空则只显示文案）
-    text: "🎉 VeryGood v1.1.7：正文加宽 · 封面/评论/分享文档齐备 · 移动端适配"  # 公告文案（支持少量 HTML）
+    text: "🎉 VeryGood v1.1.8：署名字符级锁定 · 正文加宽至 1360px · 底部栏可自定义 · 媒体灯箱放大全屏"  # 公告文案（支持少量 HTML）
     link: "/board/"                       # 跳转地址，留空则不显示按钮
     btn_text: "去看看动态"                  # 按钮文案，留空默认「了解更多」
     type: info                            # 样式：info / tip / warn
@@ -43,7 +53,8 @@ site:
     license: ""                           # 版权协议文案，如 "CC BY-NC-SA 4.0"；留空不显示
 
   # ---------- 右侧栏（v1.1） ----------
-  # ≥1366px 宽屏显示文章目录 / 近期文章 / 标签云 / 分类 / 友链缩略（330px 宽）。
+  # ≥1760px 超宽屏显示文章目录 / 近期文章 / 标签云 / 分类 / 友链缩略（330px 宽）。
+  # 1760px 以下正文始终 1360px 满宽、不被右栏挤压（v1.1.8）。
   rightbar:
     enabled: true
     show_toc: true                        # 文章页目录（宽屏固定在右栏，不再挤压正文）

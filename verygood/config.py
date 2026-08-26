@@ -30,6 +30,8 @@ DEFAULTS = {
             "btn_text": "",          # 链接按钮文案（留空默认「了解更多」）
             "type": "info",          # info / tip / warn
         },
+        # 页脚底部栏自定义（v1.1.8：品牌描述 + 导航链接，其余保持默认）
+        "footer": {"about": ""},
         # 右侧栏（v1.1，≥1366px 宽屏显示，330px 宽）
         "rightbar": {
             "enabled": True,
@@ -163,6 +165,34 @@ def normalize(cfg: dict, root: Path) -> None:
     pe.setdefault("show_copyright", True)
     pe.setdefault("show_share", True)
     pe.setdefault("license", "")
+
+    # v1.1.8：页脚底部栏可自定义（品牌描述 + 导航链接；版权行与 Powered by 署名行保持锁定）
+    ft = s.setdefault("footer", {})
+    ft.setdefault("about", "")   # 页脚品牌描述，留空回退 site.subtitle
+    _DEFAULT_FOOTER_NAV = [
+        {"label": "首页", "url": "/", "external": False},
+        {"label": "归档", "url": "/archive/", "external": False},
+        {"label": "标签", "url": "/tags/", "external": False},
+        {"label": "动态", "url": "/board/", "if": "board", "external": False},
+        {"label": "GitHub", "url": "https://github.com/{github}", "if": "github", "external": True},
+        {"label": "RSS", "url": "/rss.xml", "external": False},
+    ]
+    _nav = ft.get("nav")
+    if _nav is None:
+        ft["nav"] = list(_DEFAULT_FOOTER_NAV)
+    elif not isinstance(_nav, list):
+        ft["nav"] = []
+    else:
+        ft["nav"] = [
+            {
+                "label": str(it["label"]),
+                "url": str(it["url"]),
+                "if": str(it.get("if", "")),
+                "external": bool(it.get("external", False)),
+            }
+            for it in _nav
+            if isinstance(it, dict) and it.get("label") and it.get("url")
+        ]
 
     # v1.1：右侧栏规整
     rb = s.setdefault("rightbar", {})

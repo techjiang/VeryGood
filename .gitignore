@@ -17,3 +17,9 @@ Thumbs.db
 # 日志 / 临时
 *.log# 版本归档（根目录各历史 zip，不入库）
 verygood-*.zip
+
+# 预览对比图（不入库）
+_preview/
+
+# DuMate 工具缓存
+.dumate/

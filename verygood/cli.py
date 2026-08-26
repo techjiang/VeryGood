@@ -49,6 +49,7 @@ def cmd_serve(args) -> int:
     if not rebuild():
         return 1
     out = cfg["build"]["output_dir"]
+    _bp = _cfg.base_path(cfg)   # 如 /VeryGood；serve 托管 dist 为根，需剥离该前缀以匹配站内链接
 
     from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 
@@ -62,6 +63,13 @@ def cmd_serve(args) -> int:
         def end_headers(self):
             self.send_header("Cache-Control", "no-store")
             super().end_headers()
+
+        def translate_path(self, path):
+            # v1.1.8：本地预览兼容 basePath——页面里 /VeryGood/css/... 的站内链接
+            # 在 serve（根路径托管）下剥离前缀后映射到 dist 真实文件，避免资源 404
+            if _bp and (path == _bp or path.startswith(_bp + "/")):
+                path = path[len(_bp):] or "/"
+            return super().translate_path(path)
 
     port = args.port
     server = ThreadingHTTPServer(("127.0.0.1", port), Handler)

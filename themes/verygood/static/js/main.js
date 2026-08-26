@@ -103,15 +103,33 @@
     });
   }
 
-  /* ---------- 图片 / 视频灯箱（v1.1） ---------- */
+/* ---------- 图片 / 视频灯箱（v1.1 基础；v1.1.8：缩放 / 旋转 / 下载 / 全屏） ---------- */
   var lightbox = doc.getElementById('lightbox');
   if (lightbox) {
     var stage = doc.getElementById('lightbox-stage');
     var lbClose = doc.getElementById('lightbox-close');
+    var lbToolbar = doc.getElementById('lightbox-toolbar');
+    var lbZoomLabel = doc.getElementById('lightbox-zoom');
     var lbOpen = false;
+    var lbScale = 1, lbRotate = 0, lbMedia = null;
+    function applyTransform() {
+      if (!lbMedia) return;
+      lbMedia.style.transform = 'scale(' + lbScale + ') rotate(' + lbRotate + 'deg)';
+      if (lbZoomLabel) lbZoomLabel.textContent = Math.round(lbScale * 100) + '%';
+    }
+    function resetTransform() { lbScale = 1; lbRotate = 0; applyTransform(); }
     function openLightbox(node) {
       stage.innerHTML = '';
       stage.appendChild(node);
+      lbMedia = null;
+      /* 找出 stage 内的媒体元素（img / video），作为缩放旋转的变换对象 */
+      if (node && node.tagName === 'IMG' || node && node.tagName === 'VIDEO') lbMedia = node;
+      else if (node) {
+        var m = node.querySelector('img, video');
+        if (m) lbMedia = m;
+      }
+      if (lbToolbar) lbToolbar.removeAttribute('hidden');
+      resetTransform();
       lightbox.removeAttribute('hidden');
       requestAnimationFrame(function () { lightbox.classList.add('is-open'); });
       lbOpen = true;
@@ -123,7 +141,8 @@
       setTimeout(function () {
         lightbox.setAttribute('hidden', '');
         stage.innerHTML = '';
-        lbOpen = false;
+        lbOpen = false; lbMedia = null;
+        if (lbToolbar) lbToolbar.setAttribute('hidden', '');
         doc.body.style.overflow = '';
       }, 260);
     }
@@ -165,14 +184,54 @@
         openLightbox(clone);
       });
     });
-    if (lbClose) lbClose.addEventListener('click', closeLightbox);
+if (lbClose) lbClose.addEventListener('click', closeLightbox);
     lightbox.addEventListener('click', function (e) {
       if (e.target === lightbox || e.target === stage) closeLightbox();
     });
     doc.addEventListener('keydown', function (e) {
       if (e.key === 'Escape' && lbOpen) closeLightbox();
     });
-    /* 灯箱内图片滚动缩放（省）×：直接关闭 */
+
+    /* ---- v1.1.8：缩放手势 / 工具栏 ---- */
+    function clampScale(v) { return Math.min(6, Math.max(0.2, v)); }
+    /* 双击切换 100% / 200% */
+    stage.addEventListener('dblclick', function () {
+      lbScale = lbScale > 1.01 ? 1 : 2;
+      applyTransform();
+    });
+    /* 滚轮缩放 */
+    stage.addEventListener('wheel', function (e) {
+      if (!lbOpen) return;
+      e.preventDefault();
+      lbScale = clampScale(lbScale + (e.deltaY < 0 ? 0.15 : -0.15));
+      applyTransform();
+    }, { passive: false });
+    if (lbToolbar) {
+      lbToolbar.addEventListener('click', function (e) {
+        var btn = e.target.closest('[data-lb]');
+        if (!btn) return;
+        var act = btn.getAttribute('data-lb');
+        if (act === 'zoom-in') { lbScale = clampScale(lbScale * 1.25); applyTransform(); }
+        else if (act === 'zoom-out') { lbScale = clampScale(lbScale / 1.25); applyTransform(); }
+        else if (act === 'rotate') { lbRotate = (lbRotate + 90) % 360; applyTransform(); }
+        else if (act === 'fullscreen') {
+          if (doc.fullscreenElement) { doc.exitFullscreen && doc.exitFullscreen(); }
+          else { lightbox.requestFullscreen && lightbox.requestFullscreen(); }
+        }
+        else if (act === 'download') {
+          var src = lbMedia && (lbMedia.currentSrc || lbMedia.src);
+          if (!src) return;
+          var a = doc.createElement('a');
+          a.href = src;
+          a.download = (lbMedia && lbMedia.alt ? lbMedia.alt : 'verygood') + '.jpg';
+          doc.body.appendChild(a);
+          a.click();
+          doc.body.removeChild(a);
+        }
+      });
+    }
+    /* 初始化时隐藏工具栏的下载按钮（仅图片可下载更合理，但保持简单：统一显示） */
+    /* 灯箱内图片滚动缩放（省）×：已实现滚轮缩放 */
   }
 
   /* ---------- 代码块复制按钮 ---------- */
