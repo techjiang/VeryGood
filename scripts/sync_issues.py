@@ -190,16 +190,12 @@ def render_moment_front_matter(date: str, updated: str, issue: int) -> str:
 
 
 def gh_list_issues(cfg: dict) -> list[dict]:
-    """分页拉取全部 Issue（open + closed），避免 --limit 截断。"""
-    items: list[dict] = []
-    page = 1
-    while page <= 50:  # 最多 50 页 × 100 = 5000 个 Issue
-        batch = gh("issue", "list", "--state", "all", "--limit", "100", "--page", str(page))
-        items.extend(batch)
-        if len(batch) < 100:
-            break
-        page += 1
-    return items
+    """拉取全部 Issue（open + closed）。
+
+    注意：gh issue list 内部自动分页、不接受 --page 参数；
+    用大 --limit 一次性取全（gh 会不断翻页直到取满或取完）。
+    """
+    return gh("issue", "list", "--state", "all", "--limit", "100000")
 
 
 def main() -> int:
