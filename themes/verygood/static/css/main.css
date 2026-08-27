@@ -1217,50 +1217,84 @@ img.friend-card__avatar { object-fit: cover; }
   display: flex; align-items: center; justify-content: center; gap: 6px;
   font-size: 12.5px; color: var(--ink-faint); background: var(--surface);
   border: 1px dashed var(--line-strong); border-radius: var(--radius-sm);
-  padding: 8px 14px; margin: 0 auto 24px; max-width: 600px; text-align: center; line-height: 1.7;
+  padding: 8px 14px; margin: 0 auto 28px; max-width: 600px; text-align: center; line-height: 1.7;
 }
 .board__hint code {
   font-size: 12px; color: var(--rose-600); background: var(--rose-100);
   padding: 1px 6px; border-radius: 6px;
 }
-.board-timeline { display: flex; flex-direction: column; gap: 18px; position: relative; }
+
+/* ---- 时间线：左侧粉线 + 节点圆点 ---- */
+.board-timeline { display: flex; flex-direction: column; gap: 22px; position: relative; padding-left: 28px; }
 .board-timeline::before {
-  content: ""; position: absolute; left: 22px; top: 12px; bottom: 12px;
-  width: 2px; border-radius: 2px;
-  background: linear-gradient(var(--rose-200), var(--line));
+  content: ""; position: absolute; left: 10px; top: 18px; bottom: 18px;
+  width: 2px; border-radius: 1px;
+  background: linear-gradient(180deg, var(--rose-300) 0%, var(--rose-100) 50%, var(--line) 100%);
 }
-.moment { display: flex; gap: 14px; position: relative; }
+
+/* ---- 动态卡片（v1.5.0 重做） ---- */
+.moment { display: flex; gap: 14px; position: relative; align-items: flex-start; }
+.moment__avatar-wrap {
+  flex: 0 0 40px; position: relative; z-index: 1;
+}
+.moment__avatar-wrap::after {
+  content: ""; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  width: 46px; height: 46px; border-radius: 50%;
+  border: 2px solid var(--rose-200);
+  opacity: 0; transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+.moment:hover .moment__avatar-wrap::after { opacity: 1; }
 .moment__avatar {
-  flex: 0 0 44px; width: 44px; height: 44px; border-radius: 50%;
-  border: 2px solid var(--surface); background: var(--grad); box-shadow: var(--shadow-sm);
+  flex: 0 0 40px; width: 40px; height: 40px; border-radius: 50%;
+  border: 2px solid var(--surface); background: var(--grad);
   object-fit: cover; display: flex; align-items: center; justify-content: center;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
-.moment__avatar--fallback { color: #fff; font-size: 18px; font-weight: 700; line-height: 1; }
+.moment:hover .moment__avatar { transform: scale(1.08); box-shadow: 0 4px 12px rgba(192,119,142,0.25); }
+.moment__avatar--fallback { color: #fff; font-size: 16px; font-weight: 700; line-height: 1; }
+
 .moment__card {
   flex: 1; min-width: 0;
-  background: var(--surface); border: 1px solid var(--line); border-radius: 16px;
-  padding: 14px 18px 12px; box-shadow: var(--shadow-sm);
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 14px 18px 12px;
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
 }
-.moment__card:hover { transform: translateY(-2px); box-shadow: var(--shadow); border-color: var(--rose-200); }
-.moment__head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 8px; flex-wrap: wrap; }
-.moment__name { font-weight: 700; color: var(--rose-600); font-size: 14.5px; }
-.moment__time { font-size: 12px; color: var(--ink-faint); margin-left: auto; }
-.moment__body { margin: 0; font-size: 14.5px; line-height: 1.8; color: var(--ink); word-break: break-word; }
+.moment__card::before {
+  content: ""; position: absolute; left: 0; top: 16px; bottom: 16px;
+  width: 3px; border-radius: 0 3px 3px 0;
+  background: linear-gradient(180deg, var(--rose-300), var(--rose-500));
+  opacity: 0; transition: opacity 0.25s ease;
+}
+.moment:hover .moment__card { transform: translateX(4px); box-shadow: var(--shadow); border-color: var(--rose-200); }
+.moment:hover .moment__card::before { opacity: 1; }
+
+.moment__head { display: flex; align-items: baseline; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+.moment__name { font-weight: 700; color: var(--rose-600); font-size: 14px; }
+.moment__time { font-size: 11.5px; color: var(--ink-faint); margin-left: auto; font-family: var(--font-mono); }
+.moment__body { margin: 0; font-size: 14px; line-height: 1.85; color: var(--ink); word-break: break-word; }
 .moment__body > :first-child { margin-top: 0; }
 .moment__body > :last-child { margin-bottom: 0; }
 .moment__body p { margin: 6px 0; }
 .moment__body img {
-  max-width: 100%; border-radius: 12px; margin: 8px 0 2px;
+  max-width: 100%; border-radius: 10px; margin: 8px 0 2px;
   box-shadow: var(--shadow-sm); display: block; cursor: zoom-in;
 }
-.moment__body video { max-width: 100%; border-radius: 12px; margin: 8px 0 2px; }
-.moment__body pre { border-radius: 12px; font-size: 13px; }
-.moment__foot { display: flex; justify-content: flex-end; margin-top: 10px; gap: 8px; }
+.moment__body video { max-width: 100%; border-radius: 10px; margin: 8px 0 2px; }
+.moment__body pre { border-radius: 10px; font-size: 12.5px; }
+.moment__body blockquote {
+  border-left: 3px solid var(--rose-300); padding-left: 12px; margin: 8px 0;
+  color: var(--ink-soft); font-style: italic;
+}
+.moment__foot { display: flex; justify-content: flex-end; margin-top: 8px; gap: 8px; }
 .moment__issue {
   display: inline-flex; align-items: center; gap: 5px;
-  border: 1px solid var(--line-strong); background: var(--bg-soft); color: var(--ink-soft);
-  padding: 3px 11px; border-radius: var(--radius-pill); font-size: 12px;
+  border: 1px solid var(--line-strong); background: var(--bg-soft); color: var(--ink-faint);
+  padding: 3px 11px; border-radius: var(--radius-pill); font-size: 11px;
   text-decoration: none; transition: all 0.2s ease;
 }
 .moment__issue:hover { color: var(--rose-600); border-color: var(--rose-300); background: var(--rose-100); }

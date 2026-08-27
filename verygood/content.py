@@ -180,24 +180,53 @@ def toc_html(tokens):
 
 
 def _pinyin_slug(text: str) -> str:
-    """将中文文本转为拼音 slug（空格折叠为连字符，非字母数字保留原样）。"""
+    """混合中英文转 slug：中文→拼音（字间用连字符），英文/数字保留原样。
+
+    示例：
+      "你好"                  → "ni-hao"
+      "VeryGood"              → "verygood"
+      "欢迎使用 VeryGood"     → "huan-ying-shi-yong-verygood"
+      "v1.2.0 发布"           → "v1-2-0-fa-bu"
+      "2026年度总结"          → "2026-nian-du-zong-jie"
+    """
     if not text:
         return ""
-    # 检测是否含有中文字符；无中文时直接空格折叠
-    if not any("\u4e00" <= ch <= "\u9fff" for ch in text):
-        return re.sub(r"\s+", "-", text.strip().lower()) or "x"
+
+    # 1. 用正则把文本拆成「中文块」和「非中文块」交替数组
+    #    re.split 带捕获组时，分隔符也出现在结果中
+    tokens = re.split(r"([\u4e00-\u9fff]+)", text)
+
     try:
         from pypinyin import pinyin, Style
-        # Style.TONE3 带声调数字（保证多音字稳定），再以连字符拼接
-        py = pinyin(text, style=Style.TONE3, errors="ignore")
-        flat = "-".join(w[0] for w in py if w[0])
-        # 去掉声调数字，去重连字符，trim
-        flat = re.sub(r"[0-9]", "", flat)
-        flat = re.sub(r"-+", "-", flat)
-        flat = flat.strip("-")
-        return flat or "x"
     except Exception:
-        return re.sub(r"\s+", "-", text.strip().lower()) or "x"
+        pinyin = None  # type: ignore[assignment]
+
+    parts = []
+    for token in tokens:
+        if not token:
+            continue
+        if re.match(r"^[\u4e00-\u9fff]+$", token):
+            # 纯中文块 → 转拼音（字间用连字符）
+            if pinyin:
+                py = pinyin(token, style=Style.TONE3, errors="ignore")
+                pinyin_str = "-".join(w[0] for w in py if w and w[0])
+                pinyin_str = re.sub(r"[0-9]", "", pinyin_str)  # 去声调数字
+                pinyin_str = re.sub(r"-+", "-", pinyin_str).strip("-")
+                if pinyin_str:
+                    parts.append(pinyin_str)
+            else:
+                parts.append("zhong-wen")
+        else:
+            # 非中文块：保留字母、数字、空格，其余转连字符
+            cleaned = re.sub(r"[^\w\s-]", "-", token)
+            cleaned = re.sub(r"\s+", "-", cleaned)
+            cleaned = re.sub(r"-+", "-", cleaned).strip("-")
+            if cleaned:
+                parts.append(cleaned.lower())
+
+    slug = "-".join(parts)
+    slug = re.sub(r"-+", "-", slug).strip("-")
+    return slug or "x"
 
 
 def _slug_for_post(stem: str, title: str, cfg: dict) -> str:

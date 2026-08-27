@@ -67,6 +67,7 @@ path: /abc        # 文章变成 域名/abc；同理 path: /wz/abc → 域名/wz
 | --- | --- |
 | 你好 | `/article/ni-hao/` |
 | 前端性能优化实战 | `/article/qian-duan-xing-neng-you-hua-shi-zhan/` |
+| 欢迎使用 VeryGood | `/article/huan-ying-shi-yong-verygood/` |
 | Hello World | `/article/hello-world/` |
 
 - **关闭拼音转换**：`config.yml` 中 `posts.pinyin_slug: false`（此时用文件名作为 slug）

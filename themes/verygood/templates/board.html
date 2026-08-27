@@ -23,10 +23,11 @@
   {% if site.moments %}
   <div class="board-timeline" id="board-timeline">
     {% for item in site.moments[:site.cfg.board.per_page] %}
+    {% set _board_avatar = cfg.board.avatar or cfg.author.avatar %}
     <article class="moment reveal">
       <div class="moment__avatar-wrap">
-        {% if cfg.author.avatar %}
-        <img class="moment__avatar" src="{{ cfg.author.avatar }}" alt="{{ (cfg.author.name or site.cfg.site.title) }}的头像" width="44" height="44" loading="lazy" decoding="async">
+        {% if _board_avatar %}
+        <img class="moment__avatar" src="{{ _board_avatar }}" alt="{{ (cfg.author.name or site.cfg.site.title) }}的头像" width="44" height="44" loading="lazy" decoding="async">
         {% else %}
         <span class="moment__avatar moment__avatar--fallback" aria-hidden="true">{{ (cfg.author.name or site.cfg.site.title)[0] }}</span>
         {% endif %}

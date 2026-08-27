@@ -91,6 +91,7 @@ author:
   email: you@example.com
   avatar: ""                              # 头像 URL，留空则不显示（侧栏显示为圆形头像）
   bio: 一个喜欢记录生活与思考的人
+  motto: "保持热爱，奔赴山海"               # v1.5.0：座右铭/个性签名，显示在站点数据下方（左栏）
   social:
     github: techjiang
     twitter: ""
@@ -131,6 +132,7 @@ taxonomies:
 #   4. 关闭该 Issue = 下线这条动态。
 board:
   enabled: true                           # 生成 /board/ 页面
+  avatar: ""                              # v1.5.0：动态页头像（留空 = 使用 author.avatar；author.avatar 也留空则显示名字首字母）
   title: 朋友圈动态
   desc: 站长的碎碎念与站点动态 —— 用 Issue 打上 Moment 标签即可发布，关闭 Issue 即下线。
   per_page: 30                            # 时间线最多展示条数
