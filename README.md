@@ -1,545 +1,260 @@
-# VeryGood · 粉色系开源博客主题
+# VeryGood · 莫兰迪粉开源博客主题
 
-> **用 Issue 写博客，让 GitHub Actions 帮你发布。** 粉色 · 极简 · 顶级 SEO · 超高可玩性。
+> 用 Issue 写博客，让 GitHub Actions 帮你发布。粉色 · 极简 · 顶级 SEO · 超高可玩性。
 
-VeryGood 是一个为 GitHub Pages 量身定制的开源博客主题。**写作发生在 GitHub Issue 里**，标签即状态机，关闭 Issue 即下线文章——你只需要专注内容，剩下的交给自动化。
+VeryGood 是一个为 GitHub Pages 量身定制的开源博客主题。写作发生在 GitHub Issue 里——标签即状态机，关闭 Issue 即下线文章。你只管写，剩下的交给自动化。
 
-**当前版本：v1.5.0** —— **中文标题自动转拼音 URL**（标题"你好" → `/article/ni-hao/`，`posts.pinyin_slug: false` 可关闭，front matter `slug` 仍可覆盖）；**文章置顶功能**（front matter `pin: true`，首页卡片带🔥置顶标识，同置顶按日期倒序排列）；**首页分页默认 10 篇/页**（`posts.per_page` 可配）；**左侧栏迷你音乐播放器**（播放列表/旋转封面/进度条/控制按钮，填充空白区域）；**署名锁定再增强**（全局 body MutationObserver 监控 footer 被删除/替换，v1.3.0 构建层四重校验 + 运行时 SHA-256 守卫的基础上新增第三层防线）；**插件系统完善**（PluginContext API 稳定，5 个内置插件 + 用户自动发现，`rightbar` 注入点支持右栏组件扩展）。此前 v1.4.6：全站内容 Issue 化（sync_issues 新增 path/dir/type 字段支持）；v1.4.5：Issue 同步全面修复；v1.4.0：封面与标题融合渐变 · 代码块语言标签 + 图标复制 · 右栏时间与微语卡片 · 站点数据三级降级；v1.3.0：插件生态 + 署名双指纹；v1.2.0：文章路径可定制 · 友链头像圆形化；v1.1.8：品牌署名字符级锁定 · 媒体灯箱 · 公告弹窗 · 朋友圈动态 · 三栏布局。
+**当前版本：v1.5.1** — 幻灯片轮播替代音乐播放器、工具栏独立化、署名四层防线、左侧栏固定优化、静态资源版本戳 v=4。
 
-## ✨ 特性一览
+## 特性一览
 
 | 维度 | 能力 |
 | --- | --- |
-| 🌸 颜值 | 低饱和玫瑰灰配色（莫兰迪粉，不甜腻、不过气），深浅双主题跟随系统 + 手动切换并记忆；友链头像圆形化（透明/白底 logo 兼容）；文章页封面与标题融合渐变、首页卡片封面渐变（v1.4.0） |
-| 🧱 布局 | 桌面三栏：左侧固定信息栏（品牌 + 站点数据 + **迷你音乐播放器** + 导航）/ 中间正文 / 右侧 Widget（**近期文章 → 此刻/微语 → 标签云 → 分类 → 友链**，v1.4.2 起此刻/微语紧跟近期文章）；**移动端顶栏锁定不随滚动**，窄屏优雅降级；左栏「最近更新」v1.3.0 起默认关闭；**footer 全站 flex 贴底**；底部导航默认只留 首页/归档/RSS（v1.4.4），其余按需加 |
-| ✍️ 写作 | Gmeek 式 Issue 写作：**发布标签由 Actions 自动创建**、首个用户自动收到引导 Issue（v1.4.4）、创建 Issue 打上 `Article` 标签即发布；也支持直接写 Markdown 推到 `source/posts/`；两种方式可混用且**互不干扰**（v1.4.5：手工源文件永不被 sync 删除/覆盖）；**中文标题自动转拼音 URL**（v1.5.0：标题"你好"→`/article/ni-hao/`，`posts.pinyin_slug` 控制）；**文章置顶**（v1.5.0：`pin: true`，首页卡片带🔥标识）；**文章访问路径可定制**（`path: /abc` → 域名/abc） |
-| 🚀 部署 | 一条 GitHub Actions 工作流：Issue 事件 → 同步 Markdown（自动建标签/引导 Issue）→ 构建 → 部署 Pages |
-| 🔍 SEO | 结构化数据（BlogPosting / BreadcrumbList / WebSite+SearchAction）、Sitemap（含图片）、分类独立页、RSS、robots、humans、Open Graph、Twitter Card、canonical、noindex 分页、百度收录推送钩子 |
-| ⚡ 性能 | 纯静态零框架、图片懒加载、CSS 构建压缩、环形回顶进度、轻量交互、插件钩子错误隔离 |
-| 💬 互动 | 公告条（可关闭记忆）、朋友圈动态（站长/站点管理者用 Issue + Actions 推送，非访客留言）、giscus / utterances 评论、相关推荐、上下篇 |
-| 🔌 可玩性 | **插件生态**（`python -m verygood plugins` 查看清单；短代码 / 钩子 / 模板注入 / 全局变量 / Jinja 过滤器 API；v1.3.0 起：目录式内置插件、插件静态资源、元信息、`plugins_disabled` 禁用、`sidebar_data`/`content_top` 注入点、`__BASE__` 占位符；v1.4.0 新增 `rightbar` 注入点）、内置 **site-stats 站点数据组件**（文章/字数/浏览/访客四个真实指标，浏览量/访客不蒜子 → ibruce → localStorage **三级降级真实统计**，v1.4.4 移除无效的加载耗时与访客地区）、内置 **whisper 时钟与微语组件**（右栏时间卡片 + 打字机轮播）、代码块语言标签 + 纯图标复制、主题整套可复制改写、前端实时搜索、标签/分类/归档、友链页、分类/标签自定义描述与置顶 |
+| 🌸 颜值 | 低饱和玫瑰灰配色（莫兰迪粉 #C0778E），不甜腻、不过气；深浅双主题跟随系统 + 手动切换并记忆 |
+| 🧱 布局 | 桌面三栏：左侧固定信息栏 / 中间正文 / 右侧 Widget；移动端顶栏吸顶，窄屏优雅降级 |
+| ✍️ 写作 | Gmeek 式 Issue 写作，标签即状态机；也支持直接推 Markdown 到 `source/posts/`，两种方式互不干扰 |
+| 🚀 部署 | 一条 GitHub Actions 工作流完成全链路：Issue 同步 → 构建 → 部署 Pages |
+| 🔍 SEO | 结构化数据（BlogPosting / BreadcrumbList / WebSite+SearchAction）、Sitemap（含图片）、RSS、Open Graph、Twitter Card、canonical、百度推送 |
+| ⚡ 性能 | 纯静态零框架、图片懒加载、CSS 构建压缩、环形回顶进度 |
+| 💬 互动 | 公告弹窗、朋友圈动态（站长 Issue 推送）、giscus / utterances 评论 |
+| 🔌 可玩性 | 插件生态：5 个内置插件 + 用户自动发现，短代码 / 钩子 / 模板注入 / Jinja 过滤器全链路 API |
+| 🔒 署名锁定 | 四层防线：构建层校验 + 运行时 SHA-256 + MutationObserver + CSS 防篡改 |
 
-## 🚀 快速开始（GitHub Pages + Issue 写作）
+## 快速开始
 
-### 第一步：fork / 复制本仓库
+### 1. 创建仓库
 
-点击右上角 **Use this template** 创建你自己的仓库（或直接 fork），仓库名建议为 `你的用户名.github.io`。
+点击右上角 **Use this template** 创建你自己的仓库（或直接 fork），仓库名建议为 `用户名.github.io`。
 
-> 也可以克隆到本地改完再推：`git clone ... && cd VeryGood`
+### 2. 改配置
 
-### 第二步：改配置与启用 Pages
-
-1. 编辑 `config.yml`，至少改三处：`site.title`、`site.url`（你的站点地址）、`author` 信息；
-2. 仓库 `Settings → Pages`：Source 选择 **GitHub Actions**；
-3. （推荐）删除示例内容：`source/posts/issue-*.md`（这些是演示文章）。
-
-之后每次 push 都会自动构建部署。
-
-### 第三步：用 Issue 写第一篇文章
-
-> v1.4.4 起不再需要手动建标签：第一次部署时 Actions 会自动创建 `Article / Draft / Page / Moment` 四个标签，
-> 并在仓库**没有任何 Issue** 时自动创建一条**引导 Issue**（教你如何用 Issue 写博客，可 `issues.welcome_issue: false` 关闭）。
-> v1.4.5 起 sync 只管理「由 Issue 生成」的文件（front matter 带 `issue:` 字段）：直接放在 `source/posts/` 下的手工文章不会被误删、也不会被同名 Issue 覆盖，两种写作方式放心混用。
-
-1. 打开仓库 **Issues → New issue**，看到模板后直接清空，写下文章 Markdown 正文；
-2. 给 Issue 打标签 **`Article`**（发布）——标签在第一次部署后自动存在；若仓库里确实找不到，说明 Actions 还没跑过，等首次部署完成即可；
-3. 点 Create → 等 Actions 跑完 → 打开 `https://你的用户名.github.io` 看效果。
-
-### 给文章设置自定义访问路径（v1.2.0 / v1.5.0）
-
-文章默认在 `/article/{标题}/`，可在 front matter 加 `path` 改**访问地址**（优先级最高，直达）：
-
-```markdown
----
-path: /abc        # 文章变成 域名/abc；同理 path: /wz/abc → 域名/wz/abc
----
-```
-
-也可用 `dir: /notes`（只换目录前缀，保留标题）或全局配置 `posts.article_dir: blog`（所有文章默认 `/blog/{标题}/`）。
-
-**路径优先级**（从高到低）：front matter `path` > front matter `dir` > `posts.article_dir`（默认 `article`）。
-
-#### 中文标题自动转拼音 slug（v1.5.0）
-
-默认情况下，中文标题会自动转换为拼音 URL：
-
-| 文章标题 | 自动生成 URL |
-| --- | --- |
-| 你好 | `/article/ni-hao/` |
-| 前端性能优化实战 | `/article/qian-duan-xing-neng-you-hua-shi-zhan/` |
-| 欢迎使用 VeryGood | `/article/huan-ying-shi-yong-verygood/` |
-| Hello World | `/article/hello-world/` |
-
-- **关闭拼音转换**：`config.yml` 中 `posts.pinyin_slug: false`（此时用文件名作为 slug）
-- **手动指定 slug**：front matter 中写 `slug: my-custom-url`（覆盖自动拼音）
-- front matter `slug` 优先级高于 `path` 和 `dir`——如果你同时写了 `slug` 和 `path`，`path` 决定最终访问路径，`slug` 只影响 sitemap/canonical 中的 slug 标识
-
-```yaml
-# config.yml
-posts:
-  pinyin_slug: true    # true（默认）= 中文标题自动转拼音；false = 用文件名
-```
-
-### 文章置顶（v1.5.0）
-
-在 front matter 中加 `pin: true` 即可将文章置顶到首页最前面：
-
-```markdown
----
-title: 我的置顶文章
-pin: true
----
-```
-
-- 置顶文章在首页卡片右上角显示 **🔥 置顶** 标识（莫兰迪粉底色）
-- 多篇置顶文章之间按发布日期倒序排列
-- 非置顶文章排在所有置顶文章之后，同样按日期倒序
-- Issue 写作时在正文顶部 front matter 指令块中同样支持 `pin: true`
-
-### 给文章加封面（v1.1.7）
-
-封面会自动出现在首页文章卡片、文章页顶部、社交分享图（og:image）与 sitemap 图片里。两种写法：
-
-**写法 A：Issue 正文顶部写 front matter 指令**（最方便，Issue 即文章时用）：
-
-```markdown
----
-cover: https://example.com/cover.png   # 封面图 URL（外链或站内路径均可）
-cover_alt: 封面描述                     # 可选，无障碍/分享用
-summary: 自定义摘要                     # 可选，覆盖自动截取
----
-
-这里是你真正的文章正文……
-```
-
-**写法 B：推送 Markdown 时在文件头部写 front matter**：
-
-```markdown
----
-title: 我的文章
-cover: /assets/my-cover.png    # 放 source/assets/ 下的图会发布到 /assets/
-cover_alt: 封面描述
----
-```
-
-规则：`cover` 填外链 URL 或站内相对路径都行；不填则用 `config.yml` 的 `posts.cover_default`（可为空，空就不显示封面）。图片建议 1200×630 比例（16:9），压缩到 ≤300KB，加载更快。
-
-### 标签即状态机
-
-> 这四个发布标签在首次部署时由 Actions **自动创建**（无则建，幂等）；若你的 GitHub 账号权限受限导致创建失败，构建不会中断，可手动创建同名标签（颜色随意）。
-
-| 标签 | 作用 |
-| --- | --- |
-| `Article` | **发布**这篇文章（可配置 `issues.publish_label`） |
-| `Draft` | 存为**草稿**，线上不发布（本地 `build --drafts` 可见） |
-| `Page` | 生成**独立页面**（如「关于我」），路由 `/issue-编号/` |
-| `Moment` | 发一条**朋友圈动态**，展示在 `/board/` 时间线（站长碎碎念/站点动态） |
-| `分类:技术` | 归入「技术」分类（前缀形如 `分类:` / `category:` 均可） |
-| 其他任意标签 | 自动成为文章的 **tags** |
-
-**关闭 Issue = 删除这篇文章/这条动态**；重新打开 = 恢复发布；编辑正文 = 更新站点。评论交流直接在 Issue 里进行，天然留档。
-**文章、独立页、朋友圈动态、公告、友链、分类/标签等全站内容**都能通过 GitHub Actions + Issue 推送生效。
-
-## 🚚 推送与部署（GitHub Token / Deploy Key 用法）
-
-**写作 = Issue（不需要 Token）；推送代码/主题更新到 GitHub = 才需要认证。** 下面给三种方式，按你的网络环境选：
-
-### 方式 A：HTTPS + Personal Access Token（PAT，最简单，常规网络推荐）
-
-1. GitHub → 头像 → **Settings → Developer settings → Personal access tokens → Tokens (classic)** → Generate new token；
-2. 勾选 `repo` 权限，生成后**立即复制**（只显示一次），妥善保存（密码管理器 / 环境变量）；
-3. 本地推送认证，二选一：
-   - **推荐**：`gh auth login` 走 GitHub CLI 托管，或系统凭据管理器（`git config --global credential.helper manager`），都不需要把 token 写进任何文件；
-   - 临时方案：`git push https://<你的用户名>:<TOKEN>@github.com/<用户名>/<仓库>.git main`（Token 只在 URL 中出现一次，不落盘）；
-4. **绝对不要把 token 明文写进仓库/文档/脚本**；一旦泄露，立刻到 Developer settings 里 **Revoke**（撤销）重建。
-
-> 在 Actions 里需要更高权限（如自动建标签需要 `issues: write`，默认 `GITHUB_TOKEN` 已够用，无需额外配置）；如需用自己的 PAT，在仓库 **Settings → Secrets and variables → Actions → New repository secret** 建 `VG_TOKEN`，工作流里用 `${{ secrets.VG_TOKEN }}` 引用。
-
-### 方式 B：临时 Deploy Key 走 443（HTTPS 被墙/超时环境的实测方案）
-
-本项目实测 HTTPS push 超时，用**临时 writable deploy key 走 `ssh.github.com:443`** 稳定可推，推完即删，不留后门：
-
-```bash
-# 1) 生成一次性密钥
-ssh-keygen -t ed25519 -f ~/.ssh/vg_deploy -N "" -C "vg-deploy"
-
-# 2) 把 ~/.ssh/vg_deploy.pub 内容添加到仓库
-#    GitHub → 仓库 → Settings → Deploy keys → Add deploy key
-#    勾选 "Allow write access"
-
-# 3) 配 SSH 走 443（写入 ~/.ssh/config）
-Host github.com
-  HostName ssh.github.com
-  Port 443
-  User git
-  IdentityFile ~/.ssh/vg_deploy
-  StrictHostKeyChecking no
-
-# 4) 推送
-git push git@github.com:<用户名>/<仓库>.git main --tags
-# 或用 GIT_SSH_COMMAND="ssh -F ~/.ssh/config" git push origin main
-
-# 5) 推完立即删除 Deploy Key（仓库 Settings 里删，本地 rm ~/.ssh/vg_deploy*）
-```
-
-⚠️ **deploy key 推送不会触发 GitHub Actions**（GitHub 出于安全不向 deploy key 触发的 push 派发工作流）。需要自动部署时，用 PAT 手动触发：
-
-```bash
-curl -X POST \
-  -H "Authorization: token <你的PAT>" \
-  -H "Accept: application/vnd.github+json" \
-  https://api.github.com/repos/<用户名>/<仓库>/actions/workflows/<工作流id>/dispatches \
-  -d '{"ref":"main"}'
-```
-
-工作流 id 可在仓库 `Actions → Deploy VeryGood Blog → 左栏右侧三个点 → View workflow file` 或 API `GET /repos/<用户名>/<仓库>/actions/workflows` 查到（本项目为 `342856419`）。
-
-### 方式 C：SSH Key（GitHub 常规推送）
-
-GitHub → Settings → SSH and GPG keys → 添加本机 `~/.ssh/id_ed25519.pub`，然后 `git push origin main` 即可；443 被墙时用方式 B。
-
-## 🖥 本地开发
-
-```bash
-pip install -r requirements.txt
-pip install pypinyin              # 中文标题自动转拼音依赖
-
-python -m verygood build          # 构建到 dist/
-python -m verygood build --drafts # 构建（含草稿）
-python -m verygood serve --port 8000   # 本地预览（文件变更自动重建）
-python -m verygood plugins        # 查看插件清单（内置 / 自动发现 / 显式配置）
-```
-
-## 📁 目录结构
-
-```
-VeryGood/
-├── config.yml                    # 站点配置（唯一需要经常改的文件）
-├── requirements.txt
-├── verygood/                     # 构建引擎（纯 Python + Jinja2）
-│   ├── builder.py                # 构建器：分页/标签/分类/归档/搜索/SEO/动态路由/署名校验
-│   ├── config.py                 # 配置加载与默认值/规整
-│   ├── content.py                # Markdown / front matter 解析 / 文章路径定制
-│   ├── mdrender.py               # 渲染扩展：TOC、懒加载、短代码
-│   ├── seo.py                    # sitemap / rss / robots / humans
-│   ├── cli.py                    # build / serve / version / plugins 命令
-│   └── plugins/                  # 插件系统 + 内置插件
-├── plugins/                      # 用户插件自动发现目录（v1.2.0 生态入口）
-│   ├── footer-note/              # 示例：页脚留言
-│   └── post-stats/               # 示例：文章字数统计
-├── themes/verygood/              # 主题（整套可复制自定义）
-│   ├── theme.yml                 # 主题元数据
-│   ├── templates/                # 12 个 Jinja2 模板 + 4 个 partials
-│   └── static/                   # css / js（main.js + search.js）/ img
-├── source/                       # 本地内容源
-│   ├── posts/                    # 文章目录（issue-*.md 由 Actions 生成）
-│   ├── pages/                    # 独立页面
-│   ├── moments/                  # 朋友圈动态（打 Moment 标签的 Issue 生成）
-│   └── assets/                   # 你的资源（图片等，会复制到 /assets/）
-├── scripts/
-│   ├── sync_issues.py            # Issue → Markdown（工作流调用，分页拉取防截断）
-│   └── gen_assets.py             # 示例封面生成器（可选）
-├── docs/                         # 使用文档 / 开发文档 / 插件开发文档
-└── .github/workflows/build.yml   # 页面部署工作流（核心）
-```
-
-## ⚙️ 配置速查（`config.yml`）
+编辑 `config.yml`，至少改三处：
 
 ```yaml
 site:
-  title: My Blog                # 站点名（必填）
-  subtitle: 副标题
-  url: https://xxx.github.io    # 站点地址（必填，无末尾斜杠）
-  basePath: ""                  # 部署在 /仓库名/ 子路径时填仓库名
+  title: My Blog
+  url: https://用户名.github.io    # 无末尾斜杠
+author:
+  name: 你的名字
+```
+
+### 3. 启用 Pages
+
+仓库 `Settings → Pages`：Source 选择 **GitHub Actions**。
+
+### 4. 用 Issue 写第一篇文章
+
+1. 打开仓库 **Issues → New issue**，直接写下 Markdown 正文；
+2. 给 Issue 打标签 **`Article`** 即发布（首次部署后 Actions 自动创建标签）；
+3. 等 Actions 跑完，打开 `https://用户名.github.io` 看效果。
+
+> 关闭 Issue = 删除文章；重新打开 = 恢复发布；编辑正文 = 更新站点。评论交流直接在 Issue 里进行，天然留档。
+
+## 标签即状态机
+
+| 标签 | 作用 |
+| --- | --- |
+| `Article` | 发布这篇文章 |
+| `Draft` | 存为草稿，线上不发布 |
+| `Page` | 生成独立页面（如「关于」） |
+| `Moment` | 发一条朋友圈动态，展示在 `/board/` 时间线 |
+| `分类:技术` | 归入「技术」分类（前缀 `分类:` / `category:` 均可） |
+| 其他任意标签 | 自动成为文章 tags |
+
+## v1.5.1 更新内容
+
+**幻灯片轮播** — 音乐播放器替换为图片链接幻灯片轮播：自动播放、圆点切换、悬停暂停、页面不可见时自动暂停。
+
+**工具栏独立** — 主题切换 / 搜索 / RSS 从导航底部移至头像下方独立容器，视觉层次更清晰。
+
+**左侧栏固定优化** — 移除滚动 transition，消除闪烁。
+
+**署名四层防线** — 在原有三层（构建层 + 运行时 SHA-256 + MutationObserver）基础上新增 CSS 层防护：`user-select` / `visibility` / `opacity` 阻断样式层篡改。
+
+**静态资源版本戳** — v=4，确保浏览器缓存正确更新。
+
+## 配置示例
+
+### 幻灯片轮播
+
+```yaml
+slideshow:
+  enabled: true
+  interval: 4000            # 自动播放间隔（毫秒）
+  slides:
+    - title: "VeryGood 主题"
+      image: "https://picsum.photos/seed/verygood-1/400/225"
+      url: "https://github.com/techjiang/VeryGood"
+```
+
+### 核心配置速查
+
+```yaml
+site:
+  title: My Blog             # 站点名（必填）
+  url: https://xxx.github.io # 站点地址（必填，无末尾斜杠）
   language: zh-CN
   timezone: Asia/Shanghai
 
-  # v1.1.6：公告弹窗（进入页面自动弹出，访客关闭后本浏览器不再弹）
-  announcement:
-    enabled: true               # 是否启用弹窗
-    title: "欢迎来访"            # 弹窗标题（可留空）
-    text: "🎉 欢迎来访"          # 文案（支持少量 HTML）
-    link: "/board/"             # 点击跳转，留空则不显示按钮
-    btn_text: "去看看"           # 按钮文案，留空默认「了解更多」
-    type: info                  # info / tip / warn
-
-  # v1.1：右侧栏（≥1760px 超宽屏显示，330px 宽；v1.1.8 起 1760px 以下正文仍 1360px 满宽不被挤压）
-  rightbar:
+  announcement:              # 公告弹窗
     enabled: true
-    show_toc: true              # 文章页目录放右栏，不挤正文
-    show_recent: true           # 近期文章
-    show_tags: true             # 标签云
-    show_categories: true       # 分类
-    show_links: true            # 友链缩略
-    recent_count: 5
-    tags_max: 24
-    links_max: 8
-    show_clock: true            # v1.4.0：时间卡片（本地时间，秒级刷新，内置插件 whisper）
-    show_micro: true            # v1.4.0：微语卡片（打字机效果逐条轮播，内置插件 whisper）
-    micro_notes:                # v1.4.0：自定义微语内容（最多建议 12 条，写 [] 用插件内置文案）
-      - "用 Issue 写文章，GitHub Actions 自动构建发布。"
-      - "莫兰迪粉：温柔克制，但也很有态度。"
+    title: "欢迎来访"
+    text: "🎉 欢迎来访"
+    link: "/board/"
 
-sidebar:
-    recent_count: 0             # v1.3.0：左侧栏「最近更新」条数（默认 0 = 关闭，避免与右栏重复；改数字即可开启）
-    site_data: true             # v1.3.0：站点数据组件（文章/字数/浏览/访客，内置插件 site-stats；v1.4.4 起移除无效的加载耗时/地区）
-    collapse: false             # true 时侧栏模块默认折叠，访客可展开
-    custom:                      # 追加自定义模块（HTML 自由书写）
-      # - title: 我的项目
-      #   icon: "✨"
-      #   html: "<p>任意 HTML</p>"
-
-  nav:                          # 追加导航项
-    - label: 友链
-      url: /links/
+  rightbar:                  # 右侧栏（≥1760px 显示）
+    enabled: true
+    show_toc: true           # 文章目录
+    show_recent: true         # 近期文章
+    show_tags: true           # 标签云
+    show_categories: true     # 分类
+    show_links: true           # 友链缩略
 
 author:
-  name: Me
-  email: me@example.com
-  avatar: "https://..."          # 头像 URL，留空则不显示
+  name: 你的名字
+  avatar: "https://..."
   bio: 一句话介绍自己
   social:
     github: yourname
-    twitter: ""
-    weibo: ""
-    rss: ""
-
-taxonomies:                     # v1.1：分类/标签元数据（描述、置顶）
-  categories:
-    技术:
-      desc: 技术相关的文章
-      pin: true
-  tags:
-    verygood:
-      desc: 关于主题的更新日志
-
-board:                         # v1.1.2：朋友圈动态 /board/（站长 Issue → Actions 推送）
-  enabled: true
-  title: 朋友圈动态
-  desc: 站长的碎碎念 —— 打上 Moment 标签即发布，关闭 Issue 即下线
-  per_page: 30                  # 时间线最多展示条数
-  repo: ""                      # 形如 "owner/repo"：动态卡片跳转对应 GitHub Issue，留空不显示
-  giscus: false                 # 同步挂评论区
-
-seo:
-  image: /assets/og-default.png # 社交分享默认图（1200x630）
-  twitter_handle: ""
-  google_site_verification: ""  # Google Search Console 校验
-  baidu_site_verification: ""   # 百度站长校验
-  baidu_push: false             # 百度收录主动推送
-  sitemap: true                 # 生成 sitemap.xml（含图片）
-  rss: true
-  robots: true
-  noindex_page_2plus: true      # 分页第 2+ 页 noindex
 
 posts:
-  per_page: 10                  # 首页每页文章数（v1.5.0 默认改为 10）
-  pinyin_slug: true             # v1.5.0：中文标题自动转拼音 URL（true=自动转，false=用文件名）
+  per_page: 10               # 首页每页文章数
+  pinyin_slug: true           # 中文标题自动转拼音 URL（标题"你好"→/article/ni-hao/）
+  toc: true                   # 文章目录
   excerpt_length: 150
-  toc: true                     # 文章目录
-  toc_depth: 2-3
-  related: 3                    # 相关推荐条数
-  date_format: "%Y-%m-%d"
-  cover_default: ""             # 无封面时的默认封面
-  article_dir: article          # v1.2.0：文章默认目录前缀（front matter path > dir > 此项）
 
-post_extra:                     # v1.1.7：文章页底部信息，全部可开关
-  show_updated: true            # 显示「更新于」时间（有更新时）
-  show_copyright: true          # 显示版权行（作者 + 原文链接）
-  show_share: true              # 显示分享栏（微博 / X / LinkedIn / 复制链接）
-  license: ""                   # 自定义版权协议文案（如 "CC BY-NC-SA 4.0"），留空不显示
+comments:                     # none / giscus / utterances
+  provider: none
 
-comments:                       # none / giscus / utterances
-  provider: none                # ← 想要评论就改成 giscus 或 utterances 并填下方仓库参数
-  giscus:
-    repo: ""                    # user/comment-repo
-    repo_id: ""
-    category: ""
-    category_id: ""
-    mapping: pathname
-    lang: zh-CN
-  utterances:
-    repo: ""
+seo:
+  sitemap: true
+  rss: true
+  baidu_push: false           # 百度收录主动推送
+  noindex_page_2plus: true    # 分页第 2+ 页 noindex
 
-links:                          # 友链（/links/ + 右栏缩略）
-  - name: GitHub
-    url: https://github.com
-    desc: 全球最大代码托管平台
-    avatar: "https://github.com/github.png"   # v1.1：头像图，v1.2.0 起圆形展示；留空显示首字母彩球
-
-issues:                         # Issue 写作配置
-  publish_label: Article
-  draft_label: Draft
-  page_label: Page
-  moment_label: Moment          # Moment 标签 → 朋友圈动态（/board/）
-  slug_prefix: issue
-  welcome_issue: true           # v1.4.4：仓库没有 Issue 时自动创建一条引导 Issue；false 关闭
-
-plugins: ["plugins/my-plugin"]  # 显式声明用户插件；仓库根 plugins/ 下目录自动发现（v1.2.0）
-plugins_disabled: []            # v1.3.0：禁用插件（内置名/目录名），如 ["site-stats", "whisper"]
+plugins: []                   # 用户插件路径列表
+plugins_disabled: []          # 禁用插件（内置名/目录名）
 ```
 
-完整配置请看 [docs/使用文档.md](./docs/使用文档.md) 与 `config.yml` 内的中文注释。
+完整配置请看 `config.yml` 内的中文注释与 [使用文档](docs/使用文档.md)。
 
-## 🎨 自定义主题
+## 署名锁定（四层防线）
 
-VeryGood 的主题 = 一套可整体复制的 `themes/` 目录：
+页脚「Powered by TechSauce & VeryGood」为强制署名，不可移除：
+
+| 层级 | 手段 |
+| --- | --- |
+| ① 构建层 | 四重校验：标记存在 + class 精确匹配 + 双指纹（`data-vg-fp` / `data-vg-sig`）+ 链接域名白名单 + 文本逐字符比对 |
+| ② 运行时 | SHA-256 重算 + 隐藏检测（display / opacity / 裁剪 / 位移）+ 遮挡探测 + 3-9 秒随机周期复查 |
+| ③ MutationObserver | 监听署名元素与 footer 结构变更，删除 / 替换 / 移位立即不可用 |
+| ④ CSS 防篡改 | `user-select` / `visibility` / `opacity` 阻断样式层篡改（v1.5.1 新增） |
+
+任何删除、改名、改字、偷换链接都会让构建直接失败或页面运行时立即不可用。请保留署名行。
+
+## 与 Gmeek 的对照
+
+| | Gmeek | VeryGood |
+| --- | --- | --- |
+| 写作方式 | Issue + Label | Issue + Label（同理念） |
+| 发布链路 | Actions 同步 + 构建 | Actions 同步 + 构建（可审计、可 fork 改进） |
+| 主题风格 | 面向程序员 | 程序员 + 生活向通用，莫兰迪粉高级感 |
+| 布局 | 单栏 / 双栏 | 桌面三栏（信息栏 / 正文 / 右栏），窄屏自适应 |
+| SEO | 基础 | 更深：结构化数据 + 图片 sitemap + 百度推送 |
+| 互动 | 评论 | 评论 + 公告 + 朋友圈动态 |
+| 扩展 | 改主题 | 插件系统 + 主题复制机制，双重扩展 |
+| 署名保护 | — | 四层防线 |
+
+## 目录结构
+
+```
+VeryGood/
+├── config.yml                 # 站点配置（唯一需要经常改的文件）
+├── requirements.txt
+├── verygood/                  # 构建引擎（纯 Python + Jinja2）
+│   ├── builder.py             # 构建：分页/标签/分类/归档/SEO/署名校验
+│   ├── config.py              # 配置加载与默认值
+│   ├── content.py             # Markdown / front matter 解析
+│   ├── mdrender.py            # 渲染扩展：TOC / 懒加载 / 短代码
+│   ├── seo.py                 # sitemap / rss / robots / OG
+│   ├── cli.py                 # build / serve / plugins 命令
+│   └── plugins/               # 内置插件系统
+├── plugins/                   # 用户插件自动发现目录（即装即用）
+├── themes/verygood/           # 主题（整套可复制自定义）
+│   ├── theme.yml              # 主题元数据
+│   ├── templates/             # Jinja2 模板
+│   └── static/                # css / js / img
+├── source/                    # 内容源
+│   ├── posts/                 # 文章（issue-*.md 由 Actions 生成）
+│   ├── pages/                 # 独立页面
+│   ├── moments/               # 朋友圈动态
+│   └── assets/                # 资源文件（发布到 /assets/）
+├── scripts/
+│   └── sync_issues.py         # Issue → Markdown 同步
+├── docs/                      # 使用 / 开发 / 插件文档
+└── .github/workflows/build.yml  # 部署工作流（核心）
+```
+
+## 本地开发
+
+```bash
+pip install -r requirements.txt
+pip install pypinyin              # 中文标题转拼音依赖
+
+python -m verygood build          # 构建到 dist/
+python -m verygood build --drafts # 构建（含草稿）
+python -m verygood serve --port 8000  # 本地预览（文件变更自动重建）
+python -m verygood plugins        # 查看插件清单
+```
+
+## 自定义主题
 
 1. `cp -r themes/verygood themes/my-theme`
-2. 改 `config.yml` 里 `theme.name: my-theme`；
-3. 改 `theme.yml` 元数据与 `static/css/main.css` 顶部的 CSS 变量（全站配色都在里面）：
+2. 改 `config.yml` 里 `theme.name: my-theme`
+3. 改 `theme.yml` 元数据与 `static/css/main.css` 顶部的 CSS 变量：
 
 ```css
 :root {
-  --rose-500: #C77A90;  /* 主粉色（莫兰迪，不高饱和） */
+  --rose-500: #C0778E;  /* 主粉色（莫兰迪，不高饱和） */
   --bg: #FBF8F9;        /* 页面底色 */
   --ink: #3A2A31;       /* 正文色 */
 }
 ```
 
-模板共 11 个，沿用 Jinja2 语法，核心文件：`base.html`（骨架与 SEO）、`index.html`（首页）、`post.html`（文章页）、`partials/_card.html`（卡片）。
+## 插件开发
 
-## 🔌 插件开发（可玩性的尽头）
-
-插件 = 仓库根 `plugins/` 下的一个目录（含 `plugin.py`）或单文件 `xxx.py`，**即装即用**，无需改 config。也可在 `config.plugins` 里显式声明目录路径。**完整 API / 钩子清单 / 示例 / 发布规范见 [插件开发文档](./docs/插件开发文档.md)。**
+插件 = `plugins/` 下的一个目录（含 `plugin.py`）或单文件，即装即用，无需改 config：
 
 ```python
 # plugins/my-plugin/plugin.py
-# v1.3.0：可选元信息（`python -m verygood plugins` 清单会展示）
 __title__ = "我的插件"
 __description__ = "一句话说明"
 __version__ = "1.0.0"
-__author__ = "你"
 
-def setup(ctx):                 # 必须实现 setup(ctx)
-    # 1) 注册短代码：正文里写 {{< box >}}...
-    ctx.register_shortcode("box", box)
-
-    # 2) 注册生命周期钩子（装饰器用法）
-    @ctx.hook("post_parsed")
-    def on_post(post):          # 每篇文章解析后执行
-        post["my_field"] = "hi"
-
-    # 3) 模板注入（v1.3.0 新增 sidebar_data / content_top / content_bottom；__BASE__ 占位符自动替换为站点 basePath）
-    ctx.inject("head", '<meta name="x-custom" content="1">')
-    ctx.inject("sidebar_data", '<div class="side-block">我的侧栏组件</div>')
-
-    # 4) v1.2.0：向全部模板暴露能力
-    ctx.add_global("build_year", 2026)        # 模板里 {{ build_year }}
-    ctx.add_filter("wc", lambda s: len(s))    # 模板里 {{ text | wc }}
+def setup(ctx):
+    ctx.register_shortcode("box", box)       # 短代码
+    ctx.hook("post_parsed")(on_post)         # 生命周期钩子
+    ctx.inject("sidebar_data", '<div>...</div>')  # 模板注入
+    ctx.add_global("build_year", 2026)        # 全局变量
+    ctx.add_filter("wc", lambda s: len(s))   # Jinja 过滤器
 ```
 
-v1.3.0 还支持**目录式插件 + 静态资源**：把 `plugin.py` 与 `static/` 放进一个目录，构建时静态资源自动拷贝到 `dist/plugins/{插件名}/`，配合 `__BASE__/plugins/{插件名}/xxx.css` 引用（参考内置插件 `verygood/plugins/site-stats/`）。
+内置插件：`shortcodes`（视频嵌入）、`reading_time`（阅读时长）、`random_post`（随机文章）、`site-stats`（站点数据）、`whisper`（时间卡片 + 微语）。完整 API / 钩子清单见 [插件开发文档](docs/插件开发文档.md)。
 
-可用的钩子（事件均为可选）：
+## 文档
 
-| 钩子 | 时机 | payload |
-| --- | --- | --- |
-| `init` | 构建初始化 | `cfg`（dict） |
-| `post_parsed` | 每篇文章解析后 | `post`（dict，可加自定义字段） |
-| `page_parsed` | 每个页面解析后 | `page`（dict） |
-| `site_ready` | 站点模型就绪 | `site`（dict） |
-| `tpl_context` | 每个模板渲染前（v1.3.0） | `{"template": 模板名, "ctx": 渲染上下文}`（可注入键） |
-| `finalize` | 构建收尾 | `{"out": 输出目录, "site": site, "cfg": cfg}` |
+| 文档 | 面向 |
+| --- | --- |
+| [使用文档](docs/使用文档.md) | 博主 |
+| [开发文档](docs/开发文档.md) | 开发者 |
+| [插件开发文档](docs/插件开发文档.md) | 插件开发者 |
+| [插件使用文档](docs/插件使用文档.md) | 使用内置插件的用户 |
 
-钩子抛异常不会中断构建（错误隔离），只记日志。禁用某插件：`plugins_disabled: ["插件名"]`（内置名或仓库 `plugins/` 目录名），`python -m verygood plugins` 会标记「已禁用」。
+## 技术栈
 
-内置短代码开箱即用：
+Python 静态站点生成器 · Jinja2 模板 · PyYAML 配置 · Markdown 渲染 · Pygments 代码高亮 · pypinyin 拼音转换
 
-```markdown
-{{< youtube dQw4w9WgXcQ >}}     # 嵌入 YouTube
-{{< bilibili BV1xx411c7mD >}}  # 嵌入 B 站
-```
+## 许可证
 
-内置插件：`shortcodes`（视频嵌入）、`reading_time`（阅读时长，`post.reading_time` 自动注入卡片/文章头部）、`random_post`（/random/ 随机文章跳转）、`site-stats`（v1.3.0 站点数据组件：文章数/全站字数**服务端直出**，浏览量/访客数不蒜子 → ibruce → localStorage **三级降级真实统计**；v1.4.4 起面板精简为这四个真实可用指标，移除无效的「加载耗时/访客地区」；`site.sidebar.site_data: false` 关闭）、`whisper`（v1.4.0 右栏时间卡片 + 打字机微语卡片，`site.rightbar.show_clock` / `show_micro` / `micro_notes` 控制）。
-
-仓库自带两个示例插件（即装即用 + 现成代码参考）：`plugins/footer-note`（页脚留言）、`plugins/post-stats`（字数统计 / 阅读时长过滤器）。用 `python -m verygood plugins` 随时核对启用了哪些插件。
-
-## 🤖 与 Gmeek 的对照
-
-| | Gmeek | VeryGood |
-| --- | --- | --- |
-| 写作方式 | Issue + Label | Issue + Label（同理念） |
-| 发布链路 | Actions 同步+构建 | Actions 同步+构建（同样可审计、可 fork 改进） |
-| 主题风格 | 面向程序员 | 「程序员 + 生活向」通用，莫兰迪粉色高级感 |
-| 布局 | 单栏/双栏 | 桌面三栏（信息栏/正文/右栏），窄屏自适应 |
-| SEO | 基础 | 更深：BlogPosting/Breadcrumb/SearchAction 结构化数据 + 图片 sitemap |
-| 互动 | 评论 | 评论区 + 公告 + 朋友圈动态（站长 Issue 推送） |
-| 扩展 | 改主题 | 插件系统 + 主题复制机制，双重扩展 |
-
-## ❓ FAQ
-
-**Q：仓库里为什么多了 Article / Draft / Page / Moment 这几个标签？**
-v1.4.4 起 Actions 首次运行会自动创建这四个发布标签（不存在才创建，幂等）。没有它们就无法用「打标签」的方式发布文章——这正是"Issue 玩法失灵"最常见的根因。若你的账号权限受限创建失败，构建不中断，手动补建同名标签即可。
-
-**Q：仓库里那条「👋 欢迎使用 VeryGood」的 Issue 是什么？**
-首次部署时仓库一个 Issue 都没有，主题自动创建的一条**引导 Issue**，手把手教你怎么用 Issue 写博客（它不带发布标签，不会出现在线上站点）。可以编辑或关闭它；不想要这个功能就在 `config.yml` 写 `issues.welcome_issue: false`。
-
-**Q：我建了 Issue，Actions 也跑了，文章怎么没出现？**
-检查该 Issue 是否打了 `Article` 标签（或对应的 `issues.publish_label`）。无标签的 Issue 只是普通讨论，不会发布；打 `Draft` 标签的是草稿，线上不可见；**关闭的 Issue 会被删除下线**。
-
-**Q：打开仓库没看见 issue 模板？**
-模板在 `.github/ISSUE_TEMPLATE/article.md`，fork 模板仓库时默认带过来；也可以直接新建空白 Issue 开写。
-
-**Q：想让 issue-*.md 不进 git 历史？**
-全量切到 Issue 写作后，可在 `.gitignore` 加入：
-
-```
-source/posts/issue-*.md
-```
-
-Actions 每次自动同步生成，无需手提交。
-
-**Q：Articles 页面的搜索怎么更新？**
-搜索索引 `search.json` 在每次构建时自动生成，全前端实时搜索，无需任何后端。
-
-**Q：如何接入评论？**
-`config.yml` 的 `comments.provider` 改为 `giscus`，按 giscus.app 引导填入仓库、repo_id、category 等即可；utterances 同理。动态页也可通过 `board.giscus: true` 挂一套评论区。
-
-**Q：百度收录？**
-`seo.baidu_push` 为 true 时会在构建产物里输出推送钩子脚本（需结合站长平台主动推送 token 使用，见模板注释）。
-
-**Q：友链头像不显示？**
-在 `links` 条目里填 `avatar` 为图片 URL 即可；留空会显示首字母彩球。v1.2.0 起头像统一圆形展示（`object-fit: cover` 自动裁剪居中），透明底 / 白底 logo 都兼容，无需提前抠图。
-
-**Q：文章想放到自定义路径（比如 域名/abc）？**
-在文章 front matter 写 `path: /abc`（直达，支持任意层级如 `/wz/abc`）；`dir: /notes` 只换前缀保留标题；或用 `posts.article_dir` 改全站默认前缀。详见 README「自定义访问路径」一节。
-
-**Q：中文标题的 URL 是怎么生成的？（v1.5.0）**
-默认自动转拼音：标题"你好"→`/article/ni-hao/`，"前端性能优化"→`/article/qian-duan-xing-neng-you-hua/`。由 `posts.pinyin_slug: true`（默认）控制，设为 `false` 则用文件名。front matter 中写 `slug: custom-url` 可覆盖自动生成的 slug。
-
-**Q：怎么把文章置顶到首页？（v1.5.0）**
-在 front matter 加 `pin: true`，文章会排在首页最前面并显示🔥标识。多篇置顶按日期倒序。Issue 写作时在正文顶部 front matter 指令块中同样支持。
-
-**Q：首页每页显示多少篇文章？**
-默认 10 篇（v1.5.0），在 `config.yml` 的 `posts.per_page` 修改。
-
-**Q：左侧栏站点数据下面的社交链接怎么来的？（v1.5.0）**
-读取 `config.yml` 中 `author.social` 配置：只要 `github`/`twitter`/`weibo`/`email` 任一非空，就会在站点数据下方显示一行圆形社交图标（自动附 RSS）。全部留空则不显示该区域。
-
-**Q：公告条/侧栏折叠状态忘了怎么开？**
-公告与折叠状态存在浏览器 localStorage（`vg-ann-close`、`vg-side-block:*`），换浏览器或清缓存即恢复默认。
-
-**Q：页脚的「Powered by TechSauce & VeryGood」可以删掉吗？**
-不可以。这是主题的强制署名，v1.5.0 起为**三层防线**：① **构建层**四重校验（标记存在 + class 精确匹配 + 双指纹 `data-vg-fp`/`data-vg-sig` + 链接域名白名单 + 文本逐字符比对 + footer 内禁 script）；② **运行时**SHA-256 重算 + 隐藏检测（display/opacity/裁剪/位移）+ 遮挡探测（elementFromPoint，白名单防误杀）+ 3-9 秒随机周期复查 + MutationObserver 监听署名元素与 footer 结构变更；③ **全局 body MutationObserver**（v1.5.0 新增）监控 footer 被删除/替换/移位——任何删除、改名、改字、偷换链接、属性缺失都会让**构建直接失败**或**页面运行时立即不可用**。请保留署名行。
-
-**Q：短内容页（分类/标签/动态/友链）的底部栏怎么保证贴底不飘起？**
-v1.4.0 起 `.layout` 为 flex 纵向容器（`min-height: 100vh`），`.site-main` 自动伸展（`flex: 1`），footer 天然贴在视口底部；内容高于一屏时照常自然滚动。无需任何配置，全站所有页面统一生效。
-
-**Q：代码块的语言标签和复制按钮怎么来的？**
-v1.4.0 起构建期自动为代码块写入语言名（`data-lang`，如 Bash / Python / YAML），右上角显示语言语法标签 + 纯图标复制按钮，一键复制全文。无需配置。
-
-**Q：右栏的时间卡片和微语卡片是什么？**
-v1.4.0 内置 `whisper` 插件：时间卡片显示本地时间（秒级刷新），微语卡片为打字机效果逐条轮播短句（可暂停/继续）。`site.rightbar.show_clock` / `show_micro` 控制开关，`micro_notes` 自定义文案。
-
-**Q：分类页和归档页什么关系？**
-归档 `/archive/` 是时间线（分类云 + 按年归档）；v1.2.0 起分类有独立的 `/categories/` 页面（聚合所有分类卡片，页脚默认导航自带入口），每个分类的文章在 `/category/{分类名}/`。
-
-**Q：朋友圈动态怎么发？**
-新建 Issue → 写下正文（Markdown，支持图片、视频）→ 打上 `Moment` 标签 → Actions 自动同步到 `/board/` 时间线；想下线哪条就关闭对应 Issue。也可把 `board.repo` 配成 `owner/repo`，动态卡片会带「Issue #编号」跳转链接，方便观众查看原始内容。
-
-## 📜 许可证
-
-[MIT](./LICENSE) © VeryGood
+[MIT](./LICENSE) © [TechSauce](https://github.com/techjiang)
 
 喜欢就点个 ⭐，欢迎 Issue / PR。

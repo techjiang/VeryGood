@@ -59,15 +59,15 @@
 
 <link rel="alternate" type="application/rss+xml" title="{{ site.cfg.site.title }} · RSS" href="{{ url_for('/rss.xml') }}">
 <link rel="icon" type="image/svg+xml" href="{{ url_for('/img/favicon.svg') }}">
-<link rel="stylesheet" href="{{ url_for('/css/main.css') }}?v=3" media="all">
+<link rel="stylesheet" href="{{ url_for('/css/main.css') }}?v=4" media="all">
 
 {{ injections.get('head', []) | join('\n') | safe }}
 {% block head_extra %}{% endblock %}
 <script>/* <![CDATA[ */
 (function(){try{var t=localStorage.getItem('vg-theme');if(!t){t=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.setAttribute('data-theme',t);}catch(e){document.documentElement.setAttribute('data-theme','light');}})();
 /* ]]> */</script>
-{% if cfg.music and cfg.music.enabled %}
-<script>window.__VG_MUSIC__={"tracks":{{ cfg.music.tracks | tojson | safe }}};</script>
+{% if cfg.slideshow and cfg.slideshow.enabled %}
+<script>window.__VG_SLIDESHOW__={"slides":{{ cfg.slideshow.slides | tojson | safe }},"interval":{{ cfg.slideshow.interval or 4000 }}};</script>
 {% endif %}
 </head>
 <body class="{% block body_class %}{% endblock %}">
@@ -113,6 +113,13 @@
       {% if cfg.author.bio %}<p class="site-brand__bio">{{ cfg.author.bio }}</p>{% endif %}
     </div>
 
+    {# ---- 工具栏（主题切换/搜索/RSS，v1.5.1 移到头像下方） ---- #}
+    <div class="site-tools" id="site-tools">
+      <button class="site-tools__btn site-tools__theme" id="theme-toggle" type="button" aria-label="切换深浅色模式" title="切换深浅色模式">{{ m.icon('sun') }}{{ m.icon('moon') }}</button>
+      <a href="{{ url_for('/search/') }}" class="site-tools__btn" aria-label="搜索" title="搜索">{{ m.icon('search') }}</a>
+      <a href="{{ url_for('/rss.xml') }}" class="site-tools__btn" aria-label="RSS 订阅" title="RSS 订阅">{{ m.icon('rss') }}</a>
+    </div>
+
     {# ---- 侧栏自定义模块（v1.1，可折叠） ---- #}
     {% for mod in cfg.site.sidebar.custom %}
     <details class="side-block{% if cfg.site.sidebar.collapse %} is-collapsed{% endif %}" {% if not cfg.site.sidebar.collapse %}open{% endif %}>
@@ -137,32 +144,26 @@
     {# ---- 站点数据组件注入点（v1.3.0，内置插件 site-stats 提供） ---- #}
     {{ injections.get('sidebar_data', []) | join('\n') | safe }}
 
-    {# ---- 迷你音乐播放器（v1.5.0，展示在站点数据下方） ---- #}
-    {% if cfg.music and cfg.music.enabled %}
-    <div class="side-music" aria-label="音乐播放器">
-      <div class="side-music__header">
-        <div class="side-music__cover-wrap" id="music-cover-wrap">
-          <div class="side-music__cover-fallback" id="music-cover-fallback">♪</div>
-          <img class="side-music__cover" id="music-cover" src="" alt="封面" loading="lazy">
-        </div>
-        <div class="side-music__info">
-          <p class="side-music__title" id="music-title">加载中…</p>
-          <p class="side-music__artist" id="music-artist">-</p>
-        </div>
+    {# ---- 图片链接幻灯片（v1.5.1，展示在站点数据下方） ---- #}
+    {% if cfg.slideshow and cfg.slideshow.enabled and cfg.slideshow.slides %}
+    <div class="side-slideshow" aria-label="图片幻灯片" id="slideshow">
+      <div class="side-slideshow__viewport" id="slideshow-viewport">
+        {% for s in cfg.slideshow.slides %}
+        <a class="side-slideshow__slide{% if loop.first %} is-active{% endif %}" href="{{ s.url }}" {% if s.url.startswith('http') %}target="_blank" rel="noopener"{% endif %} data-index="{{ loop.index0 }}">
+          <img src="{{ s.image }}" alt="{{ s.title or '' }}" loading="lazy">
+          {% if s.title %}
+          <span class="side-slideshow__caption">{{ s.title }}</span>
+          {% endif %}
+        </a>
+        {% endfor %}
       </div>
-      <div class="side-music__progress-wrap">
-        <span class="side-music__time" id="music-time">0:00</span>
-        <div class="side-music__progress">
-          <div class="side-music__progress-bar" id="music-progress"></div>
-        </div>
-        <span class="side-music__time" id="music-duration">0:00</span>
+      {% if cfg.slideshow.slides | length > 1 %}
+      <div class="side-slideshow__dots" id="slideshow-dots" role="tablist">
+        {% for s in cfg.slideshow.slides %}
+        <button class="side-slideshow__dot{% if loop.first %} is-active{% endif %}" data-index="{{ loop.index0 }}" role="tab" aria-label="第 {{ loop.index }} 张"></button>
+        {% endfor %}
       </div>
-      <div class="side-music__controls">
-        <button class="side-music__btn" id="music-prev" aria-label="上一首" title="上一首"></button>
-        <button class="side-music__btn side-music__btn--play" id="music-play" aria-label="播放" title="播放"></button>
-        <button class="side-music__btn" id="music-next" aria-label="下一首" title="下一首"></button>
-      </div>
-      <audio id="music-audio" preload="none"></audio>
+      {% endif %}
     </div>
     {% endif %}
 
@@ -177,11 +178,6 @@
       <a href="{% if nav_ext %}{{ item.url }}{% else %}{{ url_for(item.url) }}{% endif %}" class="site-nav__link" {% if current_path == url_for(item.url) %}aria-current="page"{% endif %} {% if nav_ext %}target="_blank" rel="noopener nofollow"{% endif %}>{{ item.label }}</a>
       {% endfor %}
 
-      <div class="site-nav__tools">
-        <button class="site-nav__link site-nav__theme" id="theme-toggle" type="button" aria-label="切换深浅色模式" title="切换深浅色模式">{{ m.icon('sun') }}{{ m.icon('moon') }}</button>
-        <a href="{{ url_for('/search/') }}" class="site-nav__link site-nav__icon" aria-label="搜索" title="搜索">{{ m.icon('search') }}</a>
-        <a href="{{ url_for('/rss.xml') }}" class="site-nav__link site-nav__icon" aria-label="RSS 订阅" title="RSS 订阅">{{ m.icon('rss') }}</a>
-      </div>
     </nav>
     <button class="site-nav__toggle" id="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="展开菜单">
       {{ m.icon('menu') }}{{ m.icon('close') }}
@@ -476,7 +472,7 @@ var FP1 = fp('vg-power-51f3a8|' + EXPECTED);
   }
 })();
 </script>
-<script src="{{ url_for('/js/main.js') }}?v=3" defer></script>
+<script src="{{ url_for('/js/main.js') }}?v=4" defer></script>
 {{ injections.get('body_end', []) | join('\n') | safe }}
 {% endblock %}
 </body>
