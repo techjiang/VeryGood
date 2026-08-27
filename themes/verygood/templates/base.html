@@ -59,7 +59,7 @@
 
 <link rel="alternate" type="application/rss+xml" title="{{ site.cfg.site.title }} · RSS" href="{{ url_for('/rss.xml') }}">
 <link rel="icon" type="image/svg+xml" href="{{ url_for('/img/favicon.svg') }}">
-<link rel="stylesheet" href="{{ url_for('/css/main.css') }}" media="all">
+<link rel="stylesheet" href="{{ url_for('/css/main.css') }}?v=2" media="all">
 
 {{ injections.get('head', []) | join('\n') | safe }}
 {% block head_extra %}{% endblock %}

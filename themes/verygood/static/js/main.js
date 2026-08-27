@@ -467,15 +467,15 @@ window.addEventListener('scroll', requestSpy, { passive: true });
     var musicDuration = doc.getElementById('music-duration');
 
     var VG_MUSIC_ICONS = {
-      play: '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>',
-      pause: '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>',
-      prev: '<svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>',
-      next: '<svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>'
+      play: '\u25B6',
+      pause: '\u23F8',
+      prev: '\u23EE',
+      next: '\u23ED'
     };
 
-    function vgMusicSetBtnIcon(btn, html) {
+    function vgMusicSetBtnIcon(btn, text) {
       if (!btn) return;
-      btn.innerHTML = html;
+      btn.textContent = text;
     }
     function vgMusicShowError(msg) {
       if (musicTitle) musicTitle.textContent = msg;
