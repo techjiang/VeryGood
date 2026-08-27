@@ -2,7 +2,7 @@
 
 All in GitHub：GitHub Pages 托管 + GitHub Issues 写作 + GitHub Actions 发布。
 """
-__version__ = "1.5.1"
+__version__ = "1.5.2"
 
 VERSION = __version__
 NAME = "VeryGood"

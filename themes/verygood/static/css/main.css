@@ -232,6 +232,68 @@ button { font-family: inherit; }
   border-radius: var(--radius-pill);
 }
 
+/* ---- 音乐播放器（v1.5.2，右栏微语下方） ---- */
+.side-music { }
+.side-music__header { display: flex; align-items: center; gap: 8px; }
+.side-music__cover-wrap {
+  flex: 0 0 40px; width: 40px; height: 40px;
+  border-radius: 50%; overflow: hidden;
+  background: var(--bg-soft); border: 1px solid var(--line);
+  position: relative;
+}
+.side-music__cover { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.4s ease; }
+.side-music__cover-wrap.is-spinning .side-music__cover { animation: vgSpin 8s linear infinite; }
+@keyframes vgSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.side-music__cover-fallback {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; color: var(--rose-400);
+  background: linear-gradient(135deg, rgba(192,119,142,0.08), rgba(192,119,142,0.03));
+  z-index: 1; pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.side-music__cover-wrap.is-loading .side-music__cover-fallback { opacity: 0; }
+.side-music__cover-wrap.is-loading::after {
+  content: '';
+  position: absolute; inset: 0;
+  border-radius: 50%;
+  background: linear-gradient(90deg, var(--rose-100) 0%, var(--rose-300) 50%, var(--rose-100) 100%);
+  background-size: 200% 100%;
+  animation: vgMusicShimmer 1.5s ease infinite;
+  z-index: 2;
+}
+@keyframes vgMusicShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+.side-music__cover-wrap.is-spinning .side-music__cover-fallback { opacity: 0; }
+.side-music__info { flex: 1; min-width: 0; overflow: hidden; }
+.side-music__title { margin: 0; font-size: 13px; font-weight: 600; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1.4; }
+.side-music__artist { margin: 2px 0 0; font-size: 11.5px; color: var(--ink-faint); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.side-music__progress-wrap { display: flex; align-items: center; gap: 5px; margin-top: 8px; }
+.side-music__time { font-size: 10px; color: var(--ink-faint); font-family: var(--font-mono); flex: 0 0 auto; min-width: 26px; text-align: center; }
+.side-music__progress { flex: 1; height: 3px; background: var(--line); border-radius: 2px; overflow: hidden; cursor: pointer; position: relative; }
+.side-music__progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, var(--rose-300), var(--rose-500)); border-radius: 2px; transition: width 0.15s linear; }
+.side-music__controls { display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 8px; }
+.side-music__btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px;
+  border-radius: 50%; border: 1px solid var(--line);
+  background: var(--bg-soft); color: var(--ink-soft);
+  font-size: 14px; line-height: 1;
+  cursor: pointer; transition: all 0.2s ease;
+  padding: 0; flex: 0 0 auto;
+}
+.side-music__btn:hover { background: var(--rose-400); border-color: var(--rose-400); color: #fff; transform: scale(1.08); }
+.side-music__btn--play {
+  width: 32px; height: 32px;
+  background: linear-gradient(135deg, var(--rose-400), var(--rose-500));
+  border-color: transparent; color: #fff;
+  font-size: 16px;
+  box-shadow: 0 2px 6px rgba(192,119,142,0.25);
+}
+.side-music__btn--play:hover { box-shadow: 0 3px 10px rgba(192,119,142,0.35); transform: scale(1.1); }
+
 /* ---- 导航 ---- */
 .site-nav { display: flex; align-items: center; gap: 4px; }
 .site-nav__link {
@@ -790,7 +852,7 @@ mark { background: color-mix(in srgb, var(--rose-300) 45%, transparent); color: 
 .site-footer__bottom p { margin: 0; color: var(--ink-soft); font-size: 14.5px; }
 .site-footer__powered {
   font-weight: 600; font-size: 15.5px;
-  /* v1.5.1：CSS 层防篡改增强 */
+  /* v1.5.2：CSS 层防篡改增强（五重锁定） */
   user-select: none; -webkit-user-select: none;
   -moz-user-select: none; -ms-user-select: none;
   pointer-events: auto;
@@ -798,6 +860,17 @@ mark { background: color-mix(in srgb, var(--rose-300) 45%, transparent); color: 
   display: block !important;
   visibility: visible !important;
   opacity: 1 !important;
+  /* 防止被其他元素遮挡（提升层级+相对定位防位移） */
+  position: relative !important;
+  z-index: 2147483647 !important;
+  /* 内容区独立存在：即使外层被篡改，:after 伪元素仍强制显示版权信息 */
+}
+.site-footer__powered::after {
+  content: "© TechSauce & VeryGood";
+  display: block;
+  font-size: 12px;
+  color: var(--ink-faint);
+  margin-top: 2px;
 }
 .site-footer__powered a { color: var(--rose-600); }
 .site-footer__powered a:hover { color: var(--rose-700); text-decoration: underline; text-underline-offset: 3px; }
