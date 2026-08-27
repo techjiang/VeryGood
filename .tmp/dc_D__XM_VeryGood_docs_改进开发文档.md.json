@@ -1,1 +1,0 @@
-{"file": "D:/XM/VeryGood/docs/改进开发文档.md", "ext": "md", "openable": true, "format_valid": false, "checks": [{"name": "non_empty", "status": "pass", "detail": "16754 bytes"}, {"name": "utf8", "status": "pass", "detail": ""}, {"name": "placeholder", "status": "fail", "detail": "改进开发文档.md: [未替换模板变量] ugins/shortcodes.py` | 短代码 | `{{< youtube >}}` / `{{< bilibili >}}` | | rea"}]}

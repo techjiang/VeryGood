@@ -1,1 +1,0 @@
-{"file": "D:/XM/VeryGood/README.md", "ext": "md", "openable": true, "format_valid": false, "checks": [{"name": "non_empty", "status": "pass", "detail": "10632 bytes"}, {"name": "utf8", "status": "pass", "detail": ""}, {"name": "placeholder", "status": "fail", "detail": "README.md: [XXX] # 站点名（必填）   url: https://xxx.github.io # 站点地址（必填，无末尾斜杠）"}]}

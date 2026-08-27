@@ -1,3 +1,0 @@
-[render] init --mode headless 失败，回落裸 init：dumate-browser-cli init failed: 
-{"file": "D:/XM/VeryGood/themes/verygood/templates/base.html", "ext": "html", "error": null, "content_file": "D:\\XM\\VeryGood\\.tmp\\dv-extract-base-85496e1a\\content.txt", "links_file": "D:\\XM\\VeryGood\\.tmp\\dv-extract-base-85496e1a\\links.json", "text_chars": 5006, "lines": 155, "truncated": false, "outline": [], "links_count": 3, "meta": {"text_origin": "source_stripped"}, "notes": ["浏览器渲染失败: dumate-browser-cli init failed: ；正文退化为源码去标签，JS 动态生成的内容不在正文里"], "checks": [{"name": "layout", "status": "skip", "detail": "未渲染成功，渲染层九项均未覆盖"}]}
-{"file": "D:/XM/VeryGood/README.md", "ext": "md", "error": ".md 不在抽取范围（仅 docx/pptx/xlsx/pdf/html）"}
