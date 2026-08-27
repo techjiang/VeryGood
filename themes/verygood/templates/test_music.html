@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Music Player Test</title>
+<style>
+:root {
+  --rose-50:#FBF1F4; --rose-100:#F6E5EB; --rose-200:#F0D6DE;
+  --rose-300:#E3B7C4; --rose-400:#D394A8; --rose-500:#C0778E;
+  --rose-600:#A95F76; --rose-700:#8C4A61; --rose-800:#703A4D;
+  --bg:#FBF8F9; --bg-soft:#F5EDF0; --line:#EEDFE4;
+  --ink:#3A2A31; --ink-soft:#6E565F; --ink-faint:#9C8590;
+  --radius:18px; --font-mono:monospace;
+}
+body {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg); padding: 40px; display: flex;
+  justify-content: center; align-items: flex-start;
+  min-height: 100vh; margin: 0;
+}
+/* ---- 迷你音乐播放器 ---- */
+.side-music {
+  padding: 10px;
+  border-radius: var(--radius);
+  background: linear-gradient(160deg, rgba(192,119,142,0.07) 0%, rgba(192,119,142,0.02) 100%);
+  border: 1px solid var(--line);
+  overflow: hidden;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+.side-music__header {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 8px; min-width: 0;
+}
+.side-music__cover-wrap {
+  flex: 0 0 36px; width: 36px; height: 36px;
+  border-radius: 6px; overflow: hidden;
+  background: var(--bg-soft); border: 1px solid var(--line);
+  position: relative;
+}
+.side-music__cover {
+  width: 100%; height: 100%; object-fit: cover;
+  display: block; transition: transform 0.4s ease;
+}
+.side-music__cover-wrap.is-spinning .side-music__cover {
+  animation: vgSpin 8s linear infinite;
+}
+@keyframes vgSpin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+.side-music__cover-fallback {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; color: var(--rose-400);
+  background: linear-gradient(135deg, rgba(192,119,142,0.08), rgba(192,119,142,0.03));
+  z-index: 1; pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.side-music__info {
+  flex: 1; min-width: 0; overflow: hidden;
+}
+.side-music__title {
+  margin: 0; font-size: 12px; font-weight: 600; color: var(--ink);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  line-height: 1.4;
+}
+.side-music__artist {
+  margin: 1px 0 0; font-size: 10.5px; color: var(--ink-faint);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.side-music__progress-wrap {
+  display: flex; align-items: center; gap: 4px;
+  margin-bottom: 8px; min-width: 0;
+}
+.side-music__time {
+  font-size: 9px; color: var(--ink-faint);
+  font-family: var(--font-mono); flex: 0 0 auto;
+  min-width: 24px; text-align: center;
+}
+.side-music__progress {
+  flex: 1; height: 3px;
+  background: var(--line); border-radius: 2px;
+  overflow: hidden; cursor: pointer; position: relative; min-width: 0;
+}
+.side-music__progress-bar {
+  height: 100%; width: 0%;
+  background: linear-gradient(90deg, var(--rose-300), var(--rose-500));
+  border-radius: 2px; transition: width 0.15s linear;
+}
+.side-music__controls {
+  display: flex; justify-content: center; align-items: center; gap: 6px;
+}
+.side-music__btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 26px; height: 26px;
+  border-radius: 50%; border: 1px solid var(--line);
+  background: var(--bg-soft); color: var(--ink-soft);
+  font-size: 11px; line-height: 1;
+  cursor: pointer; transition: all 0.2s ease;
+  padding: 0; flex: 0 0 auto;
+}
+.side-music__btn:hover {
+  background: var(--rose-400); border-color: var(--rose-400);
+  color: #fff; transform: scale(1.08);
+}
+.side-music__btn--play {
+  width: 30px; height: 30px;
+  background: linear-gradient(135deg, var(--rose-400), var(--rose-500));
+  border-color: transparent; color: #fff; font-size: 12px;
+  box-shadow: 0 2px 6px rgba(192,119,142,0.25);
+}
+.side-music__btn--play:hover {
+  box-shadow: 0 3px 10px rgba(192,119,142,0.35);
+  transform: scale(1.1);
+}
+</style>
+</head>
+<body>
+
+<div class="side-music" aria-label="音乐播放器">
+  <div class="side-music__header">
+    <div class="side-music__cover-wrap" id="music-cover-wrap">
+      <div class="side-music__cover-fallback" id="music-cover-fallback">♪</div>
+      <img class="side-music__cover" id="music-cover" src="" alt="封面" loading="lazy">
+    </div>
+    <div class="side-music__info">
+      <p class="side-music__title" id="music-title">加载中...</p>
+      <p class="side-music__artist" id="music-artist">-</p>
+    </div>
+  </div>
+  <div class="side-music__progress-wrap">
+    <span class="side-music__time" id="music-time">0:00</span>
+    <div class="side-music__progress">
+      <div class="side-music__progress-bar" id="music-progress"></div>
+    </div>
+    <span class="side-music__time" id="music-duration">0:00</span>
+  </div>
+  <div class="side-music__controls">
+    <button class="side-music__btn" id="music-prev" aria-label="上一首">&#x23EE;</button>
+    <button class="side-music__btn side-music__btn--play" id="music-play" aria-label="播放">&#x25B6;</button>
+    <button class="side-music__btn" id="music-next" aria-label="下一首">&#x23ED;</button>
+  </div>
+  <audio id="music-audio" preload="none"></audio>
+</div>
+
+<script>
+(function() {
+  var doc = document;
+  var musicAudio = doc.getElementById('music-audio');
+  var musicPlaylist = [{title:"世界赠与我的", artist:"王菲", url:"https://img2.tofaka.com/autoupload/f/3624q/20260827/CYA8/%E7%8E%8B%E8%8F%B2%2B-%2B%E4%B8%96%E7%95%8C%E8%B5%A0%E4%BA%88%E6%88%91%E7%9A%84.mp3", cover:"https://y.qq.com/music/photo_new/T002R500x500M000004MmTPc0CZ3eX.jpg"}];
+  var musicIndex = 0;
+  var musicIsPlaying = false;
+  var musicCoverWrap = doc.getElementById('music-cover-wrap');
+  var musicCover = doc.getElementById('music-cover');
+  var musicTitle = doc.getElementById('music-title');
+  var musicArtist = doc.getElementById('music-artist');
+  var musicPlayBtn = doc.getElementById('music-play');
+  var musicPrevBtn = doc.getElementById('music-prev');
+  var musicNextBtn = doc.getElementById('music-next');
+  var musicProgressBar = doc.getElementById('music-progress');
+  var musicTime = doc.getElementById('music-time');
+  var musicDuration = doc.getElementById('music-duration');
+
+  function vgMusicFormat(sec) {
+    if (!sec || !isFinite(sec)) return '0:00';
+    var m = Math.floor(sec / 60);
+    var s = Math.floor(sec % 60);
+    return m + ':' + (s < 10 ? '0' + s : s);
+  }
+  function vgMusicLoad(i) {
+    musicIndex = (i + musicPlaylist.length) % musicPlaylist.length;
+    var t = musicPlaylist[musicIndex];
+    musicAudio.src = t.url;
+    if (musicTitle) musicTitle.textContent = t.title || '未知';
+    if (musicArtist) musicArtist.textContent = t.artist || '未知';
+    if (musicCover) musicCover.src = t.cover || '';
+    if (musicCoverWrap) musicCoverWrap.classList.remove('is-spinning');
+    musicAudio.load();
+  }
+  function vgMusicToggle() {
+    if (!musicAudio.src && musicPlaylist.length) { vgMusicLoad(musicIndex); }
+    if (musicAudio.paused) {
+      musicAudio.play().then(function() {
+        musicIsPlaying = true;
+        if (musicPlayBtn) musicPlayBtn.textContent = '\u23F8';
+        if (musicCoverWrap) musicCoverWrap.classList.add('is-spinning');
+      }).catch(function(err) {
+        if (musicTitle) musicTitle.textContent = '播放失败: ' + (err.message || '网络异常');
+      });
+    } else {
+      musicAudio.pause();
+      musicIsPlaying = false;
+      if (musicPlayBtn) musicPlayBtn.textContent = '\u25B6';
+      if (musicCoverWrap) musicCoverWrap.classList.remove('is-spinning');
+    }
+  }
+  if (musicPlaylist.length) {
+    vgMusicLoad(0);
+    if (musicPlayBtn) musicPlayBtn.addEventListener('click', vgMusicToggle);
+    if (musicPrevBtn) musicPrevBtn.addEventListener('click', function(){ vgMusicLoad(musicIndex - 1); });
+    if (musicNextBtn) musicNextBtn.addEventListener('click', function(){ vgMusicLoad(musicIndex + 1); });
+    musicAudio.addEventListener('timeupdate', function(){
+      var d = musicAudio.duration || 0;
+      var c = musicAudio.currentTime || 0;
+      if (musicProgressBar) musicProgressBar.style.width = (d ? (c / d * 100) : 0) + '%';
+      if (musicTime) musicTime.textContent = vgMusicFormat(c);
+      if (musicDuration) musicDuration.textContent = vgMusicFormat(d);
+    });
+    musicAudio.addEventListener('ended', function(){ vgMusicLoad(musicIndex + 1); });
+    musicAudio.addEventListener('error', function(){
+      if (musicTitle) musicTitle.textContent = '加载失败';
+    });
+  }
+})();
+</script>
+
+</body>
+</html>
