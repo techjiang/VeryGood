@@ -106,7 +106,7 @@ slideshow:
   interval: 4000                # 轮播间隔（毫秒）
   slides:
     - title: "VeryGood 主题"
-      image: "https://picsum.photos/seed/verygood-1/400/225"
+      image: "https://img2.tofaka.com/autoupload/f/3624q/20260827/vw3x/1192X497/TechSauce-Beijing.png"
       url: "https://github.com/techjiang/VeryGood"
     - title: "TechSauce"
       image: "https://picsum.photos/seed/verygood-2/400/225"
