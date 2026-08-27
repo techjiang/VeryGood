@@ -228,6 +228,7 @@ button { font-family: inherit; }
   100% { background-position: -200% 0; }
 }
 .side-music__cover-wrap.is-spinning .side-music__cover-fallback { opacity: 0; }
+.side-music__info {
   flex: 1; min-width: 0; overflow: hidden;
 }
 .side-music__title {
@@ -879,7 +880,7 @@ html.no-js .reveal { opacity: 1; transform: none; }
   .site-brand { font-size: 16px; }
   .site-brand__bio { display: none; }
   .side-recent { display: none; }
-  .side-music { display: none; }
+  /* .side-music 在移动端也应该显示 */
   .site-nav__toggle { display: inline-flex; align-items: center; }
   .site-nav {
     position: absolute; top: calc(100% + 1px); left: 0; right: 0;
