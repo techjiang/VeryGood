@@ -134,16 +134,12 @@
     {# ---- 站点数据组件注入点（v1.3.0，内置插件 site-stats 提供） ---- #}
     {{ injections.get('sidebar_data', []) | join('\n') | safe }}
 
-    {# ---- 社交链接条（v1.5.0，填充站点数据与导航之间的空白） ---- #}
-    {% set sc = cfg.author.social or {} %}
-    {% set _has_social = sc.github or sc.twitter or sc.weibo or sc.email %}
-    {% if _has_social %}
-    <div class="side-social" aria-label="社交链接">
-      {% if sc.github %}<a class="side-social__link" href="https://github.com/{{ sc.github }}" target="_blank" rel="noopener" aria-label="GitHub" title="GitHub">{{ m.icon('github', 17) }}</a>{% endif %}
-      {% if sc.twitter %}<a class="side-social__link" href="https://twitter.com/{{ sc.twitter }}" target="_blank" rel="noopener" aria-label="X (Twitter)" title="X (Twitter)">{{ m.icon('x', 15) }}</a>{% endif %}
-      {% if sc.weibo %}<a class="side-social__link" href="https://weibo.com/{{ sc.weibo }}" target="_blank" rel="noopener" aria-label="微博" title="微博">{{ m.icon('weibo', 16) }}</a>{% endif %}
-      {% if sc.email %}<a class="side-social__link" href="mailto:{{ sc.email }}" aria-label="邮箱" title="邮箱">{{ m.icon('link', 16) }}</a>{% endif %}
-      <a class="side-social__link" href="{{ url_for('/rss.xml') }}" aria-label="RSS 订阅" title="RSS 订阅">{{ m.icon('rss', 15) }}</a>
+    {# ---- 座右铭/个性签名（v1.5.0，展示在站点数据下方） ---- #}
+    {% if cfg.author.motto %}
+    <div class="side-motto" aria-label="座右铭">
+      <span class="side-motto__quote" aria-hidden="true">❝</span>
+      <p class="side-motto__text">{{ cfg.author.motto }}</p>
+      <span class="side-motto__quote side-motto__quote--end" aria-hidden="true">❞</span>
     </div>
     {% endif %}
 

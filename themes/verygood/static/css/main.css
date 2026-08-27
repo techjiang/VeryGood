@@ -170,25 +170,58 @@ button { font-family: inherit; }
 .side-recent__list a:hover { color: var(--rose-600); }
 .side-recent__list time { flex: 0 0 auto; font-family: var(--font-mono); font-size: 11.5px; color: var(--ink-faint); }
 
-/* ---- 社交链接条（v1.5.0） ---- */
-.side-social {
-  display: flex; align-items: center; gap: 6px;
-  padding: 10px 0 14px;
-  margin-bottom: 4px;
-  border-bottom: 1px solid var(--line);
+/* ---- 座右铭/个性签名（v1.5.0） ---- */
+.side-motto {
+  position: relative;
+  margin: 4px 0;
+  padding: 14px 16px 14px 18px;
+  border-radius: var(--radius);
+  background: linear-gradient(135deg, rgba(192, 119, 142, 0.06) 0%, rgba(192, 119, 142, 0.02) 100%);
+  border-left: 2px solid var(--rose-300);
+  overflow: hidden;
 }
-.side-social__link {
-  display: inline-flex; align-items: center; justify-content: center;
-  width: 34px; height: 34px; border-radius: 50%;
-  background: var(--bg-soft); border: 1px solid var(--line);
+.side-motto::before {
+  content: "";
+  position: absolute;
+  top: -10px; right: -10px;
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(192, 119, 142, 0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+.side-motto__quote {
+  display: inline-block;
+  color: var(--rose-300);
+  font-size: 28px;
+  line-height: 1;
+  opacity: 0.5;
+  font-family: Georgia, "Times New Roman", serif;
+  margin-right: 4px;
+  vertical-align: -4px;
+}
+.side-motto__quote--end {
+  margin-right: 0;
+  margin-left: 4px;
+  vertical-align: -10px;
+  opacity: 0.3;
+}
+.side-motto__text {
+  display: inline;
+  margin: 0;
   color: var(--ink-soft);
-  transition: all 0.2s ease;
+  font-size: 14px;
+  line-height: 1.7;
+  font-style: italic;
+  letter-spacing: 0.02em;
+  word-break: break-word;
 }
-.side-social__link:hover {
-  color: #fff; background: var(--rose-400); border-color: var(--rose-400);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(192, 119, 142, 0.2);
+.side-motto:hover {
+  background: linear-gradient(135deg, rgba(192, 119, 142, 0.1) 0%, rgba(192, 119, 142, 0.04) 100%);
+  border-left-color: var(--rose-400);
+  transform: translateX(2px);
+  transition: all 0.3s ease;
 }
+.side-motto:hover .side-motto__quote { opacity: 0.8; }
 
 /* ---- 导航 ---- */
 .site-nav { display: flex; align-items: center; gap: 4px; }

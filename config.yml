@@ -91,6 +91,7 @@ author:
   email: you@example.com
   avatar: ""                              # 头像 URL，留空则不显示（侧栏显示为圆形头像）
   bio: 一个喜欢记录生活与思考的人
+  motto: "保持热爱，奔赴山海"               # v1.5.0：座右铭/个性签名，显示在站点数据下方（左栏）
   social:
     github: techjiang
     twitter: ""
