@@ -71,8 +71,9 @@
 {%- endif %}
 {%- endmacro %}
 
-{% macro meta_line(post, show_tags=True) -%}
+{% macro meta_line(post, show_tags=True, show_category=False) -%}
 <div class="meta-line">
+  {% if show_category and post.get('category') %}<a class="chip chip--cat" href="{{ url_for(tax_path('category', post.category)) }}">{{ post.category }}</a>{% endif %}
   {% if post.get('date') %}<span class="meta-line__item" title="发布日期">{{ icon('calendar') }}<time datetime="{{ post.date.isoformat() }}">{{ post.date_str }}</time></span>{% endif %}
   {% if post.get('is_updated') and post.get('updated_str') %}<span class="meta-line__item" title="最近更新">{{ icon('pen', 12) }}<time datetime="{{ post.updated.isoformat() }}">{{ post.updated_str }}</time></span>{% endif %}
   {% if post.get('reading_time') %}<span class="meta-line__item" title="预计阅读">{{ icon('clock') }}{{ post.reading_time }}</span>{% endif %}

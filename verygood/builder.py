@@ -463,6 +463,7 @@ def build(cfg: dict, log=print, include_drafts: bool | None = None) -> dict:
     rendered_html = sorted(
         rel for rel in ow.files if rel.endswith(".html")
     )
+    _POWER_P_CNT = re.compile(r'<p\s+class="site-footer__powered"')
     for rel in rendered_html:
         f = out / rel
         try:
@@ -470,10 +471,27 @@ def build(cfg: dict, log=print, include_drafts: bool | None = None) -> dict:
         except Exception:  # noqa: BLE001
             missing.append(f"{f} [读取失败]")
             continue
-        if _POWER_MARKER not in txt:
-            missing.append(f"{f} [缺失 marker vg-power-51f3a8]")
+# v1.4.2：marker 必须存在于 <footer class="site-footer"> 块内部（防把
+        # 注释搬到页脚外其他位置糊弄构建层），且 site-footer 全页有且仅有一个
+        fm0 = _POWER_FOOTER_PAT.search(txt)
+        if not fm0:
+            missing.append(f"{f} [缺失 <footer class=\"site-footer\">]")
             continue
-        fm = _POWER_FOOTER_PAT.search(txt)
+        fend = txt.find("</footer>", fm0.end())
+        if fend == -1:
+            missing.append(f"{f} [缺失 </footer> 闭合结构]")
+            continue
+        footer_block = txt[fm0.start():fend + len("</footer>")]
+        if _POWER_MARKER not in footer_block:
+            missing.append(f"{f} [marker vg-power-51f3a8 必须位于 footer 内部]")
+            continue
+        if len(_POWER_FOOTER_PAT.findall(txt)) != 1:
+            missing.append(f"{f} [site-footer 必须恰好出现一次]")
+            continue
+        if len(_POWER_P_CNT.findall(txt)) != 1:
+            missing.append(f"{f} [.site-footer__powered 署名行必须恰好出现一次]")
+            continue
+        fm = fm0
         if not (fm and f'data-vg-sig="{_POWER_FP2}"' in fm.group(0)):
             missing.append(
                 f"{f} [缺失/篡改 footer 签名 data-vg-sig (期望 {_POWER_FP2})]"
@@ -496,7 +514,9 @@ def build(cfg: dict, log=print, include_drafts: bool | None = None) -> dict:
             )
             continue
         # 链接校验：恰好两个 a，分别精确指向两大官方地址；且均 target="_blank" + rel 含 noopener，
-        # 链接可见文本必须恰为 TechSauce / VeryGood（防止塞入前缀文本或伪装元素）
+        # 链接可见文本必须恰为 TechSauce / VeryGood（防止塞入前缀文本或伪装元素）。
+        # v1.4.2：链接与文本必须一一配对——TechSauce → docs.asoe.cn 在前，
+        #        VeryGood → github.com/techjiang/VeryGood 在后，禁止交错/调包。
         links = _POWER_A_PAT.findall(p_inner)
         hrefs, ok_attr, texts_ok = [], True, True
         for attrs, inner in links:
@@ -514,9 +534,12 @@ def build(cfg: dict, log=print, include_drafts: bool | None = None) -> dict:
                 break
             if _norm_power_text(inner) not in ("TechSauce", "VeryGood"):
                 texts_ok = False
-        href_a_ok = any(_power_href_ok(h, _POWER_HOST_A) for h in hrefs)
-        href_b_ok = any(_power_href_ok(h, _POWER_HOST_B, _POWER_PATH_B) for h in hrefs)
-        if len(links) != 2 or not ok_attr or not texts_ok or not href_a_ok or not href_b_ok:
+        pair_ok = (
+            len(links) == 2
+            and _power_href_ok(hrefs[0], _POWER_HOST_A)
+            and _power_href_ok(hrefs[1], _POWER_HOST_B, _POWER_PATH_B)
+        )
+        if len(links) != 2 or not ok_attr or not texts_ok or not pair_ok:
             missing.append(
                 f"{f} [署名链接被篡改: 链接={links!r} hrefs={hrefs} 文本ok={texts_ok}]"
             )

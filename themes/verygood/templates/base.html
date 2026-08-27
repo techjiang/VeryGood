@@ -177,6 +177,8 @@
       </ul>
     </section>
     {% endif %}
+    {# ---- 右栏插件注入点（v1.4.2：此刻/微语紧跟近期文章之后） ---- #}
+    {{ injections.get('rightbar', []) | join('\n') | safe }}
     {% if rb.show_tags and site.rightbar.top_tags %}
     <section class="side-widget">
       <h3 class="side-widget__title">{{ m.icon('tag', 13) }} 标签云</h3>
@@ -207,26 +209,27 @@
       </ul>
     </section>
     {% endif %}
-    {# ---- 右栏插件注入点（v1.4.0：时间卡片 / 微语卡片等） ---- #}
-    {{ injections.get('rightbar', []) | join('\n') | safe }}
   {% endblock %}
 </aside>
 {% endif %}
 <footer class="site-footer" data-vg-sig="{{ power_fp2 }}">
   <div class="site-footer__inner container">
-    <div class="site-footer__brand">
-      <span class="site-brand__name">{{ site.cfg.site.title }}</span>
-      <p>{{ (site.cfg.site.footer.about or site.cfg.site.subtitle) | replace('\\n', '<br>') | replace('\n', '<br>') | safe }}</p>
+    <div class="site-footer__col">
+      <h4 class="site-footer__col-title">探索</h4>
+      <ul class="site-footer__col-list">
+        {% for item in site.cfg.site.footer.nav %}
+          {% set _show = true %}
+          {% if item.if == 'board' and not cfg.board.enabled %}{% set _show = false %}{% endif %}
+          {% if item.if == 'github' and not cfg.author.social.github %}{% set _show = false %}{% endif %}
+          {% if _show %}
+          <li><a href="{% if item.external %}{{ item.url | replace('{github}', cfg.author.social.github) }}{% else %}{{ url_for(item.url) }}{% endif %}" {% if item.external %}rel="noopener" target="_blank"{% endif %}>{{ item.label }}</a></li>
+          {% endif %}
+        {% endfor %}
+      </ul>
     </div>
-    <div class="site-footer__links">
-      {% for item in site.cfg.site.footer.nav %}
-        {% set _show = true %}
-        {% if item.if == 'board' and not cfg.board.enabled %}{% set _show = false %}{% endif %}
-        {% if item.if == 'github' and not cfg.author.social.github %}{% set _show = false %}{% endif %}
-        {% if _show %}
-        <a href="{% if item.external %}{{ item.url | replace('{github}', cfg.author.social.github) }}{% else %}{{ url_for(item.url) }}{% endif %}" {% if item.external %}rel="noopener" target="_blank"{% endif %}>{{ item.label }}</a>
-        {% endif %}
-      {% endfor %}
+    <div class="site-footer__col">
+      <h4 class="site-footer__col-title">关于</h4>
+      <p class="site-footer__about">{{ site.cfg.site.footer.about or site.cfg.site.subtitle }}</p>
     </div>
     {{ injections.get('footer_extra', []) | join('\n') | safe }}
   </div>
