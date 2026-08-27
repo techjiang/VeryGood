@@ -476,7 +476,7 @@ var FP1 = fp('vg-power-51f3a8|' + EXPECTED);
   }
 })();
 </script>
-<script src="{{ url_for('/js/main.js') }}" defer></script>
+<script src="{{ url_for('/js/main.js') }}?v=2" defer></script>
 {{ injections.get('body_end', []) | join('\n') | safe }}
 {% endblock %}
 </body>
