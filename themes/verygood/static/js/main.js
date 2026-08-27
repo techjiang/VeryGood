@@ -448,7 +448,7 @@ window.addEventListener('scroll', requestSpy, { passive: true });
     vgCheckAndRestoreFooter();
   }
 
-  /* ---------- 迷你音乐播放器（v1.5.0） ---------- */
+  /* ---------- 迷你音乐播放器（v1.5.1） ---------- */
   var musicAudio = doc.getElementById('music-audio');
   if (musicAudio) {
     var musicPlaylist = (window.__VG_MUSIC__ && window.__VG_MUSIC__.tracks) || [];
@@ -456,38 +456,84 @@ window.addEventListener('scroll', requestSpy, { passive: true });
     var musicIsPlaying = false;
     var musicCoverWrap = doc.getElementById('music-cover-wrap');
     var musicCover = doc.getElementById('music-cover');
+    var musicCoverFallback = doc.getElementById('music-cover-fallback');
     var musicTitle = doc.getElementById('music-title');
     var musicArtist = doc.getElementById('music-artist');
     var musicPlayBtn = doc.getElementById('music-play');
     var musicPrevBtn = doc.getElementById('music-prev');
     var musicNextBtn = doc.getElementById('music-next');
-    var musicProgress = doc.getElementById('music-progress');
+    var musicProgressBar = doc.getElementById('music-progress');
     var musicTime = doc.getElementById('music-time');
     var musicDuration = doc.getElementById('music-duration');
 
+    var VG_MUSIC_ICONS = {
+      play: '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>',
+      pause: '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>',
+      prev: '<svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>',
+      next: '<svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>'
+    };
+
+    function vgMusicSetBtnIcon(btn, html) {
+      if (!btn) return;
+      btn.innerHTML = html;
+    }
+    function vgMusicShowError(msg) {
+      if (musicTitle) musicTitle.textContent = msg;
+      if (musicCoverWrap) musicCoverWrap.classList.remove('is-spinning', 'is-loading');
+      vgMusicSetBtnIcon(musicPlayBtn, VG_MUSIC_ICONS.play);
+    }
+    function vgMusicSetLoading(isLoading) {
+      if (!musicCoverWrap) return;
+      if (isLoading) musicCoverWrap.classList.add('is-loading');
+      else musicCoverWrap.classList.remove('is-loading');
+    }
     function vgMusicLoad(i) {
       if (!musicPlaylist.length) return;
       musicIndex = (i + musicPlaylist.length) % musicPlaylist.length;
       var t = musicPlaylist[musicIndex];
       musicAudio.src = t.url;
-      if (musicTitle) musicTitle.textContent = t.title || '未知';
-      if (musicArtist) musicArtist.textContent = t.artist || '未知';
-      if (musicCover) musicCover.src = t.cover || '';
+      if (musicTitle) musicTitle.textContent = t.title || '\u672a\u77e5';
+      if (musicArtist) musicArtist.textContent = t.artist || '\u672a\u77e5';
+      if (musicCover) {
+        musicCover.style.opacity = '0';
+        musicCover.src = t.cover || '';
+        musicCover.onload = function() { musicCover.style.opacity = '1'; };
+        musicCover.onerror = function() { musicCover.style.opacity = '0'; };
+      }
+      if (musicCoverFallback) musicCoverFallback.style.display = (t.cover ? 'flex' : 'flex');
       if (musicCoverWrap) musicCoverWrap.classList.remove('is-spinning');
       musicAudio.load();
-      if (musicIsPlaying) { musicAudio.play().catch(function(){}); }
+      vgMusicSetLoading(true);
     }
     function vgMusicToggle() {
       if (!musicAudio.src && musicPlaylist.length) { vgMusicLoad(musicIndex); }
       if (musicAudio.paused) {
-        musicAudio.play().catch(function(){});
-        musicIsPlaying = true;
-        if (musicPlayBtn) musicPlayBtn.textContent = '⏸';
-        if (musicCoverWrap) musicCoverWrap.classList.add('is-spinning');
+        var playPromise = musicAudio.play();
+        if (playPromise !== undefined) {
+          playPromise.then(function() {
+            musicIsPlaying = true;
+            vgMusicSetBtnIcon(musicPlayBtn, VG_MUSIC_ICONS.pause);
+            if (musicCoverWrap) musicCoverWrap.classList.add('is-spinning');
+            vgMusicSetLoading(false);
+          }).catch(function(err) {
+            musicIsPlaying = false;
+            vgMusicSetBtnIcon(musicPlayBtn, VG_MUSIC_ICONS.play);
+            if (musicCoverWrap) musicCoverWrap.classList.remove('is-spinning');
+            vgMusicSetLoading(false);
+            if (err.name === 'NotAllowedError') {
+              vgMusicShowError('\u9700\u70b9\u51fb\u64ad\u653e');
+            } else if (err.name === 'NotSupportedError') {
+              vgMusicShowError('\u97f3\u9891\u683c\u5f0f\u4e0d\u652f\u6301');
+            } else {
+              vgMusicShowError('\u64ad\u653e\u5931\u8d25: ' + (err.message || '\u7f51\u7edc\u5f02\u5e38'));
+            }
+            console.error('[VeryGood Music]', err);
+          });
+        }
       } else {
         musicAudio.pause();
         musicIsPlaying = false;
-        if (musicPlayBtn) musicPlayBtn.textContent = '▶';
+        vgMusicSetBtnIcon(musicPlayBtn, VG_MUSIC_ICONS.play);
         if (musicCoverWrap) musicCoverWrap.classList.remove('is-spinning');
       }
     }
@@ -499,19 +545,46 @@ window.addEventListener('scroll', requestSpy, { passive: true });
     }
     if (musicPlaylist.length) {
       vgMusicLoad(0);
+      vgMusicSetBtnIcon(musicPlayBtn, VG_MUSIC_ICONS.play);
+      vgMusicSetBtnIcon(musicPrevBtn, VG_MUSIC_ICONS.prev);
+      vgMusicSetBtnIcon(musicNextBtn, VG_MUSIC_ICONS.next);
+
       if (musicPlayBtn) musicPlayBtn.addEventListener('click', vgMusicToggle);
       if (musicPrevBtn) musicPrevBtn.addEventListener('click', function(){ vgMusicLoad(musicIndex - 1); });
       if (musicNextBtn) musicNextBtn.addEventListener('click', function(){ vgMusicLoad(musicIndex + 1); });
+      if (musicCoverWrap) musicCoverWrap.addEventListener('click', vgMusicToggle);
+
       musicAudio.addEventListener('timeupdate', function(){
         var d = musicAudio.duration || 0;
         var c = musicAudio.currentTime || 0;
-        if (musicProgress) musicProgress.style.width = (d ? (c / d * 100) : 0) + '%';
+        if (musicProgressBar) musicProgressBar.style.width = (d ? (c / d * 100) : 0) + '%';
         if (musicTime) musicTime.textContent = vgMusicFormat(c);
         if (musicDuration) musicDuration.textContent = vgMusicFormat(d);
       });
       musicAudio.addEventListener('ended', function(){ vgMusicLoad(musicIndex + 1); });
-      musicAudio.addEventListener('error', function(){ if (musicTitle) musicTitle.textContent = '加载失败'; });
-      var progWrap = musicProgress && musicProgress.parentElement;
+      musicAudio.addEventListener('error', function(){
+        vgMusicSetLoading(false);
+        var err = musicAudio.error;
+        var msg = '\u52a0\u8f7d\u5931\u8d25';
+        if (err) {
+          if (err.code === 1) msg = '\u64ad\u653e\u4e2d\u65ad';
+          else if (err.code === 2) msg = '\u7f51\u7edc\u9519\u8bef';
+          else if (err.code === 3) msg = '\u89e3\u7801\u5931\u8d25';
+          else if (err.code === 4) msg = '\u97f3\u9891\u4e0d\u53ef\u7528';
+        }
+        vgMusicShowError(msg);
+        console.error('[VeryGood Music] Audio error:', err);
+      });
+      musicAudio.addEventListener('canplaythrough', function(){
+        vgMusicSetLoading(false);
+        if (musicIsPlaying && musicAudio.paused) {
+          musicAudio.play().catch(function(){});
+        }
+      });
+      musicAudio.addEventListener('waiting', function(){ vgMusicSetLoading(true); });
+      musicAudio.addEventListener('playing', function(){ vgMusicSetLoading(false); });
+
+      var progWrap = musicProgressBar && musicProgressBar.parentElement;
       if (progWrap) {
         progWrap.addEventListener('click', function(e) {
           var d = musicAudio.duration;
@@ -521,6 +594,8 @@ window.addEventListener('scroll', requestSpy, { passive: true });
           musicAudio.currentTime = Math.max(0, Math.min(d, d * pct));
         });
       }
+    } else {
+      if (musicTitle) musicTitle.textContent = '\u6682\u65e0\u66f2\u76ee';
     }
   }
 

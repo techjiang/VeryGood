@@ -142,6 +142,7 @@
     <div class="side-music" aria-label="音乐播放器">
       <div class="side-music__header">
         <div class="side-music__cover-wrap" id="music-cover-wrap">
+          <div class="side-music__cover-fallback" id="music-cover-fallback">♪</div>
           <img class="side-music__cover" id="music-cover" src="" alt="封面" loading="lazy">
         </div>
         <div class="side-music__info">
@@ -157,11 +158,11 @@
         <span class="side-music__time" id="music-duration">0:00</span>
       </div>
       <div class="side-music__controls">
-        <button class="side-music__btn" id="music-prev" aria-label="上一首" title="上一首">⏮</button>
-        <button class="side-music__btn side-music__btn--play" id="music-play" aria-label="播放/暂停" title="播放/暂停">▶</button>
-        <button class="side-music__btn" id="music-next" aria-label="下一首" title="下一首">⏭</button>
+        <button class="side-music__btn" id="music-prev" aria-label="上一首" title="上一首"></button>
+        <button class="side-music__btn side-music__btn--play" id="music-play" aria-label="播放" title="播放"></button>
+        <button class="side-music__btn" id="music-next" aria-label="下一首" title="下一首"></button>
       </div>
-      <audio id="music-audio" preload="metadata" crossorigin="anonymous"></audio>
+      <audio id="music-audio" preload="none"></audio>
     </div>
     {% endif %}
 

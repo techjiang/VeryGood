@@ -203,7 +203,31 @@ button { font-family: inherit; }
   from { transform: rotate(0deg); }
   to   { transform: rotate(360deg); }
 }
-.side-music__info {
+.side-music__cover-fallback {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; color: var(--rose-400);
+  background: linear-gradient(135deg, rgba(192,119,142,0.08), rgba(192,119,142,0.03));
+  z-index: 1; pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.side-music__cover-wrap.is-loading .side-music__cover-fallback {
+  opacity: 0;
+}
+.side-music__cover-wrap.is-loading::after {
+  content: '';
+  position: absolute; inset: 0;
+  border-radius: 6px;
+  background: linear-gradient(90deg, var(--rose-100) 0%, var(--rose-300) 50%, var(--rose-100) 100%);
+  background-size: 200% 100%;
+  animation: vgMusicShimmer 1.5s ease infinite;
+  z-index: 2;
+}
+@keyframes vgMusicShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+.side-music__cover-wrap.is-spinning .side-music__cover-fallback { opacity: 0; }
   flex: 1; min-width: 0; overflow: hidden;
 }
 .side-music__title {
