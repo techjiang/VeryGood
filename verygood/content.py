@@ -89,12 +89,13 @@ def parse_post_file(
     date = parse_datetime(fm.get("date") or fm.get("created"), now)
     updated = parse_datetime(fm.get("updated"), date)
 
-    slug = str(fm.get("slug") or stem).strip()
-
     title_raw = fm.get("title") or ""
     if not title_raw:
         title_raw = stem.replace("-", " ").title()
     title = str(title_raw)
+
+    # v1.5.0: 中文标题自动转拼音 slug（front matter 自定义 slug 仍可覆盖）
+    slug = str(fm.get("slug") or "").strip() or _slug_for_post(stem, title, cfg)
 
     body_html = mdrender_render(md_, body, shortcodes)
 
@@ -113,6 +114,7 @@ def parse_post_file(
         "cover": str(fm.get("cover") or "").strip() or cfg["posts"]["cover_default"] or "",
         "cover_alt": str(fm.get("cover_alt") or "").strip() or title,
         "draft": bool(fm.get("draft", False)) or kind == "drafts",
+        "pin": bool(fm.get("pin", False)),
         "issue": fm.get("issue"),
         "seo": fm.get("seo") or {},
         "source_file": str(file),
@@ -175,6 +177,40 @@ def toc_html(tokens):
     from . import mdrender as _m
 
     return _m.toc_html(tokens)
+
+
+def _pinyin_slug(text: str) -> str:
+    """将中文文本转为拼音 slug（空格折叠为连字符，非字母数字保留原样）。"""
+    if not text:
+        return ""
+    # 检测是否含有中文字符；无中文时直接空格折叠
+    if not any("\u4e00" <= ch <= "\u9fff" for ch in text):
+        return re.sub(r"\s+", "-", text.strip().lower()) or "x"
+    try:
+        from pypinyin import pinyin, Style
+        # Style.TONE3 带声调数字（保证多音字稳定），再以连字符拼接
+        py = pinyin(text, style=Style.TONE3, errors="ignore")
+        flat = "-".join(w[0] for w in py if w[0])
+        # 去掉声调数字，去重连字符，trim
+        flat = re.sub(r"[0-9]", "", flat)
+        flat = re.sub(r"-+", "-", flat)
+        flat = flat.strip("-")
+        return flat or "x"
+    except Exception:
+        return re.sub(r"\s+", "-", text.strip().lower()) or "x"
+
+
+def _slug_for_post(stem: str, title: str, cfg: dict) -> str:
+    """v1.5.0：默认中文标题自动转拼音 slug。
+
+    配置：posts.pinyin_slug (bool, default True)
+      - True  且 front matter 未指定 slug -> 中文标题转拼音
+      - False 或已手动指定 slug          -> 按原逻辑保留 stem
+    """
+    if cfg.get("posts", {}).get("pinyin_slug", True):
+        slug = _pinyin_slug(title) or _pinyin_slug(stem)
+        return slug
+    return re.sub(r"\s+", "-", stem.strip().lower()) or "x"
 
 
 def load_posts(cfg: dict, md_, shortcodes: dict, log, include_drafts: bool = False) -> list[dict]:

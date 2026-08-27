@@ -39,7 +39,7 @@ site:
   announcement:
     enabled: true                         # true 时显示公告弹窗
     title: "欢迎来到 VeryGood"              # 弹窗标题（留空则只显示文案）
-    text: "🎉 VeryGood v1.4.5：Issue 自动建标签 · 空仓库自动生成引导 Issue · 站点数据只留真实指标 · 文章目录动效升级"  # 公告文案（支持少量 HTML）
+    text: "🎉 VeryGood v1.5.0：中文标题自动转拼音 URL · 文章置顶 · 左栏社交链接条 · 分页可自定义 · 署名三层防线 · 插件系统完善"  # 公告文案（支持少量 HTML）
     link: "/board/"                       # 跳转地址，留空则不显示按钮
     btn_text: "去看看动态"                  # 按钮文案，留空默认「了解更多」
     type: info                            # 样式：info / tip / warn
@@ -149,7 +149,7 @@ issues:
   welcome_issue: true                      # v1.4.4：仓库一个 Issue 都没有时，首次构建自动创建一条「引导 Issue」（说明用 Issue 写文章的玩法）；false 则关闭
 
 posts:
-  per_page: 8                              # 首页每页文章数
+  per_page: 10                             # 首页每页文章数（v1.5.0 默认改为 10）
   excerpt_length: 150                      # 摘要字数
   toc: true                                # 文章目录
   toc_depth: 2-3                           # 目录层级

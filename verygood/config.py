@@ -88,7 +88,7 @@ DEFAULTS = {
     "theme": {"name": "verygood"},
     "issues": {"publish_label": "Article", "draft_label": "Draft", "page_label": "Page", "moment_label": "Moment", "slug_prefix": "issue"},
     "posts": {
-        "per_page": 8,
+        "per_page": 10,
         "excerpt_length": 150,
         "toc": True,
         "toc_depth": "2-3",
@@ -203,6 +203,8 @@ def normalize(cfg: dict, root: Path) -> None:
 
     # v1.2.0：文章目录前缀规整（允许空字符串回退旧式 /{slug}/ 布局）
     pd = cfg.get("posts", {})
+    pd.setdefault("pinyin_slug", True)    # v1.5.0：中文标题自动转拼音 slug
+    pd.setdefault("per_page", 10)         # v1.5.0：默认每页 10 篇
     pd["article_dir"] = str(pd.get("article_dir") or "").strip().strip("/")
 
     # v1.3.0：插件配置规整（plugins_disabled 必须为字符串列表；plugins 为字符串列表）

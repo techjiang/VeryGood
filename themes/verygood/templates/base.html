@@ -134,6 +134,19 @@
     {# ---- 站点数据组件注入点（v1.3.0，内置插件 site-stats 提供） ---- #}
     {{ injections.get('sidebar_data', []) | join('\n') | safe }}
 
+    {# ---- 社交链接条（v1.5.0，填充站点数据与导航之间的空白） ---- #}
+    {% set sc = cfg.author.social or {} %}
+    {% set _has_social = sc.github or sc.twitter or sc.weibo or sc.email %}
+    {% if _has_social %}
+    <div class="side-social" aria-label="社交链接">
+      {% if sc.github %}<a class="side-social__link" href="https://github.com/{{ sc.github }}" target="_blank" rel="noopener" aria-label="GitHub" title="GitHub">{{ m.icon('github', 17) }}</a>{% endif %}
+      {% if sc.twitter %}<a class="side-social__link" href="https://twitter.com/{{ sc.twitter }}" target="_blank" rel="noopener" aria-label="X (Twitter)" title="X (Twitter)">{{ m.icon('x', 15) }}</a>{% endif %}
+      {% if sc.weibo %}<a class="side-social__link" href="https://weibo.com/{{ sc.weibo }}" target="_blank" rel="noopener" aria-label="微博" title="微博">{{ m.icon('weibo', 16) }}</a>{% endif %}
+      {% if sc.email %}<a class="side-social__link" href="mailto:{{ sc.email }}" aria-label="邮箱" title="邮箱">{{ m.icon('link', 16) }}</a>{% endif %}
+      <a class="side-social__link" href="{{ url_for('/rss.xml') }}" aria-label="RSS 订阅" title="RSS 订阅">{{ m.icon('rss', 15) }}</a>
+    </div>
+    {% endif %}
+
     <nav class="site-nav" id="site-nav" aria-label="主导航">
       <a href="{{ url_for('/') }}" {% if current_path == url_for('/') %}aria-current="page"{% endif %} class="site-nav__link">首页</a>
       <a href="{{ url_for('/archive/') }}" {% if current_path == url_for('/archive/') %}aria-current="page"{% endif %} class="site-nav__link">归档</a>
@@ -425,9 +438,22 @@ var FP1 = fp('vg-power-51f3a8|' + EXPECTED);
   if (guardEl && typeof MutationObserver !== 'undefined') {
     new MutationObserver(guard).observe(guardEl, { attributes: true, childList: true, subtree: true, characterData: true });
   }
-  var guardFooter = document.querySelector('footer.site-footer');
-  if (guardFooter && typeof MutationObserver !== 'undefined') {
-    new MutationObserver(guard).observe(guardFooter, { attributes: true, childList: true, subtree: true });
+  /* 全局 body 监控：footer / powered 被删除/替换 → 立即失效（v1.5.0） */
+  var guardBody = document.body;
+  if (guardBody && typeof MutationObserver !== 'undefined') {
+    new MutationObserver(function(mutations) {
+      for (var i = 0; i < mutations.length; i++) {
+        var m = mutations[i];
+        if (m.type === 'childList') {
+          for (var j = 0; j < m.removedNodes.length; j++) {
+            var n = m.removedNodes[j];
+            if (n.nodeType === 1 && (n.tagName === 'FOOTER' || (n.querySelector && n.querySelector('.site-footer__powered')))) {
+              kill(); return;
+            }
+          }
+        }
+      }
+    }).observe(guardBody, { childList: true, subtree: true });
   }
 })();
 </script>

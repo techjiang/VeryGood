@@ -97,6 +97,13 @@ def build_site_model(cfg: dict, ctx, posts: list, pages: list, log) -> dict:
     tags = _sort_meta(tags, tax_meta["tags"])
     cats = _sort_meta(cats, tax_meta["categories"])
 
+    # v1.5.0：置顶排序（front matter pin: true 置顶文章排在最前面，同置顶再按日期倒序）
+    pinned = [p for p in posts if p.get("pin")]
+    rest = [p for p in posts if not p.get("pin")]
+    pinned.sort(key=lambda p: p["date"], reverse=True)
+    rest.sort(key=lambda p: p["date"], reverse=True)
+    posts[:] = pinned + rest
+
     archive: dict[str, list] = {}
     for p in posts:
         archive.setdefault(p["date"].strftime("%Y"), []).append(p)

@@ -1,5 +1,6 @@
 {% import "partials/_macros.html" as m -%}
-<article class="post-card{% if not post.cover_url %} post-card--plain{% endif %}">
+<article class="post-card{% if not post.cover_url %} post-card--plain{% endif %}{% if post.pin %} is-pinned{% endif %}">
+  {% if post.pin %}<span class="post-card__pin" title="置顶">{{ m.icon('fire', 12) }} 置顶</span>{% endif %}
   {% if post.cover_url %}
   <a class="post-card__cover" href="{{ url_for(post.url) }}" tabindex="-1" aria-hidden="true">
     <img src="{{ post.cover_url }}" alt="{{ post.cover_alt }}" loading="lazy" decoding="async" width="1200" height="630">

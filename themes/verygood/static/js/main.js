@@ -1,4 +1,4 @@
-/* VeryGood Theme · main.js (v1.1) */
+/* VeryGood Theme · main.js (v1.5.0) */
 (function () {
   'use strict';
 var doc = document;
@@ -388,5 +388,64 @@ window.addEventListener('scroll', requestSpy, { passive: true });
       }
     });
   });
+
+  /* ---------- v1.5.0：署名三层防线之客户端守卫 ----------
+   * 第一层：builder.py 构建期字符级 + 双指纹校验（部署即失败）
+   * 第二层：base.html 内联 footer JS 守卫（DOM 级删除/替换检测）
+   * 第三层（本段）：全局 body MutationObserver
+   *   监控整个 <body> 的 childList 变化，一旦 footer 被删除/替换/清空，
+   *   立即重建署名并恢复 footer 结构，确保署名在任何情况下都可见。
+   */
+  var VG_FOOTER_SIGNATURE = 'Powered by TechSauce & VeryGood';
+  function vgFindFooter() {
+    return doc.querySelector('.site-footer') || doc.getElementById('site-footer') || doc.querySelector('footer');
+  }
+  function vgCheckAndRestoreFooter() {
+    var ft = vgFindFooter();
+    if (!ft) {
+      /* footer 整个被删——重建一个最小署名 footer */
+      ft = doc.createElement('footer');
+      ft.className = 'site-footer';
+      ft.id = 'site-footer';
+      var p = doc.createElement('p');
+      p.className = 'vg-signature';
+      p.innerHTML = 'Powered by <a href="https://github.com/TechSauce/VeryGood" rel="noopener" target="_blank">TechSauce</a> &amp; <a href="https://github.com/TechSauce/VeryGood" rel="noopener" target="_blank">VeryGood</a>';
+      ft.appendChild(p);
+      doc.body.appendChild(ft);
+      return;
+    }
+    var sig = ft.querySelector('.vg-signature') || ft.querySelector('p');
+    if (!sig || ft.textContent.indexOf('TechSauce') === -1 || ft.textContent.indexOf('VeryGood') === -1) {
+      /* 署名被篡改或清空——重建 */
+      ft.innerHTML = '';
+      var sp = doc.createElement('p');
+      sp.className = 'vg-signature';
+      sp.innerHTML = 'Powered by <a href="https://github.com/TechSauce/VeryGood" rel="noopener" target="_blank">TechSauce</a> &amp; <a href="https://github.com/TechSauce/VeryGood" rel="noopener" target="_blank">VeryGood</a>';
+      ft.appendChild(sp);
+    }
+  }
+  if (typeof MutationObserver !== 'undefined') {
+    var vgObserver = new MutationObserver(function (mutations) {
+      for (var i = 0; i < mutations.length; i++) {
+        if (mutations[i].type === 'childList') {
+          var removed = mutations[i].removedNodes;
+          for (var j = 0; j < removed.length; j++) {
+            var node = removed[j];
+            if (node && (node.nodeType === 1) &&
+                ((node.classList && node.classList.contains('site-footer')) ||
+                 (node.id === 'site-footer') ||
+                 (node.tagName === 'FOOTER') ||
+                 (node.querySelector && node.querySelector('.vg-signature')))) {
+              vgCheckAndRestoreFooter();
+              return;
+            }
+          }
+        }
+      }
+    });
+    vgObserver.observe(doc.body, { childList: true, subtree: true });
+    /* 首次检查 */
+    vgCheckAndRestoreFooter();
+  }
 
 })();

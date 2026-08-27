@@ -4,15 +4,15 @@
 
 VeryGood 是一个为 GitHub Pages 量身定制的开源博客主题。**写作发生在 GitHub Issue 里**，标签即状态机，关闭 Issue 即下线文章——你只需要专注内容，剩下的交给自动化。
 
-**当前版本：v1.4.5** —— **Issue 同步全面修复，玩法彻底可用**（线上实测：创建 Issue → 打 `Article` 标签 → Actions 自动同步为文章并部署；修复了「Issue 玩法失灵」的三个根因——① 强制自动创建 `Article/Draft/Page/Moment` 四个发布标签，不再需要手动建；② 仓库没有任何 Issue 时自动创建一条「欢迎使用 VeryGood」引导 Issue 手把手教你玩；③ **sync 不再误删/覆盖手工维护的源文件**：只有带 `issue:` 字段（确实由 Issue 同步生成）的文件才受 Issue 生命周期管理，你直接放在 `source/posts/` 下的文章永远安全）；**文章目录样式与交互动效增强**（hover 滑入、当前项莫兰迪粉高亮条）；**侧栏站点数据精简为四个真实可用指标**（文章/字数/浏览/访客，移除无效的「加载耗时/访客地区」）；**底部栏导航精简**（默认只剩 首页/归档/RSS，其余按需在 `site.footer.nav` 配置）；**署名锁定逻辑修复**（去除构建校验的重复校验块，保留唯一指纹 + 文本配对 + footer 内禁 script 全量校验，且不写死配置——所有动态项随你的 `config.yml` 变化）。此前 v1.4.4：发布标签自动创建 + 首个用户引导 Issue；v1.4.3：页脚压缩高度与字号 · 微语去暂停 · 时钟改北京时间 UTC+8 · 署名锁定 class 精确匹配 + footer 禁 script；v1.4.2：右栏顺序重排 · 分类并入标题下方 meta 行 · 页脚两栏改版 · 署名四重校验；v1.4.0：短内容页 footer 贴底 · 封面与标题融合渐变 · 代码块语言标签 + 图标复制 · 右栏时间与微语卡片 · 站点数据三级降级真实统计 · 署名守卫抗误杀。更早：站点数据组件 + 插件目录化 + 署名双指纹 v1.3.0 · 插件生态 v1.2.0 · 移动端顶栏锁定 · 分类独立页 · 文章路径可定制 · 友链头像圆形化 · 品牌署名字符级锁定 v1.1.8 · 媒体灯箱 · 正文 1360px 满宽 · 公告弹窗 v1.1.6 · 朋友圈动态 · 全站内容 Actions · 三栏布局。
+**当前版本：v1.5.0** —— **中文标题自动转拼音 URL**（标题"你好" → `/article/ni-hao/`，`posts.pinyin_slug: false` 可关闭，front matter `slug` 仍可覆盖）；**文章置顶功能**（front matter `pin: true`，首页卡片带🔥置顶标识，同置顶按日期倒序排列）；**首页分页默认 10 篇/页**（`posts.per_page` 可配）；**左侧栏社交链接条**（站点数据下方自动展示 GitHub/Twitter/微博/邮箱/RSS 圆形图标，填充空白区域）；**署名锁定再增强**（全局 body MutationObserver 监控 footer 被删除/替换，v1.3.0 构建层四重校验 + 运行时 SHA-256 守卫的基础上新增第三层防线）；**插件系统完善**（PluginContext API 稳定，5 个内置插件 + 用户自动发现，`rightbar` 注入点支持右栏组件扩展）。此前 v1.4.6：全站内容 Issue 化（sync_issues 新增 path/dir/type 字段支持）；v1.4.5：Issue 同步全面修复；v1.4.0：封面与标题融合渐变 · 代码块语言标签 + 图标复制 · 右栏时间与微语卡片 · 站点数据三级降级；v1.3.0：插件生态 + 署名双指纹；v1.2.0：文章路径可定制 · 友链头像圆形化；v1.1.8：品牌署名字符级锁定 · 媒体灯箱 · 公告弹窗 · 朋友圈动态 · 三栏布局。
 
 ## ✨ 特性一览
 
 | 维度 | 能力 |
 | --- | --- |
 | 🌸 颜值 | 低饱和玫瑰灰配色（莫兰迪粉，不甜腻、不过气），深浅双主题跟随系统 + 手动切换并记忆；友链头像圆形化（透明/白底 logo 兼容）；文章页封面与标题融合渐变、首页卡片封面渐变（v1.4.0） |
-| 🧱 布局 | 桌面三栏：左侧固定信息栏（品牌 + 站点数据 + 导航）/ 中间正文 / 右侧 Widget（**近期文章 → 此刻/微语 → 标签云 → 分类 → 友链**，v1.4.2 起此刻/微语紧跟近期文章）；**移动端顶栏锁定不随滚动**，窄屏优雅降级；左栏「最近更新」v1.3.0 起默认关闭；**footer 全站 flex 贴底**；底部导航默认只留 首页/归档/RSS（v1.4.4），其余按需加 |
-| ✍️ 写作 | Gmeek 式 Issue 写作：**发布标签由 Actions 自动创建**、首个用户自动收到引导 Issue（v1.4.4）、创建 Issue 打上 `Article` 标签即发布；也支持直接写 Markdown 推到 `source/posts/`；两种方式可混用且**互不干扰**（v1.4.5：手工源文件永不被 sync 删除/覆盖）；**文章访问路径可定制**（`path: /abc` → 域名/abc） |
+| 🧱 布局 | 桌面三栏：左侧固定信息栏（品牌 + 站点数据 + **社交链接条** + 导航）/ 中间正文 / 右侧 Widget（**近期文章 → 此刻/微语 → 标签云 → 分类 → 友链**，v1.4.2 起此刻/微语紧跟近期文章）；**移动端顶栏锁定不随滚动**，窄屏优雅降级；左栏「最近更新」v1.3.0 起默认关闭；**footer 全站 flex 贴底**；底部导航默认只留 首页/归档/RSS（v1.4.4），其余按需加 |
+| ✍️ 写作 | Gmeek 式 Issue 写作：**发布标签由 Actions 自动创建**、首个用户自动收到引导 Issue（v1.4.4）、创建 Issue 打上 `Article` 标签即发布；也支持直接写 Markdown 推到 `source/posts/`；两种方式可混用且**互不干扰**（v1.4.5：手工源文件永不被 sync 删除/覆盖）；**中文标题自动转拼音 URL**（v1.5.0：标题"你好"→`/article/ni-hao/`，`posts.pinyin_slug` 控制）；**文章置顶**（v1.5.0：`pin: true`，首页卡片带🔥标识）；**文章访问路径可定制**（`path: /abc` → 域名/abc） |
 | 🚀 部署 | 一条 GitHub Actions 工作流：Issue 事件 → 同步 Markdown（自动建标签/引导 Issue）→ 构建 → 部署 Pages |
 | 🔍 SEO | 结构化数据（BlogPosting / BreadcrumbList / WebSite+SearchAction）、Sitemap（含图片）、分类独立页、RSS、robots、humans、Open Graph、Twitter Card、canonical、noindex 分页、百度收录推送钩子 |
 | ⚡ 性能 | 纯静态零框架、图片懒加载、CSS 构建压缩、环形回顶进度、轻量交互、插件钩子错误隔离 |
@@ -45,7 +45,7 @@ VeryGood 是一个为 GitHub Pages 量身定制的开源博客主题。**写作�
 2. 给 Issue 打标签 **`Article`**（发布）——标签在第一次部署后自动存在；若仓库里确实找不到，说明 Actions 还没跑过，等首次部署完成即可；
 3. 点 Create → 等 Actions 跑完 → 打开 `https://你的用户名.github.io` 看效果。
 
-### 给文章设置自定义访问路径（v1.2.0）
+### 给文章设置自定义访问路径（v1.2.0 / v1.5.0）
 
 文章默认在 `/article/{标题}/`，可在 front matter 加 `path` 改**访问地址**（优先级最高，直达）：
 
@@ -56,6 +56,44 @@ path: /abc        # 文章变成 域名/abc；同理 path: /wz/abc → 域名/wz
 ```
 
 也可用 `dir: /notes`（只换目录前缀，保留标题）或全局配置 `posts.article_dir: blog`（所有文章默认 `/blog/{标题}/`）。
+
+**路径优先级**（从高到低）：front matter `path` > front matter `dir` > `posts.article_dir`（默认 `article`）。
+
+#### 中文标题自动转拼音 slug（v1.5.0）
+
+默认情况下，中文标题会自动转换为拼音 URL：
+
+| 文章标题 | 自动生成 URL |
+| --- | --- |
+| 你好 | `/article/ni-hao/` |
+| 前端性能优化实战 | `/article/qian-duan-xing-neng-you-hua-shi-zhan/` |
+| Hello World | `/article/hello-world/` |
+
+- **关闭拼音转换**：`config.yml` 中 `posts.pinyin_slug: false`（此时用文件名作为 slug）
+- **手动指定 slug**：front matter 中写 `slug: my-custom-url`（覆盖自动拼音）
+- front matter `slug` 优先级高于 `path` 和 `dir`——如果你同时写了 `slug` 和 `path`，`path` 决定最终访问路径，`slug` 只影响 sitemap/canonical 中的 slug 标识
+
+```yaml
+# config.yml
+posts:
+  pinyin_slug: true    # true（默认）= 中文标题自动转拼音；false = 用文件名
+```
+
+### 文章置顶（v1.5.0）
+
+在 front matter 中加 `pin: true` 即可将文章置顶到首页最前面：
+
+```markdown
+---
+title: 我的置顶文章
+pin: true
+---
+```
+
+- 置顶文章在首页卡片右上角显示 **🔥 置顶** 标识（莫兰迪粉底色）
+- 多篇置顶文章之间按发布日期倒序排列
+- 非置顶文章排在所有置顶文章之后，同样按日期倒序
+- Issue 写作时在正文顶部 front matter 指令块中同样支持 `pin: true`
 
 ### 给文章加封面（v1.1.7）
 
@@ -293,7 +331,8 @@ seo:
   noindex_page_2plus: true      # 分页第 2+ 页 noindex
 
 posts:
-  per_page: 8                   # 首页每页文章数
+  per_page: 10                  # 首页每页文章数（v1.5.0 默认改为 10）
+  pinyin_slug: true             # v1.5.0：中文标题自动转拼音 URL（true=自动转，false=用文件名）
   excerpt_length: 150
   toc: true                     # 文章目录
   toc_depth: 2-3
@@ -464,11 +503,23 @@ Actions 每次自动同步生成，无需手提交。
 **Q：文章想放到自定义路径（比如 域名/abc）？**
 在文章 front matter 写 `path: /abc`（直达，支持任意层级如 `/wz/abc`）；`dir: /notes` 只换前缀保留标题；或用 `posts.article_dir` 改全站默认前缀。详见 README「自定义访问路径」一节。
 
+**Q：中文标题的 URL 是怎么生成的？（v1.5.0）**
+默认自动转拼音：标题"你好"→`/article/ni-hao/`，"前端性能优化"→`/article/qian-duan-xing-neng-you-hua/`。由 `posts.pinyin_slug: true`（默认）控制，设为 `false` 则用文件名。front matter 中写 `slug: custom-url` 可覆盖自动生成的 slug。
+
+**Q：怎么把文章置顶到首页？（v1.5.0）**
+在 front matter 加 `pin: true`，文章会排在首页最前面并显示🔥标识。多篇置顶按日期倒序。Issue 写作时在正文顶部 front matter 指令块中同样支持。
+
+**Q：首页每页显示多少篇文章？**
+默认 10 篇（v1.5.0），在 `config.yml` 的 `posts.per_page` 修改。
+
+**Q：左侧栏站点数据下面的社交链接怎么来的？（v1.5.0）**
+读取 `config.yml` 中 `author.social` 配置：只要 `github`/`twitter`/`weibo`/`email` 任一非空，就会在站点数据下方显示一行圆形社交图标（自动附 RSS）。全部留空则不显示该区域。
+
 **Q：公告条/侧栏折叠状态忘了怎么开？**
 公告与折叠状态存在浏览器 localStorage（`vg-ann-close`、`vg-side-block:*`），换浏览器或清缓存即恢复默认。
 
 **Q：页脚的「Powered by TechSauce & VeryGood」可以删掉吗？**
-不可以。这是主题的强制署名，v1.3.0 起为**构建层 + 运行时双重防线**：构建时先验证 `vg-power-51f3a8` 标记，再对署名可见文本逐字符比对（剥离零宽/双向控制字符）、链接域名精确白名单 + 可见文本必须恰为 TechSauce / VeryGood，最后校验双指纹 `data-vg-fp` / `data-vg-sig`（SHA-256 与署名文本绑定）——任何删除、改名、改字、偷换链接、属性缺失都会让**构建直接失败**；即使绕过构建层，**页面运行时守卫**会重算 SHA-256 指纹、检测隐藏（display/opacity/裁剪/位移）、遮挡（elementFromPoint，公告弹窗/灯箱已加入白名单防误杀）并以 3-9 秒随机周期复查 + MutationObserver 监听，一经发现整页立即不可用。请保留署名行。
+不可以。这是主题的强制署名，v1.5.0 起为**三层防线**：① **构建层**四重校验（标记存在 + class 精确匹配 + 双指纹 `data-vg-fp`/`data-vg-sig` + 链接域名白名单 + 文本逐字符比对 + footer 内禁 script）；② **运行时**SHA-256 重算 + 隐藏检测（display/opacity/裁剪/位移）+ 遮挡探测（elementFromPoint，白名单防误杀）+ 3-9 秒随机周期复查 + MutationObserver 监听署名元素与 footer 结构变更；③ **全局 body MutationObserver**（v1.5.0 新增）监控 footer 被删除/替换/移位——任何删除、改名、改字、偷换链接、属性缺失都会让**构建直接失败**或**页面运行时立即不可用**。请保留署名行。
 
 **Q：短内容页（分类/标签/动态/友链）的底部栏怎么保证贴底不飘起？**
 v1.4.0 起 `.layout` 为 flex 纵向容器（`min-height: 100vh`），`.site-main` 自动伸展（`flex: 1`），footer 天然贴在视口底部；内容高于一屏时照常自然滚动。无需任何配置，全站所有页面统一生效。
