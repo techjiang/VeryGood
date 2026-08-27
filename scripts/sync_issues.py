@@ -205,7 +205,8 @@ def extract_front_matter(body: str) -> tuple[dict, str]:
     except Exception:
         return {}, body
     # 只保留构建器认识的字段，其余忽略
-    allowed = {"cover", "cover_alt", "slug", "summary", "excerpt"}
+    # v1.4.6: 新增 path / dir / type 支持，使自定义路径页面和特殊类型页面也能 Issue 化
+    allowed = {"cover", "cover_alt", "slug", "summary", "excerpt", "path", "dir", "type"}
     fm = {k: v for k, v in fm.items() if k in allowed and v not in (None, "")}
     return fm, rest
 
@@ -225,6 +226,13 @@ def render_front_matter(title: str, tags: list[str], category: str,
         lines.append(f"cover_alt: {fm_value(extra['cover_alt'])}")
     if extra and extra.get("slug"):
         lines.append(f"slug: {fm_value(extra['slug'])}")
+    # v1.4.6: 支持自定义路径与特殊页面类型（从 Issue 正文 front matter 指令传入）
+    if extra and extra.get("path"):
+        lines.append(f"path: {fm_value(extra['path'])}")
+    if extra and extra.get("dir"):
+        lines.append(f"dir: {fm_value(extra['dir'])}")
+    if extra and extra.get("type"):
+        lines.append(f"type: {fm_value(extra['type'])}")
     if category:
         lines.append(f"category: {fm_value(category)}")
     if tags:
