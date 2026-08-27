@@ -8,8 +8,7 @@
 
 本插件同时是 v1.3.0 插件生态的完整示范：
   · 元信息（__title__ / __description__ / __version__ / __author__）
-  · hook('post_parsed') 累计全站字数
-  · hook('site_ready') 在站点模型就绪后注入组件骨架
+  · hook('site_ready') 在站点模型就绪后注入组件骨架（直接从 site.posts 读取 word_count 求和）
   · inject('head'/'sidebar_data'/'body_end') 三处注入
   · __BASE__ 占位符（渲染时自动替换为站点 basePath）
   · 目录式内置插件 + static/ 静态资源（构建期拷到 dist/plugins/site-stats/）
@@ -27,12 +26,6 @@ _STATIC_URL = "__BASE__/plugins/site-stats/"
 
 
 def setup(ctx):
-    counter = {"words": 0}
-
-    @ctx.hook("post_parsed")
-    def _count_words(post):
-        # 文章解析完成后累计全站字数（依赖 content 解析时写入的 word_count 字段）
-        counter["words"] += int(post.get("word_count") or 0)
 
     @ctx.hook("site_ready")
     def _inject(site):
@@ -41,7 +34,9 @@ def setup(ctx):
             return
         posts = site.get("posts") or []
         n_posts = len(posts)
-        n_words = counter["words"]
+        # 直接使用 builder 在 build_site_model 中通过 content.clean_text 正确计算的 word_count
+        # 不再依赖 reading_time 插件的 post_parsed hook（该插件用 split() 计词数，中文严重失真）
+        n_words = sum(int(p.get("word_count") or 0) for p in posts)
 
         # 1) 样式：head 注入
         ctx.inject("head", f'<link rel="stylesheet" href="{_STATIC_URL}site-stats.css">')
