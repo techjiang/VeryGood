@@ -6,7 +6,7 @@
 
   function pad(n) { return (n < 10 ? "0" : "") + n; }
 
-  /* ---- 时钟 ---- */
+  /* ---- 时钟：北京时间(UTC+8) ---- */
   function tickClock() {
     var h = document.getElementById("vg-clock-h");
     var m = document.getElementById("vg-clock-m");
@@ -14,10 +14,11 @@
     var d = document.getElementById("vg-clock-date");
     if (!h || !m || !s || !d) return;
     var now = new Date();
-    h.textContent = pad(now.getHours());
-    m.textContent = pad(now.getMinutes());
-    s.textContent = pad(now.getSeconds());
-    d.textContent = now.getFullYear() + "年" + (now.getMonth() + 1) + "月" + now.getDate() + "日" + " · 星期" + WEEK[now.getDay()];
+    var bj = new Date(now.getTime() + (now.getTimezoneOffset() + 480) * 60000);
+    h.textContent = pad(bj.getHours());
+    m.textContent = pad(bj.getMinutes());
+    s.textContent = pad(bj.getSeconds());
+    d.textContent = bj.getFullYear() + "年" + (bj.getMonth() + 1) + "月" + bj.getDate() + "日" + " · 星期" + WEEK[bj.getDay()] + " · 北京时间";
   }
   if (document.getElementById("vg-clock-h")) {
     tickClock();
@@ -27,7 +28,6 @@
   /* ---- 微语打字机 ---- */
   var dataEl = document.getElementById("vg-whisper-data");
   var textEl = document.getElementById("vg-whisper-text");
-  var pauseBtn = document.getElementById("vg-whisper-pause");
   var idxEl = document.getElementById("vg-whisper-idx");
   if (dataEl && textEl) {
     var notes = [];
@@ -43,12 +43,11 @@
       var TYPE_MS = 90;      // 每字间隔
       var HOLD_MS = 2600;    // 打完停留
       var ERASE_MS = 40;     // 删除间隔
-      var ci = 0, pos = 0, deleting = false, paused = false, timer = null;
+      var ci = 0, pos = 0, deleting = false, timer = null;
 
       function renderIdx() { if (idxEl) idxEl.textContent = (ci + 1) + "/" + notes.length; }
 
       function step() {
-        if (paused) return;
         var txt = notes[ci];
         if (!deleting) {
           pos += 1;
@@ -75,14 +74,6 @@
 
       renderIdx();
       timer = setTimeout(step, 500);
-
-      if (pauseBtn) {
-        pauseBtn.addEventListener("click", function () {
-          paused = !paused;
-          pauseBtn.textContent = paused ? "继续" : "暂停";
-          if (!paused) { clearTimeout(timer); timer = setTimeout(step, 60); }
-        });
-      }
     } else if (idxEl) {
       idxEl.textContent = "";
     }

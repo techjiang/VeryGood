@@ -424,7 +424,7 @@ def build(cfg: dict, log=print, include_drafts: bool | None = None) -> dict:
     #     任何位置互换、整段克隆到其他站点、改容器属性 → 立即识别
     #   · 一切改动/顺序调换/增删字符 → 构建失败
     # 与主题内置运行时防线（逐字符比对 + 指纹重算 + 可见性/遮挡探测 + 周期性再校验）构成双保险。
-    _POWER_PAT = re.compile(r'<p\s+(class="site-footer__powered"[^>]*?)>(.*?)</p>', re.S)
+    _POWER_PAT = re.compile(r'<p\s+class="site-footer__powered"\s+([^>]*)>(.*?)</p>', re.S)
     _POWER_A_PAT = re.compile(r'<a\s+([^>]*)>(.*?)</a>', re.S | re.I)
     _POWER_FOOTER_PAT = re.compile(r'<footer\s+class="site-footer"[^>]*>', re.S)
     _POWER_HOST_A = "docs.asoe.cn"
@@ -500,6 +500,27 @@ def build(cfg: dict, log=print, include_drafts: bool | None = None) -> dict:
         m = _POWER_PAT.search(txt)
         if not m:
             missing.append(f"{f} [缺失 .site-footer__powered 署名行]")
+            continue
+        p_attrs, p_inner = m.group(1), m.group(2)
+        # v1.4.3：class 属性值必须恰好等于 site-footer__powered（不可混入其他 class）
+        cm = re.search(r'class="([^"]*)"', m.group(0))
+        if not (cm and cm.group(1) == "site-footer__powered"):
+            missing.append(f"{f} [.site-footer__powered class 被篡改]")
+            continue
+        if f'data-vg-fp="{_POWER_FP1}"' not in p_attrs:
+            missing.append(
+                f"{f} [缺失/篡改署名行指纹 data-vg-fp (期望 {_POWER_FP1})]"
+            )
+            continue
+        if _norm_power_text(p_inner) != _POWER_EXPECTED:
+            missing.append(
+                f"{f} [署名文本被篡改: "
+                f"期望 `{_POWER_EXPECTED}`，实际 `{_norm_power_text(p_inner)}`"
+            )
+            continue
+        # v1.4.3：footer 块内禁止出现 script 标签（防注入绕过）
+        if re.search(r'<script', footer_block, re.S | re.I):
+            missing.append(f"{f} [footer 内发现 script 标签，禁止注入]")
             continue
         p_attrs, p_inner = m.group(1), m.group(2)
         if f'data-vg-fp="{_POWER_FP1}"' not in p_attrs:

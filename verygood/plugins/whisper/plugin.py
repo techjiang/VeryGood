@@ -19,7 +19,7 @@ from __future__ import annotations
 import json
 
 __title__ = "时钟与微语"
-__description__ = "右栏时间卡片（秒级刷新）+ 打字机微语卡片（可暂停轮播）"
+__description__ = "右栏时间卡片（秒级刷新，北京时间 UTC+8）+ 打字机微语卡片（自动轮播）"
 __version__ = "1.0.0"
 __author__ = "VeryGood Team"
 
@@ -78,7 +78,6 @@ def setup(ctx):
                 '<span class="vg-whisper__cursor" aria-hidden="true"></span>'
                 "</div>"
                 '<div class="vg-whisper__foot">'
-                '<button class="vg-whisper__pause" id="vg-whisper-pause" type="button">暂停</button>'
                 '<span class="vg-whisper__idx" id="vg-whisper-idx"></span>'
                 "</div>"
                 f'<script type="application/json" id="vg-whisper-data">{data}</script>'
