@@ -91,12 +91,22 @@ author:
   email: you@example.com
   avatar: ""                              # 头像 URL，留空则不显示（侧栏显示为圆形头像）
   bio: 一个喜欢记录生活与思考的人
-  motto: "保持热爱，奔赴山海"               # v1.5.0：座右铭/个性签名，显示在站点数据下方（左栏）
   social:
     github: techjiang
     twitter: ""
     weibo: ""
     rss: ""                               # 留空自动指向 /rss.xml
+
+# ---------- 迷你音乐播放器（v1.5.0） ----------
+# 支持 MP3 等网络音频。播放器显示在左栏站点数据下方。
+music:
+  enabled: true
+  tracks:
+    - title: "示例音乐"
+      artist: "示例歌手"
+      url: "https://example.com/music/sample.mp3"   # 音乐文件 URL
+      cover: "https://example.com/music/cover.jpg"   # 封面图片 URL（可选）
+    # 可继续添加更多歌曲，自动循环播放
 
 # ---------- 分类 / 标签元数据（v1.1） ----------
 # 为分类 / 标签添加描述与置顶，会在标签云页 / 归档页展示。

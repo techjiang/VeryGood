@@ -444,8 +444,84 @@ window.addEventListener('scroll', requestSpy, { passive: true });
       }
     });
     vgObserver.observe(doc.body, { childList: true, subtree: true });
-    /* 首次检查 */
+  /* 首次检查 */
     vgCheckAndRestoreFooter();
+  }
+
+  /* ---------- 迷你音乐播放器（v1.5.0） ---------- */
+  var musicAudio = doc.getElementById('music-audio');
+  if (musicAudio) {
+    var musicPlaylist = (window.__VG_MUSIC__ && window.__VG_MUSIC__.tracks) || [];
+    var musicIndex = 0;
+    var musicIsPlaying = false;
+    var musicCoverWrap = doc.getElementById('music-cover-wrap');
+    var musicCover = doc.getElementById('music-cover');
+    var musicTitle = doc.getElementById('music-title');
+    var musicArtist = doc.getElementById('music-artist');
+    var musicPlayBtn = doc.getElementById('music-play');
+    var musicPrevBtn = doc.getElementById('music-prev');
+    var musicNextBtn = doc.getElementById('music-next');
+    var musicProgress = doc.getElementById('music-progress');
+    var musicTime = doc.getElementById('music-time');
+    var musicDuration = doc.getElementById('music-duration');
+
+    function vgMusicLoad(i) {
+      if (!musicPlaylist.length) return;
+      musicIndex = (i + musicPlaylist.length) % musicPlaylist.length;
+      var t = musicPlaylist[musicIndex];
+      musicAudio.src = t.url;
+      if (musicTitle) musicTitle.textContent = t.title || '未知';
+      if (musicArtist) musicArtist.textContent = t.artist || '未知';
+      if (musicCover) musicCover.src = t.cover || '';
+      if (musicCoverWrap) musicCoverWrap.classList.remove('is-spinning');
+      musicAudio.load();
+      if (musicIsPlaying) { musicAudio.play().catch(function(){}); }
+    }
+    function vgMusicToggle() {
+      if (!musicAudio.src && musicPlaylist.length) { vgMusicLoad(musicIndex); }
+      if (musicAudio.paused) {
+        musicAudio.play().catch(function(){});
+        musicIsPlaying = true;
+        if (musicPlayBtn) musicPlayBtn.textContent = '⏸';
+        if (musicCoverWrap) musicCoverWrap.classList.add('is-spinning');
+      } else {
+        musicAudio.pause();
+        musicIsPlaying = false;
+        if (musicPlayBtn) musicPlayBtn.textContent = '▶';
+        if (musicCoverWrap) musicCoverWrap.classList.remove('is-spinning');
+      }
+    }
+    function vgMusicFormat(sec) {
+      if (!sec || !isFinite(sec)) return '0:00';
+      var m = Math.floor(sec / 60);
+      var s = Math.floor(sec % 60);
+      return m + ':' + (s < 10 ? '0' + s : s);
+    }
+    if (musicPlaylist.length) {
+      vgMusicLoad(0);
+      if (musicPlayBtn) musicPlayBtn.addEventListener('click', vgMusicToggle);
+      if (musicPrevBtn) musicPrevBtn.addEventListener('click', function(){ vgMusicLoad(musicIndex - 1); });
+      if (musicNextBtn) musicNextBtn.addEventListener('click', function(){ vgMusicLoad(musicIndex + 1); });
+      musicAudio.addEventListener('timeupdate', function(){
+        var d = musicAudio.duration || 0;
+        var c = musicAudio.currentTime || 0;
+        if (musicProgress) musicProgress.style.width = (d ? (c / d * 100) : 0) + '%';
+        if (musicTime) musicTime.textContent = vgMusicFormat(c);
+        if (musicDuration) musicDuration.textContent = vgMusicFormat(d);
+      });
+      musicAudio.addEventListener('ended', function(){ vgMusicLoad(musicIndex + 1); });
+      musicAudio.addEventListener('error', function(){ if (musicTitle) musicTitle.textContent = '加载失败'; });
+      var progWrap = musicProgress && musicProgress.parentElement;
+      if (progWrap) {
+        progWrap.addEventListener('click', function(e) {
+          var d = musicAudio.duration;
+          if (!d || !isFinite(d)) return;
+          var rect = progWrap.getBoundingClientRect();
+          var pct = (e.clientX - rect.left) / rect.width;
+          musicAudio.currentTime = Math.max(0, Math.min(d, d * pct));
+        });
+      }
+    }
   }
 
 })();
