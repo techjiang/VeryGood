@@ -70,14 +70,17 @@ def load_issues_cfg() -> dict:
     return issues
 
 
-def gh(*args: str) -> list[dict]:
+def gh(*args: str, fields: str | None = None) -> list[dict]:
     """调用 gh CLI 并解析 JSON 输出。
 
+    fields: 自定义 --json 字段列表（逗号分隔），默认使用 Issue 常用字段；
+    标签 / 其他实体没有 number/body 等字段，必须显式传（如 "name"）。
     支持环境变量 VERYGOOD_GH 覆盖可执行命令（默认 "gh"），
     便于测试或使用自定义 gh 路径。
     """
     exe_cmd = shlex.split(os.environ.get("VERYGOOD_GH", "gh"))
-    cmd = exe_cmd + [*args, "--json", "number,title,state,body,createdAt,updatedAt,labels,url"]
+    fields = fields or "number,title,state,body,createdAt,updatedAt,labels,url"
+    cmd = exe_cmd + [*args, "--json", fields]
     proc = subprocess.run(
         cmd,
         cwd=str(ROOT),
@@ -272,7 +275,7 @@ def ensure_labels(cfg: dict) -> None:
     下创建会失败，仅告警不中断（构建仍可用）。
     """
     try:
-        existing = gh("label", "list")
+        existing = gh("label", "list", fields="name,color")
     except RuntimeError as e:
         log(f"[sync] 无法读取标签列表（跳过自动建标签）：{e}")
         return
