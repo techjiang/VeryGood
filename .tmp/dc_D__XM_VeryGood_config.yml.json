@@ -1,0 +1,1 @@
+{"file": "D:/XM/VeryGood/config.yml", "ext": "yml", "openable": true, "format_valid": false, "checks": [{"name": "non_empty", "status": "pass", "detail": "13124 bytes"}, {"name": "utf8", "status": "pass", "detail": ""}, {"name": "placeholder", "status": "fail", "detail": "config.yml: [XXX] 部署：填仓库名（部署在 /VeryGood/ 下）；根域名（xxx.github.io）留空   language: zh-C"}]}

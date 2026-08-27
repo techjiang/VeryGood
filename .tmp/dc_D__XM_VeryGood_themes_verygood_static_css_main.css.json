@@ -1,0 +1,1 @@
+{"file": "D:/XM/VeryGood/themes/verygood/static/css/main.css", "ext": "css", "openable": true, "format_valid": true, "checks": [{"name": "non_empty", "status": "pass", "detail": "64226 bytes"}, {"name": "type_supported", "status": "skip", "detail": ".css 不在本技能校验范围，仅确认文件存在且非空"}]}

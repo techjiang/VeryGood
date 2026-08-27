@@ -1,0 +1,155 @@
+[html:l1] {% import "partials/_macros.html" as m -%}
+[html:l7] {% block title %}{{ page_title or (site.cfg.site.title ~ (' · ' ~ site.cfg.site.subtitle if site.cfg.site.subtitle else '')) }}{% endblock %}
+[html:l9] {% block keywords %}{% if keywords %} {% endif %}{% endblock %}
+[html:l15] {% if noindex %} {% endif %}
+[html:l16] {% if cfg.seo.google_site_verification %} {% endif %}
+[html:l17] {% if cfg.seo.baidu_site_verification %} {% endif %}
+[html:l19] {# ---- Open Graph ---- #}
+[html:l29] {# ---- Twitter Card ---- #}
+[html:l31] {% if cfg.seo.twitter_handle %} {% endif %}
+[html:l36] {# ---- 结构化数据 ---- #}
+[html:l37] {% block jsonld %}
+[html:l38] {{ m.jsonld({
+[html:l39] "@context": "https://schema.org",
+[html:l40] "@type": "WebSite",
+[html:l41] "name": site.cfg.site.title,
+[html:l42] "alternateName": site.cfg.site.subtitle or "",
+[html:l43] "url": abs_url('/'),
+[html:l44] "description": site.cfg.site.description,
+[html:l45] "inLanguage": cfg.site.language,
+[html:l46] "publisher": {
+[html:l47] "@type": "Organization",
+[html:l48] "name": site.cfg.site.title,
+[html:l49] "url": abs_url('/'),
+[html:l50] "logo": {"@type": "ImageObject", "url": abs_url(cfg.seo.image)}
+[html:l51] },
+[html:l52] "potentialAction": {
+[html:l53] "@type": "SearchAction",
+[html:l54] "target": {"@type": "EntryPoint", "urlTemplate": abs_url('/search/?q={search_term_string}')},
+[html:l55] "query-input": "required name=search_term_string"
+[html:l56] }
+[html:l57] }) }}
+[html:l58] {% endblock %}
+[html:l64] {{ injections.get('head', []) | join('\n') | safe }}
+[html:l65] {% block head_extra %}{% endblock %}
+[html:l67] {% if cfg.slideshow and cfg.slideshow.enabled %}
+[html:l69] {% endif %}
+[html:l72] 跳到主要内容
+[html:l74] {% if site.announcement.enabled and site.announcement.text %}
+[html:l78] {{ m.icon('close', 16) }}
+[html:l79] {{ m.icon('megaphone', 22) }}
+[html:l80] {% if site.announcement.title %} {{ site.announcement.title }} {% endif %}
+[html:l82] {% if site.announcement.link %}
+[html:l83] {% set ann_ext = site.announcement.link.startswith('http') or site.announcement.link.startswith('//') %}
+[html:l84] {{ site.announcement.text | safe }}
+[html:l85] {% else %}{{ site.announcement.text | safe }}{% endif %}
+[html:l87] {% if site.announcement.link %}
+[html:l88] {% set ann_ext = site.announcement.link.startswith('http') or site.announcement.link.startswith('//') %}
+[html:l89] {{ site.announcement.btn_text or '了解更多' }}
+[html:l90] {% endif %}
+[html:l93] {% endif %}
+[html:l100] {% if cfg.author.avatar %}
+[html:l102] {% else %}
+[html:l106] {% endif %}
+[html:l109] {{ cfg.author.name or site.cfg.site.title }}
+[html:l111] {% if cfg.author.bio %} {{ cfg.author.bio }} {% endif %}
+[html:l114] {# ---- 工具栏（主题切换/搜索/RSS，v1.5.1 移到头像下方） ---- #}
+[html:l116] {{ m.icon('sun') }}{{ m.icon('moon') }}
+[html:l117] {{ m.icon('search') }}
+[html:l118] {{ m.icon('rss') }}
+[html:l121] {# ---- 侧栏自定义模块（v1.1，可折叠） ---- #}
+[html:l122] {% for mod in cfg.site.sidebar.custom %}
+[html:l124] {{ mod.icon or '' }} {{ mod.title }}
+[html:l125] {{ mod.html | safe }}
+[html:l127] {% endfor %}
+[html:l129] {# ---- 最近更新（v1.1 可折叠；v1.3.0 默认关闭，与右栏「近期文章」去重，改 recent_count 数字即可开启） ---- #}
+[html:l130] {% set recent_n = cfg.site.sidebar.recent_count %}
+[html:l131] {% if recent_n and site.posts %}
+[html:l133] 最近更新
+[html:l135] {% for r in site.posts[:recent_n] %}
+[html:l136] {{ r.title }} {{ r.date | datefmt('%m-%d') }}
+[html:l137] {% endfor %}
+[html:l140] {% endif %}
+[html:l142] {# ---- 站点数据组件注入点（v1.3.0，内置插件 site-stats 提供） ---- #}
+[html:l143] {{ injections.get('sidebar_data', []) | join('\n') | safe }}
+[html:l145] {# ---- 图片链接幻灯片（v1.5.1，展示在站点数据下方） ---- #}
+[html:l146] {% if cfg.slideshow and cfg.slideshow.enabled and cfg.slideshow.slides %}
+[html:l149] {% for s in cfg.slideshow.slides %}
+[html:l152] {% if s.title %}
+[html:l153] {{ s.title }}
+[html:l154] {% endif %}
+[html:l156] {% endfor %}
+[html:l158] {% if cfg.slideshow.slides | length > 1 %}
+[html:l160] {% for s in cfg.slideshow.slides %}
+[html:l162] {% endfor %}
+[html:l164] {% endif %}
+[html:l166] {% endif %}
+[html:l169] 首页
+[html:l170] 归档
+[html:l171] 分类
+[html:l172] 标签
+[html:l173] {% if cfg.board.enabled %} 动态 {% endif %}
+[html:l174] {% for item in cfg.site.nav %}
+[html:l175] {% set nav_ext = item.url.startswith('http') or item.url.startswith('//') %}
+[html:l176] {{ item.label }}
+[html:l177] {% endfor %}
+[html:l181] {{ m.icon('menu') }}{{ m.icon('close') }}
+[html:l187] {{ injections.get('content_top', []) | join('\n') | safe }}
+[html:l188] {% block content %}{% endblock %}
+[html:l189] {{ injections.get('content_bottom', []) | join('\n') | safe }}
+[html:l192] {% if site.cfg.site.rightbar.enabled %}
+[html:l194] {% block rightbar %}
+[html:l195] {% set rb = site.cfg.site.rightbar %}
+[html:l196] {% if rb.show_recent and site.rightbar.recent %}
+[html:l198] {{ m.icon('clock', 13) }} 近期文章
+[html:l200] {% for r in site.rightbar.recent %}
+[html:l201] {{ r.title }}
+[html:l202] {% endfor %}
+[html:l205] {% endif %}
+[html:l206] {# ---- 右栏插件注入点（v1.4.2：此刻/微语紧跟近期文章之后） ---- #}
+[html:l207] {{ injections.get('rightbar', []) | join('\n') | safe }}
+[html:l208] {% if rb.show_tags and site.rightbar.top_tags %}
+[html:l210] {{ m.icon('tag', 13) }} 标签云
+[html:l212] {% for t in site.rightbar.top_tags %}
+[html:l213] {{ t.name }}
+[html:l214] {% endfor %}
+[html:l217] {% endif %}
+[html:l218] {% if rb.show_categories and site.rightbar.categories %}
+[html:l220] {{ m.icon('folder', 13) }} 分类
+[html:l222] {% for c in site.rightbar.categories %}
+[html:l223] {{ c.name }} {{ c.count }}
+[html:l224] {% endfor %}
+[html:l227] {% endif %}
+[html:l228] {% if rb.show_links and site.rightbar.links %}
+[html:l230] {{ m.icon('link', 13) }} 友链
+[html:l232] {% for l in site.rightbar.links %}
+[html:l233] {{ l.name }}
+[html:l234] {% endfor %}
+[html:l237] {% endif %}
+[html:l238] {% endblock %}
+[html:l240] {% endif %}
+[html:l244] 探索
+[html:l246] {% for item in site.cfg.site.footer.nav %}
+[html:l247] {% set _show = true %}
+[html:l248] {% if item.if == 'board' and not cfg.board.enabled %}{% set _show = false %}{% endif %}
+[html:l249] {% if item.if == 'github' and not cfg.author.social.github %}{% set _show = false %}{% endif %}
+[html:l250] {% if _show %}
+[html:l251] {{ item.label }}
+[html:l252] {% endif %}
+[html:l253] {% endfor %}
+[html:l257] 关于
+[html:l258] {{ site.cfg.site.footer.about or site.cfg.site.subtitle }}
+[html:l260] {{ injections.get('footer_extra', []) | join('\n') | safe }}
+[html:l263] © {{ site.year }} {{ site.cfg.site.title }}{% if cfg.site.footer_text %} · {{ cfg.site.footer_text }}{% endif %}
+[html:l265] Powered by TechSauce & VeryGood
+[html:l277] 0%
+[html:l282] {{ m.icon('close', 18) }}
+[html:l285] {{ m.icon('zoom-out', 16) }}
+[html:l286] {{ m.icon('zoom-in', 16) }}
+[html:l287] 100%
+[html:l288] {{ m.icon('rotate', 16) }}
+[html:l289] {{ m.icon('download', 16) }}
+[html:l290] {{ m.icon('expand', 16) }}
+[html:l295] {% block scripts %}
+[html:l298] {{ injections.get('body_end', []) | join('\n') | safe }}
+[html:l299] {% endblock %}

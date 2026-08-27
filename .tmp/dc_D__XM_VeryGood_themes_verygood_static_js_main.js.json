@@ -1,0 +1,1 @@
+{"file": "D:/XM/VeryGood/themes/verygood/static/js/main.js", "ext": "js", "openable": true, "format_valid": true, "checks": [{"name": "non_empty", "status": "pass", "detail": "20780 bytes"}, {"name": "type_supported", "status": "skip", "detail": ".js 不在本技能校验范围，仅确认文件存在且非空"}]}
