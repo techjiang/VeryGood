@@ -4,7 +4,7 @@
 
 VeryGood 是一个为 GitHub Pages 量身定制的开源博客主题。**写作发生在 GitHub Issue 里**，标签即状态机，关闭 Issue 即下线文章——你只需要专注内容，剩下的交给自动化。
 
-**当前版本：v1.5.0** —— **中文标题自动转拼音 URL**（标题"你好" → `/article/ni-hao/`，`posts.pinyin_slug: false` 可关闭，front matter `slug` 仍可覆盖）；**文章置顶功能**（front matter `pin: true`，首页卡片带🔥置顶标识，同置顶按日期倒序排列）；**首页分页默认 10 篇/页**（`posts.per_page` 可配）；**左侧栏迷你音乐播放器**（站点数据下方展示迷你音乐播放器（旋转封面+进度条+控制按钮）（渐变背景 + 粉色左边框 + 引号装饰 + hover 微动效），填充空白区域）；**署名锁定再增强**（全局 body MutationObserver 监控 footer 被删除/替换，v1.3.0 构建层四重校验 + 运行时 SHA-256 守卫的基础上新增第三层防线）；**插件系统完善**（PluginContext API 稳定，5 个内置插件 + 用户自动发现，`rightbar` 注入点支持右栏组件扩展）。此前 v1.4.6：全站内容 Issue 化（sync_issues 新增 path/dir/type 字段支持）；v1.4.5：Issue 同步全面修复；v1.4.0：封面与标题融合渐变 · 代码块语言标签 + 图标复制 · 右栏时间与微语卡片 · 站点数据三级降级；v1.3.0：插件生态 + 署名双指纹；v1.2.0：文章路径可定制 · 友链头像圆形化；v1.1.8：品牌署名字符级锁定 · 媒体灯箱 · 公告弹窗 · 朋友圈动态 · 三栏布局。
+**当前版本：v1.5.0** —— **中文标题自动转拼音 URL**（标题"你好" → `/article/ni-hao/`，`posts.pinyin_slug: false` 可关闭，front matter `slug` 仍可覆盖）；**文章置顶功能**（front matter `pin: true`，首页卡片带🔥置顶标识，同置顶按日期倒序排列）；**首页分页默认 10 篇/页**（`posts.per_page` 可配）；**左侧栏迷你音乐播放器**（播放列表/旋转封面/进度条/控制按钮，填充空白区域）；**署名锁定再增强**（全局 body MutationObserver 监控 footer 被删除/替换，v1.3.0 构建层四重校验 + 运行时 SHA-256 守卫的基础上新增第三层防线）；**插件系统完善**（PluginContext API 稳定，5 个内置插件 + 用户自动发现，`rightbar` 注入点支持右栏组件扩展）。此前 v1.4.6：全站内容 Issue 化（sync_issues 新增 path/dir/type 字段支持）；v1.4.5：Issue 同步全面修复；v1.4.0：封面与标题融合渐变 · 代码块语言标签 + 图标复制 · 右栏时间与微语卡片 · 站点数据三级降级；v1.3.0：插件生态 + 署名双指纹；v1.2.0：文章路径可定制 · 友链头像圆形化；v1.1.8：品牌署名字符级锁定 · 媒体灯箱 · 公告弹窗 · 朋友圈动态 · 三栏布局。
 
 ## ✨ 特性一览
 
@@ -201,6 +201,7 @@ GitHub → Settings → SSH and GPG keys → 添加本机 `~/.ssh/id_ed25519.pub
 
 ```bash
 pip install -r requirements.txt
+pip install pypinyin              # 中文标题自动转拼音依赖
 
 python -m verygood build          # 构建到 dist/
 python -m verygood build --drafts # 构建（含草稿）
