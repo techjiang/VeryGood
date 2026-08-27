@@ -7,13 +7,17 @@ VeryGood · Issue 同步脚本（Gmeek 式写作的核心）
     python scripts/sync_issues.py
 
 功能：
+  0. 自动确保 Article / Draft / Page / Moment 四个发布标签存在于仓库
+     （不存在则自动创建，幂等；只读权限下跳过、不阻塞构建）。
+  5. 仓库一个 Issue 都没有时（首次部署），自动创建一条「欢迎引导 Issue」，
+     手把手教会站长用 Issue 写文章（可 issues.welcome_issue: false 关闭）。
   1. 用 gh CLI 拉取仓库全部 Issue（open + closed）。
   2. 打上「发布标签」（默认 Article，可在 config.yml issues.publish_label 修改）
      的 Issue → 生成 source/posts/issue-{编号}.md（含 front matter）。
   3. 打上「草稿标签」（默认 Draft）→ 生成草稿（本地构建时可见，线上不可见）。
   4. 打上「页面标签」（默认 Page）→ 生成 source/pages/issue-{编号}.md 独立页面。
   5. 打上「动态标签」（默认 Moment）→ 生成 source/moments/issue-{编号}.md
-     朋友圈动态（/board/ 时间线），站长/站点管理者的碎碎念与站点动态。
+     朋友圈动态（/board/ 时间线）。
   6. Issue 被关闭/删除 → 删除对应 md 文件（关闭即下线对应内容）。
   7. 其余 Label 自动成为文章的 tags；形如「分类:xx」的 Label 成为 category。
 
@@ -44,6 +48,7 @@ DEFAULTS = {
     "page_label": "Page",
     "moment_label": "Moment",
     "slug_prefix": "issue",
+    "welcome_issue": True,
 }
 
 CATEGORY_PREFIXES = ("分类:", "分类：", "category:", "Category:")
@@ -83,6 +88,21 @@ def gh(*args: str) -> list[dict]:
     if proc.returncode != 0:
         raise RuntimeError(f"gh {' '.join(args)} 失败: {proc.stderr.strip()}")
     return json.loads(proc.stdout or "[]")
+
+
+def gh_raw(*args: str) -> str:
+    """调用 gh CLI 的写操作/非 JSON 命令（label create / issue create 等）。"""
+    exe_cmd = shlex.split(os.environ.get("VERYGOOD_GH", "gh"))
+    proc = subprocess.run(
+        exe_cmd + list(args),
+        cwd=str(ROOT),
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+    )
+    if proc.returncode != 0:
+        raise RuntimeError(f"gh {' '.join(args)} 失败: {proc.stderr.strip()}")
+    return proc.stdout.strip()
 
 
 def to_local(dt_iso: str, tz_name: str) -> str:
@@ -235,6 +255,58 @@ def gh_list_issues(cfg: dict) -> list[dict]:
     return gh("issue", "list", "--state", "all", "--limit", "100000")
 
 
+# 发布标签的名称 / 颜色 / 说明（自动创建时使用；颜色统一莫兰迪粉系）
+_LABEL_META = {
+    "publish_label": ("C0778E", "带此标签的 Issue 发布为博客文章"),
+    "draft_label": ("9E9E9E", "草稿：仅本地预览可见，不上线"),
+    "page_label": ("4A90D9", "独立页面：生成 /页面名/ 独立页"),
+    "moment_label": ("E68A5E", "动态：同步到 /board/ 朋友圈时间线"),
+}
+
+
+def ensure_labels(cfg: dict) -> None:
+    """确保四个发布标签存在于仓库（不存在则自动创建），幂等。
+
+    标签是 Gmeek 式写作的「开关」：没有标签用户就无法按玩法发文章，
+    这是「Issue 玩法不可用」最常见的根因。只读权限（如 `issues: read`）
+    下创建会失败，仅告警不中断（构建仍可用）。
+    """
+    try:
+        existing = gh("label", "list")
+    except RuntimeError as e:
+        log(f"[sync] 无法读取标签列表（跳过自动建标签）：{e}")
+        return
+    have = {l.get("name") for l in existing}
+    for key, (color, desc) in _LABEL_META.items():
+        name = cfg[key]
+        if name in have:
+            continue
+        try:
+            gh_raw("label", "create", name, "--color", color, "--description", desc)
+            log(f"[sync] 已自动创建标签「{name}」（颜色 #{color}）")
+        except RuntimeError as e:
+            # 高概率是权限不足（issues: read），也可能是并发竞争，均不致命
+            log(f"[sync] 自动创建标签「{name}」失败（不影响构建）：{e}")
+
+
+_WELCOME_TITLE = "👋 欢迎使用 VeryGood —— 用 Issue 写博客"
+
+_WELCOME_BODY = """欢迎！这个仓库的博客正在通过 **GitHub Issues** 驱动：\n\n## ✍️ 发布一篇文章\n\n1. 点右上角 **New issue**，标题写文章标题，正文写 Markdown 内容；\n2. 给这个 Issue 打上标签 **`Article`**（站点第一次部署时已自动创建好这个标签）；\n3. 等 GitHub Actions 跑完，文章就自动发布到博客了 🎉\n\n## 📌 更多玩法\n\n| 标签 | 作用 |\n| --- | --- |\n| **Article** | 发布为博客文章 |\n| **Draft** | 草稿，只有本地构建可见，不上线 |\n| **Page** | 独立页面（可自定义路径） |\n| **Moment** | 同步到 `/board/` 朋友圈动态 |\n| `分类:XX` | 给文章设置分类（中文冒号或英文冒号均可） |\n| 其他任意标签 | 自动变成文章的 tag |\n\n> 关闭 Issue = 下线对应内容；再次打开 = 重新上线。\n\n本引导 Issue 可随时关闭或编辑，不会影响线上博客。\n想了解全部玩法，请看仓库 README：**Use Issue to write → 用 Issue 写博客**。\n"""
+
+
+def ensure_welcome_issue(cfg: dict, items: list[dict]) -> None:
+    """仓库一个 Issue 都没有时，自动创建一条引导 Issue（幂等、可关闭）。"""
+    if not cfg.get("welcome_issue", True):
+        return
+    if items:
+        return
+    try:
+        gh_raw("issue", "create", "--title", _WELCOME_TITLE, "--body", _WELCOME_BODY)
+        log("[sync] 仓库暂无 Issue：已自动创建引导 Issue（用 Issue 写博客的玩法说明）")
+    except RuntimeError as e:
+        log(f"[sync] 自动创建引导 Issue 失败（不影响构建，可用 issues.welcome_issue: false 关闭）：{e}")
+
+
 def main() -> int:
     cfg = load_issues_cfg()
     tz_name = ""
@@ -246,12 +318,16 @@ def main() -> int:
             pass
 
     log(f"[sync] 拉取仓库 Issue（发布: {cfg['publish_label']} / 草稿: {cfg['draft_label']} / 页面: {cfg['page_label']} / 动态: {cfg['moment_label']}）")
+    ensure_labels(cfg)
     items = gh_list_issues(cfg)
     if not items:
-        # 仓库暂无任何 Issue：跳过同步并保留现有内容（模板示例可正常构建上线，
-        # 待首个 Issue 创建后即以 GitHub Issues 为准开始同步）。
-        log("[sync] 仓库暂无 Issue，跳过同步（保留现有内容）")
-        return 0
+        # 仓库暂无任何 Issue：为「用 Issue 写博客」的玩法创建一条引导 Issue，
+        # 若创建失败或用户关闭 welcome_issue 则跳过同步并保留现有内容。
+        ensure_welcome_issue(cfg, items)
+        items = gh_list_issues(cfg)
+        if not items:
+            log("[sync] 仓库暂无 Issue，跳过同步（保留现有内容）")
+            return 0
 
     posts_dir = ROOT / "source" / "posts"
     pages_dir = ROOT / "source" / "pages"

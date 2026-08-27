@@ -1,5 +1,6 @@
-/* VeryGood 站点数据组件运行时（v1.4.0）—— 内置插件 site-stats。
-   职责：浏览量/访客数（不蒜子多源 + 本地真实计数兜底）、页面加载耗时、访客地区。
+/* VeryGood 站点数据组件运行时（v1.4.4）—— 内置插件 site-stats。
+   职责：浏览量/访客数（不蒜子多源 + 本地真实计数兜底）。
+   v1.4.4 起移除无效的「加载耗时 / 访客地区」两个面板项及相关代码。
    全部 try/catch 包裹，任何失败静默降级，绝不影响页面主流程。 */
 (function () {
   'use strict';
@@ -98,50 +99,6 @@
       document.head.appendChild(s);
       setTimeout(function () { if (window[cbName]) { try { delete window[cbName]; } catch (e) { window[cbName] = function () {}; } applyLocal(); } }, 4000);
     } catch (e) { applyLocal(); }
-  }
-
-  /* ---------- 2. 页面加载耗时（导航到可交互） ---------- */
-  function fillLoad() {
-    try {
-      var ms = 0;
-      var nav = performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
-      if (nav && nav.domContentLoadedEventEnd) {
-        ms = nav.domContentLoadedEventEnd - nav.startTime;
-      } else if (window.performance.timing) {
-        ms = window.performance.timing.domContentLoadedEventEnd - window.performance.timing.navigationStart;
-      }
-      /* 合理性防御：为负数 / 超过 2 分钟的结果一律不展示（个别环境 nav timing 异常） */
-      if (!(ms > 0 && ms < 120000)) {
-        var t2 = window.performance.timing;
-        if (t2 && t2.domContentLoadedEventEnd && t2.navigationStart) {
-          ms = t2.domContentLoadedEventEnd - t2.navigationStart;
-        }
-      }
-      setText('vg-stats-load', (ms > 0 && ms < 120000) ? (ms / 1000).toFixed(1) + 's' : '–');
-    } catch (e) { /* 忽略 */ }
-  }
-
-  /* ---------- 3. 访客地区：Intl 时区推断 + 语言兜底 ---------- */
-  var REGIONS = {
-    'Asia/Shanghai': '中国', 'Asia/Hong_Kong': '中国香港', 'Asia/Macau': '中国澳门',
-    'Asia/Taipei': '中国台湾', 'Asia/Tokyo': '日本', 'Asia/Seoul': '韩国',
-    'Asia/Singapore': '新加坡', 'Asia/Kuala_Lumpur': '马来西亚', 'Asia/Bangkok': '泰国',
-    'Asia/Jakarta': '印尼', 'Asia/Ho_Chi_Minh': '越南', 'Asia/Manila': '菲律宾',
-    'Asia/Kolkata': '印度', 'Asia/Dubai': '阿联酋', 'Asia/Almaty': '哈萨克斯坦',
-    'Europe/London': '英国', 'Europe/Paris': '法国', 'Europe/Berlin': '德国',
-    'America/New_York': '美国', 'America/Los_Angeles': '美国', 'America/Chicago': '美国',
-    'America/Toronto': '加拿大', 'Australia/Sydney': '澳大利亚', 'Pacific/Auckland': '新西兰'
-  };
-  function fillRegion() {
-    try {
-      var tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-      var name = REGIONS[tz] || (tz ? tz.replace(/_/g, ' ').replace('/', ' · ') : '');
-      if (!name) {
-        var lang = (navigator.language || 'zh-CN');
-        name = lang.indexOf('zh') === 0 ? '中国' : lang;
-      }
-      setText('vg-stats-region', name);
-    } catch (e) { /* 忽略 */ }
   }
 
   if (document.readyState === 'loading') {

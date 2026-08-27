@@ -21,7 +21,7 @@ on:
 
 permissions:
   contents: read
-  issues: read          # sync_issues.py 拉取 Issue 列表（gh issue list）必需
+  issues: write         # sync_issues.py 需要：自动创建 Article/Draft/Page/Moment 标签 + 首次部署引导 Issue
   pages: write
   id-token: write
 

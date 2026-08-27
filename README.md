@@ -4,20 +4,20 @@
 
 VeryGood 是一个为 GitHub Pages 量身定制的开源博客主题。**写作发生在 GitHub Issue 里**，标签即状态机，关闭 Issue 即下线文章——你只需要专注内容，剩下的交给自动化。
 
-**当前版本：v1.4.2** —— **右栏顺序重排**：此刻/微语紧跟「近期文章」之后（不再垫底）；**分类并入文章标题下方 meta 行**（与日期/阅读时长/字数同一行，封面版同样内联）；**页脚改版**：简洁两栏（左「探索」导航、右「关于」简介），页面还原为细版权行 + 品牌署名行；**署名锁定继续增强**：构建层新增 footer 唯一性、marker 必须位于 footer 内部、署名行全页唯一、链接-文本一一配对（TechSauce→docs.asoe.cn 在前、VeryGood→github 在后，禁止调包）四重校验。此前 v1.4.0：短内容页底部栏贴底 · 封面与标题融合渐变 · 代码块语言标签 + 图标复制 · 右栏时间与微语卡片 · 站点数据三级降级真实统计 · 署名守卫抗误杀（v1.4.1 封面渐变只暗化底部 60% 区域）。更早：站点数据组件 + 插件目录化 + 署名双指纹 v1.3.0 · 插件生态 v1.2.0 · 移动端顶栏锁定 · 分类独立页 · 文章路径可定制 · 友链头像圆形化 · 品牌署名字符级锁定 v1.1.8 · 媒体灯箱 · 正文 1360px 满宽 · 公告弹窗 v1.1.6 · 朋友圈动态 · 全站内容 Actions · 三栏布局。
+**当前版本：v1.4.4** —— **发布标签自动创建 + 首个用户引导 Issue**（Issue 玩法不再需要手动建标签：Actions 首次运行自动创建 `Article / Draft / Page / Moment` 四个标签；仓库没有 Issue 时自动生成一条「欢迎使用 VeryGood」引导 Issue，手把手教会你用 Issue 写博客，可 `issues.welcome_issue: false` 关闭）；**文章目录样式与交互动效增强**（hover 滑入、当前项莫兰迪粉高亮条）；**侧栏站点数据精简为四个真实可用指标**（文章/字数/浏览/访客，移除无效的「加载耗时/访客地区」）；**底部栏导航精简**（默认只剩 首页/归档/RSS，其余按需在 `site.footer.nav` 配置）；**署名锁定逻辑修复**（去除构建校验的重复校验块，保留唯一指纹 + 文本配对 + footer 内禁 script 全量校验，且不写死配置——所有动态项随你的 `config.yml` 变化）。此前 v1.4.3：页脚压缩高度与字号 · 微语去暂停 · 时钟改北京时间 UTC+8 · 署名锁定 class 精确匹配 + footer 禁 script；v1.4.2：右栏顺序重排 · 分类并入标题下方 meta 行 · 页脚两栏改版 · 署名四重校验；v1.4.0：短内容页 footer 贴底 · 封面与标题融合渐变 · 代码块语言标签 + 图标复制 · 右栏时间与微语卡片 · 站点数据三级降级真实统计 · 署名守卫抗误杀。更早：站点数据组件 + 插件目录化 + 署名双指纹 v1.3.0 · 插件生态 v1.2.0 · 移动端顶栏锁定 · 分类独立页 · 文章路径可定制 · 友链头像圆形化 · 品牌署名字符级锁定 v1.1.8 · 媒体灯箱 · 正文 1360px 满宽 · 公告弹窗 v1.1.6 · 朋友圈动态 · 全站内容 Actions · 三栏布局。
 
 ## ✨ 特性一览
 
 | 维度 | 能力 |
 | --- | --- |
 | 🌸 颜值 | 低饱和玫瑰灰配色（莫兰迪粉，不甜腻、不过气），深浅双主题跟随系统 + 手动切换并记忆；友链头像圆形化（透明/白底 logo 兼容）；文章页封面与标题融合渐变、首页卡片封面渐变（v1.4.0） |
-| 🧱 布局 | 桌面三栏：左侧固定信息栏（品牌 + 站点数据 + 导航）/ 中间正文 / 右侧 Widget（**近期文章 → 此刻/微语 → 标签云 → 分类 → 友链**，v1.4.2 起此刻/微语紧跟近期文章）；**移动端顶栏锁定不随滚动**，窄屏优雅降级；左栏「最近更新」v1.3.0 起默认关闭（避免与右栏「近期文章」重复）；**footer 全站 flex 贴底**（v1.4.0 修复短内容页飘起；v1.4.2 页脚改为简洁两栏：左「探索」导航 + 右「关于」简介） |
-| ✍️ 写作 | Gmeek 式 Issue 写作；也支持直接写 Markdown 推到 `source/posts/`；两种方式可混用；**文章访问路径可定制**（`path: /abc` → 域名/abc） |
-| 🚀 部署 | 一条 GitHub Actions 工作流：Issue 事件 → 同步 Markdown → 构建 → 部署 Pages |
+| 🧱 布局 | 桌面三栏：左侧固定信息栏（品牌 + 站点数据 + 导航）/ 中间正文 / 右侧 Widget（**近期文章 → 此刻/微语 → 标签云 → 分类 → 友链**，v1.4.2 起此刻/微语紧跟近期文章）；**移动端顶栏锁定不随滚动**，窄屏优雅降级；左栏「最近更新」v1.3.0 起默认关闭；**footer 全站 flex 贴底**；底部导航默认只留 首页/归档/RSS（v1.4.4），其余按需加 |
+| ✍️ 写作 | Gmeek 式 Issue 写作：**发布标签由 Actions 自动创建**、首个用户自动收到引导 Issue（v1.4.4），创建 Issue 打上 `Article` 标签即发布；也支持直接写 Markdown 推到 `source/posts/`；两种方式可混用；**文章访问路径可定制**（`path: /abc` → 域名/abc） |
+| 🚀 部署 | 一条 GitHub Actions 工作流：Issue 事件 → 同步 Markdown（自动建标签/引导 Issue）→ 构建 → 部署 Pages |
 | 🔍 SEO | 结构化数据（BlogPosting / BreadcrumbList / WebSite+SearchAction）、Sitemap（含图片）、分类独立页、RSS、robots、humans、Open Graph、Twitter Card、canonical、noindex 分页、百度收录推送钩子 |
 | ⚡ 性能 | 纯静态零框架、图片懒加载、CSS 构建压缩、环形回顶进度、轻量交互、插件钩子错误隔离 |
 | 💬 互动 | 公告条（可关闭记忆）、朋友圈动态（站长/站点管理者用 Issue + Actions 推送，非访客留言）、giscus / utterances 评论、相关推荐、上下篇 |
-| 🔌 可玩性 | **插件生态**（`python -m verygood plugins` 查看清单；短代码 / 钩子 / 模板注入 / 全局变量 / Jinja 过滤器 API；v1.3.0 起：目录式内置插件、插件静态资源、元信息、`plugins_disabled` 禁用、`sidebar_data`/`content_top` 注入点、`__BASE__` 占位符；v1.4.0 新增 `rightbar` 注入点）、内置 **site-stats 站点数据组件**（浏览量/访客/加载耗时/地区，三级降级真实统计）、内置 **whisper 时钟与微语组件**（右栏时间卡片 + 打字机轮播）、代码块语言标签 + 纯图标复制、主题整套可复制改写、前端实时搜索、标签/分类/归档、友链页、分类/标签自定义描述与置顶 |
+| 🔌 可玩性 | **插件生态**（`python -m verygood plugins` 查看清单；短代码 / 钩子 / 模板注入 / 全局变量 / Jinja 过滤器 API；v1.3.0 起：目录式内置插件、插件静态资源、元信息、`plugins_disabled` 禁用、`sidebar_data`/`content_top` 注入点、`__BASE__` 占位符；v1.4.0 新增 `rightbar` 注入点）、内置 **site-stats 站点数据组件**（文章/字数/浏览/访客四个真实指标，浏览量/访客不蒜子 → ibruce → localStorage **三级降级真实统计**，v1.4.4 移除无效的加载耗时与访客地区）、内置 **whisper 时钟与微语组件**（右栏时间卡片 + 打字机轮播）、代码块语言标签 + 纯图标复制、主题整套可复制改写、前端实时搜索、标签/分类/归档、友链页、分类/标签自定义描述与置顶 |
 
 ## 🚀 快速开始（GitHub Pages + Issue 写作）
 
@@ -37,8 +37,11 @@ VeryGood 是一个为 GitHub Pages 量身定制的开源博客主题。**写作�
 
 ### 第三步：用 Issue 写第一篇文章
 
+> v1.4.4 起不再需要手动建标签：第一次部署时 Actions 会自动创建 `Article / Draft / Page / Moment` 四个标签，
+> 并在仓库**没有任何 Issue** 时自动创建一条**引导 Issue**（教你如何用 Issue 写博客，可 `issues.welcome_issue: false` 关闭）。
+
 1. 打开仓库 **Issues → New issue**，看到模板后直接清空，写下文章 Markdown 正文；
-2. 给 Issue 打标签 **`Article`**（发布）；
+2. 给 Issue 打标签 **`Article`**（发布）——标签在第一次部署后自动存在；若仓库里确实找不到，说明 Actions 还没跑过，等首次部署完成即可；
 3. 点 Create → 等 Actions 跑完 → 打开 `https://你的用户名.github.io` 看效果。
 
 ### 给文章设置自定义访问路径（v1.2.0）
@@ -83,6 +86,8 @@ cover_alt: 封面描述
 
 ### 标签即状态机
 
+> 这四个发布标签在首次部署时由 Actions **自动创建**（无则建，幂等）；若你的 GitHub 账号权限受限导致创建失败，构建不会中断，可手动创建同名标签（颜色随意）。
+
 | 标签 | 作用 |
 | --- | --- |
 | `Article` | **发布**这篇文章（可配置 `issues.publish_label`） |
@@ -94,6 +99,64 @@ cover_alt: 封面描述
 
 **关闭 Issue = 删除这篇文章/这条动态**；重新打开 = 恢复发布；编辑正文 = 更新站点。评论交流直接在 Issue 里进行，天然留档。
 **文章、独立页、朋友圈动态、公告、友链、分类/标签等全站内容**都能通过 GitHub Actions + Issue 推送生效。
+
+## 🚚 推送与部署（GitHub Token / Deploy Key 用法）
+
+**写作 = Issue（不需要 Token）；推送代码/主题更新到 GitHub = 才需要认证。** 下面给三种方式，按你的网络环境选：
+
+### 方式 A：HTTPS + Personal Access Token（PAT，最简单，常规网络推荐）
+
+1. GitHub → 头像 → **Settings → Developer settings → Personal access tokens → Tokens (classic)** → Generate new token；
+2. 勾选 `repo` 权限，生成后**立即复制**（只显示一次），妥善保存（密码管理器 / 环境变量）；
+3. 本地推送认证，二选一：
+   - **推荐**：`gh auth login` 走 GitHub CLI 托管，或系统凭据管理器（`git config --global credential.helper manager`），都不需要把 token 写进任何文件；
+   - 临时方案：`git push https://<你的用户名>:<TOKEN>@github.com/<用户名>/<仓库>.git main`（Token 只在 URL 中出现一次，不落盘）；
+4. **绝对不要把 token 明文写进仓库/文档/脚本**；一旦泄露，立刻到 Developer settings 里 **Revoke**（撤销）重建。
+
+> 在 Actions 里需要更高权限（如自动建标签需要 `issues: write`，默认 `GITHUB_TOKEN` 已够用，无需额外配置）；如需用自己的 PAT，在仓库 **Settings → Secrets and variables → Actions → New repository secret** 建 `VG_TOKEN`，工作流里用 `${{ secrets.VG_TOKEN }}` 引用。
+
+### 方式 B：临时 Deploy Key 走 443（HTTPS 被墙/超时环境的实测方案）
+
+本项目实测 HTTPS push 超时，用**临时 writable deploy key 走 `ssh.github.com:443`** 稳定可推，推完即删，不留后门：
+
+```bash
+# 1) 生成一次性密钥
+ssh-keygen -t ed25519 -f ~/.ssh/vg_deploy -N "" -C "vg-deploy"
+
+# 2) 把 ~/.ssh/vg_deploy.pub 内容添加到仓库
+#    GitHub → 仓库 → Settings → Deploy keys → Add deploy key
+#    勾选 "Allow write access"
+
+# 3) 配 SSH 走 443（写入 ~/.ssh/config）
+Host github.com
+  HostName ssh.github.com
+  Port 443
+  User git
+  IdentityFile ~/.ssh/vg_deploy
+  StrictHostKeyChecking no
+
+# 4) 推送
+git push git@github.com:<用户名>/<仓库>.git main --tags
+# 或用 GIT_SSH_COMMAND="ssh -F ~/.ssh/config" git push origin main
+
+# 5) 推完立即删除 Deploy Key（仓库 Settings 里删，本地 rm ~/.ssh/vg_deploy*）
+```
+
+⚠️ **deploy key 推送不会触发 GitHub Actions**（GitHub 出于安全不向 deploy key 触发的 push 派发工作流）。需要自动部署时，用 PAT 手动触发：
+
+```bash
+curl -X POST \
+  -H "Authorization: token <你的PAT>" \
+  -H "Accept: application/vnd.github+json" \
+  https://api.github.com/repos/<用户名>/<仓库>/actions/workflows/<工作流id>/dispatches \
+  -d '{"ref":"main"}'
+```
+
+工作流 id 可在仓库 `Actions → Deploy VeryGood Blog → 左栏右侧三个点 → View workflow file` 或 API `GET /repos/<用户名>/<仓库>/actions/workflows` 查到（本项目为 `342856419`）。
+
+### 方式 C：SSH Key（GitHub 常规推送）
+
+GitHub → Settings → SSH and GPG keys → 添加本机 `~/.ssh/id_ed25519.pub`，然后 `git push origin main` 即可；443 被墙时用方式 B。
 
 ## 🖥 本地开发
 
@@ -176,9 +239,9 @@ site:
       - "用 Issue 写文章，GitHub Actions 自动构建发布。"
       - "莫兰迪粉：温柔克制，但也很有态度。"
 
-  sidebar:
+sidebar:
     recent_count: 0             # v1.3.0：左侧栏「最近更新」条数（默认 0 = 关闭，避免与右栏重复；改数字即可开启）
-    site_data: true             # v1.3.0：站点数据组件（文章/字数/浏览/访客/加载耗时/地区，内置插件 site-stats）
+    site_data: true             # v1.3.0：站点数据组件（文章/字数/浏览/访客，内置插件 site-stats；v1.4.4 起移除无效的加载耗时/地区）
     collapse: false             # true 时侧栏模块默认折叠，访客可展开
     custom:                      # 追加自定义模块（HTML 自由书写）
       # - title: 我的项目
@@ -268,6 +331,7 @@ issues:                         # Issue 写作配置
   page_label: Page
   moment_label: Moment          # Moment 标签 → 朋友圈动态（/board/）
   slug_prefix: issue
+  welcome_issue: true           # v1.4.4：仓库没有 Issue 时自动创建一条引导 Issue；false 关闭
 
 plugins: ["plugins/my-plugin"]  # 显式声明用户插件；仓库根 plugins/ 下目录自动发现（v1.2.0）
 plugins_disabled: []            # v1.3.0：禁用插件（内置名/目录名），如 ["site-stats", "whisper"]
@@ -345,7 +409,7 @@ v1.3.0 还支持**目录式插件 + 静态资源**：把 `plugin.py` 与 `static
 {{< bilibili BV1xx411c7mD >}}  # 嵌入 B 站
 ```
 
-内置插件：`shortcodes`（视频嵌入）、`reading_time`（阅读时长，`post.reading_time` 自动注入卡片/文章头部）、`random_post`（/random/ 随机文章跳转）、`site-stats`（v1.3.0 站点数据组件：文章数/全站字数服务端直出，浏览量/访客数不蒜子 → ibruce → localStorage **三级降级真实统计**，加载耗时/访客地区运行时计算；`site.sidebar.site_data: false` 关闭）、`whisper`（v1.4.0 右栏时间卡片 + 打字机微语卡片，`site.rightbar.show_clock` / `show_micro` / `micro_notes` 控制）。
+内置插件：`shortcodes`（视频嵌入）、`reading_time`（阅读时长，`post.reading_time` 自动注入卡片/文章头部）、`random_post`（/random/ 随机文章跳转）、`site-stats`（v1.3.0 站点数据组件：文章数/全站字数**服务端直出**，浏览量/访客数不蒜子 → ibruce → localStorage **三级降级真实统计**；v1.4.4 起面板精简为这四个真实可用指标，移除无效的「加载耗时/访客地区」；`site.sidebar.site_data: false` 关闭）、`whisper`（v1.4.0 右栏时间卡片 + 打字机微语卡片，`site.rightbar.show_clock` / `show_micro` / `micro_notes` 控制）。
 
 仓库自带两个示例插件（即装即用 + 现成代码参考）：`plugins/footer-note`（页脚留言）、`plugins/post-stats`（字数统计 / 阅读时长过滤器）。用 `python -m verygood plugins` 随时核对启用了哪些插件。
 
@@ -362,6 +426,15 @@ v1.3.0 还支持**目录式插件 + 静态资源**：把 `plugin.py` 与 `static
 | 扩展 | 改主题 | 插件系统 + 主题复制机制，双重扩展 |
 
 ## ❓ FAQ
+
+**Q：仓库里为什么多了 Article / Draft / Page / Moment 这几个标签？**
+v1.4.4 起 Actions 首次运行会自动创建这四个发布标签（不存在才创建，幂等）。没有它们就无法用「打标签」的方式发布文章——这正是"Issue 玩法失灵"最常见的根因。若你的账号权限受限创建失败，构建不中断，手动补建同名标签即可。
+
+**Q：仓库里那条「👋 欢迎使用 VeryGood」的 Issue 是什么？**
+首次部署时仓库一个 Issue 都没有，主题自动创建的一条**引导 Issue**，手把手教你怎么用 Issue 写博客（它不带发布标签，不会出现在线上站点）。可以编辑或关闭它；不想要这个功能就在 `config.yml` 写 `issues.welcome_issue: false`。
+
+**Q：我建了 Issue，Actions 也跑了，文章怎么没出现？**
+检查该 Issue 是否打了 `Article` 标签（或对应的 `issues.publish_label`）。无标签的 Issue 只是普通讨论，不会发布；打 `Draft` 标签的是草稿，线上不可见；**关闭的 Issue 会被删除下线**。
 
 **Q：打开仓库没看见 issue 模板？**
 模板在 `.github/ISSUE_TEMPLATE/article.md`，fork 模板仓库时默认带过来；也可以直接新建空白 Issue 开写。

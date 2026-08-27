@@ -39,7 +39,7 @@ site:
   announcement:
     enabled: true                         # true 时显示公告弹窗
     title: "欢迎来到 VeryGood"              # 弹窗标题（留空则只显示文案）
-    text: "🎉 VeryGood v1.4.0：底部栏贴底不再飘起 · 文章封面与标题融合渐变 · 代码块语言标签&图标复制 · 右栏时钟&微语 · 站点数据真实统计"  # 公告文案（支持少量 HTML）
+    text: "🎉 VeryGood v1.4.5：Issue 自动建标签 · 空仓库自动生成引导 Issue · 站点数据只留真实指标 · 文章目录动效升级"  # 公告文案（支持少量 HTML）
     link: "/board/"                       # 跳转地址，留空则不显示按钮
     btn_text: "去看看动态"                  # 按钮文案，留空默认「了解更多」
     type: info                            # 样式：info / tip / warn
@@ -79,7 +79,7 @@ site:
   # 左侧栏由「站点信息 + 站点数据 + 导航 + 自定义模块」组成（v1.3.0 起）。
   sidebar:
     recent_count: 0                       # 左栏「最近更新」条数（v1.3.0 默认 0 = 关闭；改为数字即可重新开启）
-    site_data: true                       # v1.3.0：站点数据组件（文章/字数/浏览/访客/加载耗时/地区），内置插件 site-stats 提供
+    site_data: true                       # v1.3.0：站点数据组件（文章/字数/浏览/访客 四项真实指标，v1.4.4 起移除加载耗时/地区），内置插件 site-stats 提供
     collapse: false                       # true 时侧栏模块默认折叠，访客可点击展开
     custom:                               # 追加自定义模块（放在最近更新下方）
       # - title: 我的项目
@@ -146,6 +146,7 @@ issues:
   page_label: Page                         # 带此标签的 Issue 生成独立页面（/issue-{编号}/，正文顶部可写 front matter 自定义 slug）
   moment_label: Moment                     # 带此标签的 Issue 生成朋友圈动态（/board/ 时间线）
   slug_prefix: issue                       # 生成 source/posts|pages|moments/issue-{编号}.md
+  welcome_issue: true                      # v1.4.4：仓库一个 Issue 都没有时，首次构建自动创建一条「引导 Issue」（说明用 Issue 写文章的玩法）；false 则关闭
 
 posts:
   per_page: 8                              # 首页每页文章数
