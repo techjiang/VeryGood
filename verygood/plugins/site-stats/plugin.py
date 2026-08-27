@@ -54,8 +54,6 @@ def setup(ctx):
             f'<div class="side-stats__cell"><b id="vg-stats-words">{n_words}</b><span>字数</span></div>'
             '<div class="side-stats__cell"><b id="vg-stats-pv">–</b><span>浏览</span></div>'
             '<div class="side-stats__cell"><b id="vg-stats-uv">–</b><span>访客</span></div>'
-            '<div class="side-stats__cell"><b id="vg-stats-load">–</b><span>加载</span></div>'
-            '<div class="side-stats__cell"><b id="vg-stats-region">–</b><span>地区</span></div>'
             "</div></section>"
         )
         ctx.inject("sidebar_data", skeleton)

@@ -414,13 +414,16 @@ button { font-family: inherit; }
 .post-toc__list ul { list-style: none; margin: 0; padding: 0; }
 .post-toc__list li { margin: 0; padding: 0; }
 .post-toc__list a {
-  display: block; padding: 5px 8px; border-radius: 8px;
+  display: block; padding: 6px 10px; border-radius: 8px;
   color: var(--ink-soft); font-size: 13.5px; line-height: 1.5;
-  border-left: 2px solid transparent; margin-left: -1px;
+  border-left: 3px solid transparent; margin-left: -1px;
+  transition: color 0.2s ease, background 0.2s ease, border-left-color 0.2s ease, padding-left 0.2s ease;
 }
-.post-toc__list a:hover { color: var(--rose-600); background: var(--bg-soft); }
-.post-toc__list a.is-active { color: var(--ink-soft); background: transparent; border-left-color: var(--rose-500); }
-.post-toc__list ul ul a { padding-left: 20px; font-size: 13px; }
+.post-toc__list a:hover { color: var(--rose-600); background: var(--bg-soft); border-left-color: var(--rose-200); padding-left: 14px; }
+.post-toc__list a.is-active { color: var(--rose-600); background: color-mix(in srgb, var(--rose-100) 40%, transparent); border-left-color: var(--rose-500); padding-left: 14px; font-weight: 600; }
+.post-toc__list ul ul a { padding-left: 22px; font-size: 13px; }
+.post-toc__list ul ul a:hover { padding-left: 26px; }
+.post-toc__list ul ul a.is-active { padding-left: 26px; }
 
 /* ---------- 正文排版 md-body ---------- */
 .md-body { font-size: 16.5px; line-height: 1.85; color: var(--ink); }

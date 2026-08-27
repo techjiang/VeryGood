@@ -182,10 +182,6 @@ def normalize(cfg: dict, root: Path) -> None:
     _DEFAULT_FOOTER_NAV = [
         {"label": "首页", "url": "/", "external": False},
         {"label": "归档", "url": "/archive/", "external": False},
-        {"label": "分类", "url": "/categories/", "external": False},
-        {"label": "标签", "url": "/tags/", "external": False},
-        {"label": "动态", "url": "/board/", "if": "board", "external": False},
-        {"label": "GitHub", "url": "https://github.com/{github}", "if": "github", "external": True},
         {"label": "RSS", "url": "/rss.xml", "external": False},
     ]
     _nav = ft.get("nav")

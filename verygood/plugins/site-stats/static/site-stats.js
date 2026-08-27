@@ -146,9 +146,9 @@
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', function () {
-      startBusuanziV1(); fillLoad(); fillRegion();
+      startBusuanziV1();
     });
   } else {
-    fillLoad(); fillRegion(); startBusuanziV1();
+    startBusuanziV1();
   }
 })();

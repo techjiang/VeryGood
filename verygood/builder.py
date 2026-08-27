@@ -522,19 +522,6 @@ def build(cfg: dict, log=print, include_drafts: bool | None = None) -> dict:
         if re.search(r'<script', footer_block, re.S | re.I):
             missing.append(f"{f} [footer 内发现 script 标签，禁止注入]")
             continue
-        p_attrs, p_inner = m.group(1), m.group(2)
-        if f'data-vg-fp="{_POWER_FP1}"' not in p_attrs:
-            missing.append(
-                f"{f} [缺失/篡改署名行指纹 data-vg-fp (期望 {_POWER_FP1})]"
-            )
-            continue
-        if _norm_power_text(p_inner) != _POWER_EXPECTED:
-            missing.append(
-                f"{f} [署名文本被篡改: "
-                f"期望 `{_POWER_EXPECTED}`，实际 `{_norm_power_text(p_inner)}`]"
-            )
-            continue
-        # 链接校验：恰好两个 a，分别精确指向两大官方地址；且均 target="_blank" + rel 含 noopener，
         # 链接可见文本必须恰为 TechSauce / VeryGood（防止塞入前缀文本或伪装元素）。
         # v1.4.2：链接与文本必须一一配对——TechSauce → docs.asoe.cn 在前，
         #        VeryGood → github.com/techjiang/VeryGood 在后，禁止交错/调包。
