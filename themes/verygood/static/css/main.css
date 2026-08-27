@@ -231,7 +231,7 @@ button { font-family: inherit; }
   flex: 1; min-width: 0; overflow: hidden;
 }
 .side-music__title {
-  margin: 0; font-size: 12px; font-weight: 600; color: var(--ink-main);
+  margin: 0; font-size: 12px; font-weight: 600; color: var(--ink);
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   line-height: 1.4;
 }
