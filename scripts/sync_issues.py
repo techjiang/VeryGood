@@ -310,6 +310,33 @@ def ensure_welcome_issue(cfg: dict, items: list[dict]) -> None:
         log(f"[sync] 自动创建引导 Issue 失败（不影响构建，可用 issues.welcome_issue: false 关闭）：{e}")
 
 
+def is_synced_file(path: Path) -> bool:
+    """判断文件是否为 sync 生成（front matter 含 `issue: 编号` 字段）。
+
+    手工放在 source/posts 下的文章（如示例文章）没有该字段，属于
+    作者直接维护的源文件——它们不参与 Issue 生命周期，sync 绝不删除/覆盖。
+    """
+    try:
+        head = path.read_text(encoding="utf-8", errors="ignore")[:600]
+    except OSError:
+        return False
+    return bool(re.search(r"(?m)^issue:\s*\d+", head))
+
+
+def unlink_if_synced(path: Path) -> None:
+    """仅当文件确实由 Issue 同步生成时才删除（手工源文件一律保留）。"""
+    try:
+        if path.exists() and is_synced_file(path):
+            path.unlink()
+    except OSError:
+        pass
+
+
+def target_exists_manual(path: Path) -> bool:
+    """目标文件已存在、且不是 sync 生成的（即作者手工维护）→ 不覆盖不删除。"""
+    return path.exists() and not is_synced_file(path)
+
+
 def main() -> int:
     cfg = load_issues_cfg()
     tz_name = ""
@@ -358,10 +385,11 @@ def main() -> int:
         state = item.get("state", "open").lower()
 
         # 非开放 Issue（已关闭）或完全没有标签 → 删除对应文件 = 下线
+        # 仅删除由 sync 生成的文件；手工创作的源文件不受 Issue 生命周期影响
         if state != "open" or (not labels):
-            file_post.unlink(missing_ok=True)
-            file_page.unlink(missing_ok=True)
-            file_moment.unlink(missing_ok=True)
+            unlink_if_synced(file_post)
+            unlink_if_synced(file_page)
+            unlink_if_synced(file_moment)
             continue
 
         # 发布类别互斥时取其一：Page > Moment > Draft > Article
@@ -387,11 +415,14 @@ def main() -> int:
         updated = to_local(item["updatedAt"], tz_name)
 
         if kind == "moment":
+            if target_exists_manual(file_moment):
+                log(f"[sync] 跳过动态 #{number}：{file_moment.name} 为手工文件，不会被 Issue 覆盖")
+                continue
             fm = render_moment_front_matter(date_, updated, number)
             target = file_moment
             target.write_text(fm + body + "\n", encoding="utf-8")
-            file_post.unlink(missing_ok=True)
-            file_page.unlink(missing_ok=True)
+            unlink_if_synced(file_post)
+            unlink_if_synced(file_page)
             written_moments.add(str(target.name))
             log(f"[sync] 动态 #{number} <- {title!r}")
             continue
@@ -409,28 +440,37 @@ def main() -> int:
             extra=user_fm,
         )
         target = file_page if kind == "page" else file_post
+        peer = file_post if kind == "page" else file_page  # 同 Issue 的另一类别文件
+        if target_exists_manual(target):
+            log(f"[sync] 跳过写入 {target.name}：该文件为手工维护，不会被 Issue 覆盖（如需接管请删除文件后重跑）")
+            unlink_if_synced(file_moment)
+            unlink_if_synced(peer)
+            continue
         target.write_text(fm + body_rest + "\n", encoding="utf-8")
-        file_moment.unlink(missing_ok=True)
-        (file_post if kind == "page" else file_page).unlink(missing_ok=True)
+        unlink_if_synced(file_moment)
+        unlink_if_synced(peer)
         if kind == "page":
             written_pages.add(str(target.name))
         else:
             written_posts.add(str(target.name))
         log(f"[sync] {'页面' if kind == 'page' else ('草稿' if kind == 'draft' else '文章')} #{number} <- {title!r} (tags={tags})")
 
-    # 清理：已被删除/改名不存在的 issue 残留
+    # 清理：已被关闭/删除的 Issue 残留（仅清理 sync 生成的文件，手工源文件保留）
     for f in sorted(existing_posts, key=lambda p: p.name):
         if f.name not in written_posts:
-            f.unlink(missing_ok=True)
-            log(f"[sync] 移除已删除的文章文件 {f.name}")
+            unlink_if_synced(f)
+            if not f.exists():
+                log(f"[sync] 移除已删除的文章文件 {f.name}")
     for f in sorted(existing_pages, key=lambda p: p.name):
         if f.name not in written_pages:
-            f.unlink(missing_ok=True)
-            log(f"[sync] 移除已删除的页面文件 {f.name}")
+            unlink_if_synced(f)
+            if not f.exists():
+                log(f"[sync] 移除已删除的页面文件 {f.name}")
     for f in sorted(existing_moments, key=lambda p: p.name):
         if f.name not in written_moments:
-            f.unlink(missing_ok=True)
-            log(f"[sync] 移除已删除的动态文件 {f.name}")
+            unlink_if_synced(f)
+            if not f.exists():
+                log(f"[sync] 移除已删除的动态文件 {f.name}")
 
     log(f"[sync] 完成：文章 {len(written_posts)} 篇，页面 {len(written_pages)} 个，动态 {len(written_moments)} 条")
     return 0
