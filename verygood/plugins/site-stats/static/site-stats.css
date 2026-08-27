@@ -1,54 +1,86 @@
-/* VeryGood 站点数据组件（v1.3.0）—— 随内置插件 site-stats 注入左侧栏。
+/* VeryGood 站点数据组件（v1.4.6）—— 随内置插件 site-stats 注入左侧栏。
    莫兰迪粉低饱和配色，跟随主题 CSS 变量，深浅模式自动适配。 */
+
 .side-stats {
+  margin-top: 16px;
+  padding-top: 16px;
   border-top: 1px solid var(--line);
-  padding-top: 14px;
-  margin-top: 4px;
 }
+
 .side-stats__title {
   display: flex;
   align-items: center;
   gap: 7px;
-  margin: 0 0 10px;
+  margin: 0 0 14px;
   font-size: 13px;
   font-weight: 600;
   color: var(--ink-strong);
   letter-spacing: 0.03em;
 }
+
+.side-stats__title::before {
+  content: "";
+  display: inline-block;
+  width: 4px;
+  height: 14px;
+  border-radius: 2px;
+  background: var(--rose-400);
+}
+
 .side-stats__grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 7px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
 }
+
 .side-stats__cell {
   display: flex;
   flex-direction: column;
-  gap: 3px;
-  padding: 8px 10px;
-  border-radius: 10px;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 12px 8px;
+  border-radius: 12px;
   background: var(--bg-soft);
   border: 1px solid var(--line);
-  transition: border-color 0.18s ease, transform 0.18s ease;
+  transition: all 0.2s ease;
+  text-align: center;
+  min-height: 64px;
 }
+
 .side-stats__cell:hover {
   border-color: var(--pink-soft);
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(192, 119, 142, 0.08);
 }
+
 .side-stats__cell b {
-  font-size: 15px;
+  font-size: 18px;
   font-weight: 700;
   color: var(--ink-strong);
   font-variant-numeric: tabular-nums;
-  word-break: break-all;
+  line-height: 1;
 }
+
 .side-stats__cell span {
   font-size: 11px;
   color: var(--ink-soft);
+  line-height: 1.2;
 }
-.side-stats__cell b::after {
-  content: "";
+
+/* 浏览/访客数加载中状态 */
+.side-stats__cell b:empty::before,
+.side-stats__cell b:only-child::before {
+  content: "–";
+  color: var(--ink-faint);
 }
-/* 暗色模式微调：卡片底色稍亮，避免与背景粘连 */
+
+/* 暗色模式微调 */
 [data-theme="dark"] .side-stats__cell {
   background: rgba(255, 255, 255, 0.03);
+}
+
+[data-theme="dark"] .side-stats__cell:hover {
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
