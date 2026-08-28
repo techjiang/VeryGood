@@ -98,19 +98,19 @@ author:
     weibo: ""
     rss: ""                               # 留空自动指向 /rss.xml
 
-# ---------- 图片链接幻灯片（v1.5.1，左栏站点数据下方） ----------
+# ---------- 图片链接幻灯片（v1.5.4，左栏站点数据下方） ----------
 slideshow:
   enabled: true
   interval: 4000
   slides:
     - title: "VeryGood 主题"
-      image: "https://img2.tofaka.com/autoupload/f/3624q/20260827/vw3x/1192X497/TechSauce-Beijing.png"
+      image: "/images/slide1.png"
       url: "https://github.com/techjiang/VeryGood"
     - title: "TechSauce"
-      image: "https://picsum.photos/seed/verygood-2/400/225"
+      image: "/images/slide2.jpg"
       url: "https://docs.asoe.cn"
     - title: "GitHub Pages"
-      image: "https://picsum.photos/seed/verygood-3/400/225"
+      image: "/images/slide3.jpg"
       url: "https://pages.github.com"
 
 # ---------- 音乐播放器（v1.5.2，右栏微语下方） ----------
