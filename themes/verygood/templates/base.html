@@ -59,16 +59,14 @@
 
 <link rel="alternate" type="application/rss+xml" title="{{ site.cfg.site.title }} · RSS" href="{{ url_for('/rss.xml') }}">
 <link rel="icon" type="image/svg+xml" href="{{ url_for('/img/favicon.svg') }}">
-<link rel="stylesheet" href="{{ url_for('/css/main.css') }}?v=5" media="all">
+      <link rel="stylesheet" href="{{ url_for('/css/main.css') }}?v=6" media="all">
 
 {{ injections.get('head', []) | join('\n') | safe }}
 {% block head_extra %}{% endblock %}
 <script>/* <![CDATA[ */
 (function(){try{var t=localStorage.getItem('vg-theme');if(!t){t=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.setAttribute('data-theme',t);}catch(e){document.documentElement.setAttribute('data-theme','light');}})();
 /* ]]> */</script>
-{% if cfg.slideshow and cfg.slideshow.enabled %}
-<script>window.__VG_SLIDESHOW__={"slides":{{ cfg.slideshow.slides | tojson | safe }},"interval":{{ cfg.slideshow.interval or 4000 }}};</script>
-{% endif %}
+
 {% if cfg.music and cfg.music.enabled %}
 <script>window.__VG_MUSIC__={"tracks":{{ cfg.music.tracks | tojson | safe }}};</script>
 {% endif %}
@@ -147,33 +145,17 @@
     {# ---- 站点数据组件注入点（v1.3.0，内置插件 site-stats 提供） ---- #}
     {{ injections.get('sidebar_data', []) | join('\n') | safe }}
 
-    {# ---- 图片链接幻灯片（v1.5.3 重写，Edge 全兼容） ---- #}
-    {% if cfg.slideshow and cfg.slideshow.enabled and cfg.slideshow.slides %}
-    <div class="side-slideshow" id="slideshow" aria-label="图片幻灯片">
-      <div class="side-slideshow__track" id="slideshow-track">
-        {% for s in cfg.slideshow.slides %}
-        <a class="side-slideshow__item"
-           href="{{ s.url }}"
-           {% if s.url.startswith('http') %}target="_blank" rel="noopener"{% endif %}
-           data-index="{{ loop.index0 }}">
-          <img src="{{ s.image }}" alt="{{ s.title or '' }}" loading="eager">
-          {% if s.title %}
-          <span class="side-slideshow__title">{{ s.title }}</span>
-          {% endif %}
-        </a>
-        {% endfor %}
-      </div>
-      {% if cfg.slideshow.slides | length > 1 %}
-      <div class="side-slideshow__dots" id="slideshow-dots">
-        {% for s in cfg.slideshow.slides %}
-        <button class="side-slideshow__dot{% if loop.first %} is-active{% endif %}"
-                data-index="{{ loop.index0 }}"
-                aria-label="第 {{ loop.index }} 张"></button>
-        {% endfor %}
-      </div>
-      {% endif %}
+    {# ---- 心电图特效（v1.6.0，纯 CSS/SVG，无外部资源） ---- #}
+    <div class="side-heartbeat" aria-hidden="true">
+      <svg class="side-heartbeat__svg" viewBox="0 0 300 60" preserveAspectRatio="none">
+        <path class="side-heartbeat__path"
+              d="M0,30 h15 l4,-18 l8,36 l8,-36 l4,18 h30
+                 l4,-18 l8,36 l8,-36 l4,18 h30
+                 l4,-18 l8,36 l8,-36 l4,18 h30
+                 l4,-18 l8,36 l8,-36 l4,18 h30
+                 l4,-18 l8,36 l8,-36 l4,18 h15" />
+      </svg>
     </div>
-    {% endif %}
 
     <nav class="site-nav" id="site-nav" aria-label="主导航">
       <a href="{{ url_for('/') }}" {% if current_path == url_for('/') %}aria-current="page"{% endif %} class="site-nav__link">首页</a>
@@ -528,7 +510,7 @@ var FP1 = fp('vg-power-51f3a8|' + EXPECTED);
   }
 })();
 </script>
-<script src="{{ url_for('/js/main.js') }}?v=5" defer></script>
+      <script src="{{ url_for('/js/main.js') }}?v=6" defer></script>
 {{ injections.get('body_end', []) | join('\n') | safe }}
 {% endblock %}
 </body>
