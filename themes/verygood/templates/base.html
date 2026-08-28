@@ -152,8 +152,12 @@
     <div class="side-slideshow" aria-label="图片幻灯片" id="slideshow">
       <div class="side-slideshow__viewport" id="slideshow-viewport">
         {% for s in cfg.slideshow.slides %}
-        <a class="side-slideshow__slide{% if loop.first %} is-active{% endif %}" href="{{ s.url }}" {% if s.url.startswith('http') %}target="_blank" rel="noopener"{% endif %} data-index="{{ loop.index0 }}">
-          <img src="{{ s.image }}" alt="{{ s.title or '' }}" loading="eager" decoding="async">
+        <a class="side-slideshow__slide{% if loop.first %} is-active{% endif %}"
+           href="{{ s.url }}"
+           {% if s.url.startswith('http') %}target="_blank" rel="noopener"{% endif %}
+           data-index="{{ loop.index0 }}"
+           style="background-image:url('{{ s.image }}')">
+          <img src="{{ s.image }}" alt="{{ s.title or '' }}" loading="eager" decoding="async" onerror="this.style.display='none'">
           {% if s.title %}
           <span class="side-slideshow__caption">{{ s.title }}</span>
           {% endif %}
