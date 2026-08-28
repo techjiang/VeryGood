@@ -55,7 +55,9 @@ jobs:
         run: python scripts/sync_issues.py
 
       - name: Build site
-        run: python -m verygood build
+  env:
+    PYTHONPATH: .
+  run: python -m verygood build
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
