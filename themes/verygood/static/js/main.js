@@ -449,9 +449,10 @@ window.addEventListener('scroll', requestSpy, { passive: true });
     vgCheckAndRestoreFooter();
   }
 
-  /* ---------- 图片链接幻灯片（v1.5.3 重写，Edge 全兼容） ---------- */
+  /* ---------- 图片链接幻灯片（v1.5.4，Flexbox 横向滚动） ---------- */
   var slideshow = doc.getElementById('slideshow');
   if (slideshow) {
+    var ssTrack = doc.getElementById('slideshow-track');
     var ssSlides = slideshow.querySelectorAll('.side-slideshow__item');
     var ssDots = slideshow.querySelectorAll('.side-slideshow__dot');
     var ssCount = ssSlides.length;
@@ -462,9 +463,7 @@ window.addEventListener('scroll', requestSpy, { passive: true });
     function ssGo(i) {
       if (!ssCount) return;
       ssIndex = (i + ssCount) % ssCount;
-      ssSlides.forEach(function(el, idx) {
-        el.classList.toggle('is-active', idx === ssIndex);
-      });
+      ssTrack.style.transform = 'translateX(-' + (ssIndex * 100) + '%)';
       ssDots.forEach(function(el, idx) {
         el.classList.toggle('is-active', idx === ssIndex);
       });
