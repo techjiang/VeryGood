@@ -4,14 +4,14 @@
 
 VeryGood 是一个为 GitHub Pages 量身定制的开源博客主题。写作发生在 GitHub Issue 里——标签即状态机，关闭 Issue 即下线文章。你只管写，剩下的交给自动化。
 
-**当前版本：v1.5.2** — 右侧栏音乐播放器、署名五层防线（CSS 伪元素备份 + 多重定时器防清除）、静态资源版本戳 v=5。
+**当前版本：v1.6.0** — 左侧栏心电图特效（纯 CSS/SVG 动画，零外部资源依赖）、彻底移除幻灯片功能、静态资源版本戳 v=6。
 
 ## 特性一览
 
 | 维度 | 能力 |
 | --- | --- |
 | 🌸 颜值 | 低饱和玫瑰灰配色（莫兰迪粉 #C0778E），不甜腻、不过气；深浅双主题跟随系统 + 手动切换并记忆 |
-| 🧱 布局 | 桌面三栏：左侧固定信息栏 / 中间正文 / 右侧 Widget；移动端顶栏吸顶，窄屏优雅降级 |
+| 🧱 布局 | 桌面三栏：左侧固定信息栏（含心电图特效）/ 中间正文 / 右侧 Widget；移动端顶栏吸顶，窄屏优雅降级 |
 | ✍️ 写作 | Gmeek 式 Issue 写作，标签即状态机；也支持直接推 Markdown 到 `source/posts/`，两种方式互不干扰 |
 | 🚀 部署 | 一条 GitHub Actions 工作流完成全链路：Issue 同步 → 构建 → 部署 Pages |
 | 🔍 SEO | 结构化数据（BlogPosting / BreadcrumbList / WebSite+SearchAction）、Sitemap（含图片）、RSS、Open Graph、Twitter Card、canonical、百度推送 |
@@ -19,6 +19,7 @@ VeryGood 是一个为 GitHub Pages 量身定制的开源博客主题。写作发
 | 💬 互动 | 公告弹窗、朋友圈动态（站长 Issue 推送）、giscus / utterances 评论 |
 | 🔌 可玩性 | 插件生态：5 个内置插件 + 用户自动发现，短代码 / 钩子 / 模板注入 / Jinja 过滤器全链路 API |
 | 🔒 署名锁定 | 五层防线：构建层校验 + 运行时 SHA-256 + MutationObserver + CSS 防篡改 + CSS 伪元素备份 |
+| 💗 心跳特效 | 左侧栏纯 CSS/SVG 心电图动画，零 JS 依赖、零外部资源，流畅无卡顿 |
 
 ## 快速开始
 
@@ -61,6 +62,16 @@ author:
 | `分类:技术` | 归入「技术」分类（前缀 `分类:` / `category:` 均可） |
 | 其他任意标签 | 自动成为文章 tags |
 
+## v1.6.0 更新内容
+
+**左侧栏心电图特效** — 彻底移除 v1.5.x 的图片链接幻灯片功能，在左侧栏空出位置新增纯 CSS/SVG 心电图动画：SVG path 描线动画（`stroke-dasharray` + `stroke-dashoffset` 循环绘制），粉色波形连续滚动，顶部装饰圆点随心跳脉动。零 JavaScript 依赖、零外部资源请求，兼容 PC 端与移动端，流畅无卡顿。
+
+**左侧栏固定不动** — 明确锁定左侧栏 `position: fixed`，不随页面滚动移动，视觉稳定。
+
+**稳定性提升** — 移除幻灯片后消除了此前 PC 端图片不显示的根因（外部图床被浏览器追踪防护拦截），不再依赖任何外部图片域名，所有视觉元素均在仓库内自包含。
+
+**静态资源版本戳** — v=6，确保浏览器缓存正确更新。
+
 ## v1.5.2 更新内容
 
 **右侧栏音乐播放器** — 在右侧栏"微语"下方新增音乐功能卡片：封面旋转动画、进度条拖拽 seek、上一首/下一首切换、自动播放下一首、加载 shimmer 效果、播放错误友好提示。通过 `config.yml` 的 `music` 配置段自定义曲目列表。
@@ -71,7 +82,7 @@ author:
 
 ## v1.5.1 更新内容
 
-**幻灯片轮播** — 音乐播放器替换为图片链接幻灯片轮播：自动播放、圆点切换、悬停暂停、页面不可见时自动暂停。
+**幻灯片轮播**（已于 v1.6.0 移除） — 曾在左侧栏新增图片链接幻灯片轮播功能，后因 PC 端浏览器追踪防护拦截外部图床域名导致图片不显示，v1.6.0 彻底移除并替换为心电图特效。
 
 **工具栏独立** — 主题切换 / 搜索 / RSS 从导航底部移至头像下方独立容器，视觉层次更清晰。
 
@@ -95,18 +106,6 @@ music:
       cover: "https://example.com/cover.jpg"
 ```
 
-### 幻灯片轮播
-
-```yaml
-slideshow:
-  enabled: true
-  interval: 4000            # 自动播放间隔（毫秒）
-  slides:
-    - title: "VeryGood 主题"
-      image: "https://picsum.photos/seed/verygood-1/400/225"
-      url: "https://github.com/techjiang/VeryGood"
-```
-
 ### 核心配置速查
 
 ```yaml
@@ -125,7 +124,7 @@ site:
   rightbar:                  # 右侧栏（≥1760px 显示）
     enabled: true
     show_toc: true           # 文章目录
-    show_recent: true         # 近期文章
+    show_recent: true        # 近期文章
     show_tags: true           # 标签云
     show_categories: true     # 分类
     show_links: true           # 友链缩略
