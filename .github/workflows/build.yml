@@ -55,9 +55,9 @@ jobs:
         run: python scripts/sync_issues.py
 
       - name: Build site
-  env:
-    PYTHONPATH: .
-  run: python -m verygood build
+        env:
+          PYTHONPATH: .  # 优先使用仓库本地 verygood 源码，而非 PyPI 旧版
+        run: python -m verygood build
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
