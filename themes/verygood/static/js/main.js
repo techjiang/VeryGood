@@ -19,6 +19,7 @@ var doc = document;
     if (mqMobile.addEventListener) { mqMobile.addEventListener('change', hSchedule); }
     else if (mqMobile.addListener) { mqMobile.addListener(hSchedule); }
     window.addEventListener('resize', hSchedule);
+    window.addEventListener('load', hSchedule);
   }
 
   /* ---------- 深浅色切换 ---------- */
