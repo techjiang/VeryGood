@@ -152,7 +152,7 @@
     <div class="side-slideshow" id="slideshow" aria-label="图片幻灯片">
       <div class="side-slideshow__track" id="slideshow-track">
         {% for s in cfg.slideshow.slides %}
-        <a class="side-slideshow__item{% if loop.first %} is-active{% endif %}"
+        <a class="side-slideshow__item"
            href="{{ s.url }}"
            {% if s.url.startswith('http') %}target="_blank" rel="noopener"{% endif %}
            data-index="{{ loop.index0 }}">
