@@ -449,58 +449,6 @@ window.addEventListener('scroll', requestSpy, { passive: true });
     vgCheckAndRestoreFooter();
   }
 
-  /* ---------- 图片链接幻灯片（v1.5.4，Flexbox 横向滚动） ---------- */
-  var slideshow = doc.getElementById('slideshow');
-  if (slideshow) {
-    var ssTrack = doc.getElementById('slideshow-track');
-    var ssSlides = slideshow.querySelectorAll('.side-slideshow__item');
-    var ssDots = slideshow.querySelectorAll('.side-slideshow__dot');
-    var ssCount = ssSlides.length;
-    var ssIndex = 0;
-    var ssTimer = null;
-    var ssInterval = 4000;
-
-    function ssGo(i) {
-      if (!ssCount) return;
-      ssIndex = (i + ssCount) % ssCount;
-      ssTrack.style.transform = 'translateX(-' + (ssIndex * 100) + '%)';
-      ssDots.forEach(function(el, idx) {
-        el.classList.toggle('is-active', idx === ssIndex);
-      });
-    }
-
-    function ssNext() { ssGo(ssIndex + 1); }
-
-    function ssStart() {
-      if (ssTimer) clearInterval(ssTimer);
-      if (ssCount > 1) ssTimer = setInterval(ssNext, ssInterval);
-    }
-
-    function ssStop() {
-      if (ssTimer) { clearInterval(ssTimer); ssTimer = null; }
-    }
-
-    /* 点击圆点切换 */
-    ssDots.forEach(function(dot) {
-      dot.addEventListener('click', function() {
-        ssGo(parseInt(dot.getAttribute('data-index'), 10));
-        ssStart();
-      });
-    });
-
-    /* 鼠标悬停暂停 */
-    slideshow.addEventListener('mouseenter', ssStop);
-    slideshow.addEventListener('mouseleave', ssStart);
-
-    /* 页面不可见时暂停 */
-    doc.addEventListener('visibilitychange', function() {
-      if (doc.hidden) ssStop(); else ssStart();
-    });
-
-    ssGo(0);
-    ssStart();
-  }
-
   /* ---------- 音乐播放器（v1.5.2，右栏） ---------- */
   var musicAudio = doc.getElementById('music-audio');
   if (musicAudio) {
