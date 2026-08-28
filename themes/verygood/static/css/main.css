@@ -170,76 +170,6 @@ button { font-family: inherit; }
 .side-recent__list a:hover { color: var(--rose-600); }
 .side-recent__list time { flex: 0 0 auto; font-family: var(--font-mono); font-size: 11.5px; color: var(--ink-faint); }
 
-/* ---- 心电图特效（v1.6.0，纯 CSS/SVG，无外部资源） ---- */
-.side-heartbeat {
-  width: 100%;
-  height: 60px;
-  min-height: 60px;
-  margin-top: 16px;
-  border-radius: var(--radius);
-  border: 1px solid var(--line);
-  background: var(--surface-2);
-  box-shadow: var(--shadow-sm);
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  cursor: default;
-}
-.side-heartbeat__svg {
-  width: 100%;
-  height: 100%;
-  display: block;
-}
-.side-heartbeat__path {
-  fill: none;
-  stroke: #C0778E;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-dasharray: 600;
-  stroke-dashoffset: 600;
-  animation: vgHeartbeat 2.4s linear infinite;
-}
-@keyframes vgHeartbeat {
-  0%   { stroke-dashoffset: 600; }
-  15%  { stroke-dashoffset: 600; }
-  45%  { stroke-dashoffset: 0; }
-  80%  { stroke-dashoffset: -600; }
-  100% { stroke-dashoffset: -600; }
-}
-/* 装饰圆点 */
-.side-heartbeat::before {
-  content: '';
-  position: absolute;
-  left: 8px; top: 50%;
-  width: 6px; height: 6px;
-  margin-top: -3px;
-  border-radius: 50%;
-  background: #C0778E;
-  animation: vgBeatPulse 2.4s ease-in-out infinite;
-}
-@keyframes vgBeatPulse {
-  0%, 100% { opacity: 0.3; transform: scale(1); }
-  15%      { opacity: 1; transform: scale(1.4); }
-  30%      { opacity: 0.5; transform: scale(1); }
-  45%      { opacity: 1; transform: scale(1.4); }
-  60%      { opacity: 0.3; transform: scale(1); }
-}
-/* 底部标签 */
-.side-heartbeat__label {
-  position: absolute;
-  bottom: 2px; right: 8px;
-  font-size: 9px;
-  font-family: var(--font-mono);
-  color: var(--ink-faint);
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  opacity: 0.6;
-  pointer-events: none;
-}
-
 /* ---- 音乐播放器（v1.5.2，右栏微语下方） ---- */
 .side-music { }
 .side-music__header { display: flex; align-items: center; gap: 8px; }
@@ -917,21 +847,6 @@ html.no-js .reveal { opacity: 1; transform: none; }
   .site-brand { font-size: 16px; }
   .site-brand__bio { display: none; }
   .side-recent { display: none; }
-  /* v1.6.0：移动端心电图自适应 */
-  .side-heartbeat {
-    margin: 6px -16px 0;
-    border-radius: 0;
-    border-left: 0;
-    border-right: 0;
-    border-top: 0;
-    box-shadow: none;
-    height: 50px;
-    min-height: 50px;
-  }
-  .side-heartbeat__svg {
-    width: 100%;
-    height: 100%;
-  }
   .site-nav__toggle { display: inline-flex; align-items: center; }
   .site-nav {
     position: absolute; top: calc(100% + 1px); left: 0; right: 0;
