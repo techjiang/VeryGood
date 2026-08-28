@@ -177,15 +177,17 @@ button { font-family: inherit; }
   border: 1px solid var(--line);
   background: var(--surface-2);
   box-shadow: var(--shadow-sm);
+  width: 100%;
   max-width: 100%;
   box-sizing: border-box;
 }
 .side-slideshow__viewport {
   position: relative;
   width: 100%;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: 3 / 2;
   overflow: hidden;
   background: var(--bg-soft);
+  min-height: 120px;
 }
 .side-slideshow__slide {
   position: absolute; inset: 0;
@@ -903,14 +905,31 @@ html.no-js .reveal { opacity: 1; transform: none; }
 /* ---------- 移动端 ---------- */
 @media (max-width: 860px) {
   .site-header { padding: 8px 16px; }
-  .site-header__inner { flex-wrap: nowrap; gap: 10px; }
+  .site-header__inner { flex-wrap: wrap; gap: 10px; }
   .site-identity { flex-direction: row; align-items: center; text-align: left; gap: 10px; flex: 1; min-width: 0; }
   .site-avatar { width: 42px; height: 42px; border-width: 2px; flex: 0 0 42px; }
   .site-brand { font-size: 16px; }
   .site-brand__bio { display: none; }
   .side-recent { display: none; }
-  /* .side-slideshow 在移动端隐藏（左栏折叠） */
-  .side-slideshow { display: none; }
+  /* v1.5.2：移动端幻灯片改为页头下方全宽横幅展示 */
+  .side-slideshow {
+    display: block;
+    flex: 0 0 100%;
+    order: 50;
+    margin: 6px -16px 0;
+    border-radius: 0;
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    box-shadow: none;
+  }
+  .side-slideshow__viewport {
+    aspect-ratio: 21 / 9;
+    min-height: 100px;
+  }
+  .side-slideshow__dots {
+    padding: 5px 0;
+  }
   .site-nav__toggle { display: inline-flex; align-items: center; }
   .site-nav {
     position: absolute; top: calc(100% + 1px); left: 0; right: 0;
