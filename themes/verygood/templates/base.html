@@ -147,27 +147,28 @@
     {# ---- 站点数据组件注入点（v1.3.0，内置插件 site-stats 提供） ---- #}
     {{ injections.get('sidebar_data', []) | join('\n') | safe }}
 
-    {# ---- 图片链接幻灯片（v1.5.1，展示在站点数据下方） ---- #}
+    {# ---- 图片链接幻灯片（v1.5.3 重写，Edge 全兼容） ---- #}
     {% if cfg.slideshow and cfg.slideshow.enabled and cfg.slideshow.slides %}
-    <div class="side-slideshow" aria-label="图片幻灯片" id="slideshow">
-      <div class="side-slideshow__viewport" id="slideshow-viewport">
+    <div class="side-slideshow" id="slideshow" aria-label="图片幻灯片">
+      <div class="side-slideshow__track" id="slideshow-track">
         {% for s in cfg.slideshow.slides %}
-        <a class="side-slideshow__slide{% if loop.first %} is-active{% endif %}"
+        <a class="side-slideshow__item{% if loop.first %} is-active{% endif %}"
            href="{{ s.url }}"
            {% if s.url.startswith('http') %}target="_blank" rel="noopener"{% endif %}
-           data-index="{{ loop.index0 }}"
-           style="background-image:url('{{ s.image }}')">
-          <img src="{{ s.image }}" alt="{{ s.title or '' }}" loading="eager" decoding="async" onerror="this.style.display='none'">
+           data-index="{{ loop.index0 }}">
+          <img src="{{ s.image }}" alt="{{ s.title or '' }}" loading="eager">
           {% if s.title %}
-          <span class="side-slideshow__caption">{{ s.title }}</span>
+          <span class="side-slideshow__title">{{ s.title }}</span>
           {% endif %}
         </a>
         {% endfor %}
       </div>
       {% if cfg.slideshow.slides | length > 1 %}
-      <div class="side-slideshow__dots" id="slideshow-dots" role="tablist">
+      <div class="side-slideshow__dots" id="slideshow-dots">
         {% for s in cfg.slideshow.slides %}
-        <button class="side-slideshow__dot{% if loop.first %} is-active{% endif %}" data-index="{{ loop.index0 }}" role="tab" aria-label="第 {{ loop.index }} 张"></button>
+        <button class="side-slideshow__dot{% if loop.first %} is-active{% endif %}"
+                data-index="{{ loop.index0 }}"
+                aria-label="第 {{ loop.index }} 张"></button>
         {% endfor %}
       </div>
       {% endif %}
