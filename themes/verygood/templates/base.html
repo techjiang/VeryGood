@@ -153,7 +153,7 @@
       <div class="side-slideshow__viewport" id="slideshow-viewport">
         {% for s in cfg.slideshow.slides %}
         <a class="side-slideshow__slide{% if loop.first %} is-active{% endif %}" href="{{ s.url }}" {% if s.url.startswith('http') %}target="_blank" rel="noopener"{% endif %} data-index="{{ loop.index0 }}">
-          <img src="{{ s.image }}" alt="{{ s.title or '' }}" loading="lazy">
+          <img src="{{ s.image }}" alt="{{ s.title or '' }}" loading="eager" decoding="async">
           {% if s.title %}
           <span class="side-slideshow__caption">{{ s.title }}</span>
           {% endif %}
