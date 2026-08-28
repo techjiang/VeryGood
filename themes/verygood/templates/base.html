@@ -59,7 +59,7 @@
 
 <link rel="alternate" type="application/rss+xml" title="{{ site.cfg.site.title }} · RSS" href="{{ url_for('/rss.xml') }}">
 <link rel="icon" type="image/svg+xml" href="{{ url_for('/img/favicon.svg') }}">
-      <link rel="stylesheet" href="{{ url_for('/css/main.css') }}?v=6" media="all">
+      <link rel="stylesheet" href="{{ url_for('/css/main.css') }}?v=7" media="all">
 
 {{ injections.get('head', []) | join('\n') | safe }}
 {% block head_extra %}{% endblock %}
@@ -144,18 +144,6 @@
 
     {# ---- 站点数据组件注入点（v1.3.0，内置插件 site-stats 提供） ---- #}
     {{ injections.get('sidebar_data', []) | join('\n') | safe }}
-
-    {# ---- 心电图特效（v1.6.0，纯 CSS/SVG，无外部资源） ---- #}
-    <div class="side-heartbeat" aria-hidden="true">
-      <svg class="side-heartbeat__svg" viewBox="0 0 300 60" preserveAspectRatio="none">
-        <path class="side-heartbeat__path"
-              d="M0,30 h15 l4,-18 l8,36 l8,-36 l4,18 h30
-                 l4,-18 l8,36 l8,-36 l4,18 h30
-                 l4,-18 l8,36 l8,-36 l4,18 h30
-                 l4,-18 l8,36 l8,-36 l4,18 h30
-                 l4,-18 l8,36 l8,-36 l4,18 h15" />
-      </svg>
-    </div>
 
     <nav class="site-nav" id="site-nav" aria-label="主导航">
       <a href="{{ url_for('/') }}" {% if current_path == url_for('/') %}aria-current="page"{% endif %} class="site-nav__link">首页</a>
@@ -510,7 +498,7 @@ var FP1 = fp('vg-power-51f3a8|' + EXPECTED);
   }
 })();
 </script>
-      <script src="{{ url_for('/js/main.js') }}?v=6" defer></script>
+      <script src="{{ url_for('/js/main.js') }}?v=7" defer></script>
 {{ injections.get('body_end', []) | join('\n') | safe }}
 {% endblock %}
 </body>
