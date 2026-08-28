@@ -170,7 +170,7 @@ button { font-family: inherit; }
 .side-recent__list a:hover { color: var(--rose-600); }
 .side-recent__list time { flex: 0 0 auto; font-family: var(--font-mono); font-size: 11.5px; color: var(--ink-faint); }
 
-/* ---- 图片链接幻灯片（v1.5.1） ---- */
+/* ---- 图片链接幻灯片（v1.5.3 修复版） ---- */
 .side-slideshow {
   border-radius: var(--radius);
   overflow: hidden;
@@ -181,32 +181,44 @@ button { font-family: inherit; }
   max-width: 100%;
   box-sizing: border-box;
 }
+/* 使用 padding-top 百分比实现宽高比，所有浏览器兼容 */
 .side-slideshow__viewport {
   position: relative;
   width: 100%;
-  aspect-ratio: 3 / 2;
   overflow: hidden;
   background: var(--bg-soft);
-  min-height: 120px;
+}
+.side-slideshow__viewport::before {
+  content: '';
+  display: block;
+  padding-top: 66.67%; /* 3:2 */
 }
 .side-slideshow__slide {
-  position: absolute; inset: 0;
-  display: flex; align-items: flex-end;
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  display: block;
   opacity: 0;
   transition: opacity 0.6s ease;
   pointer-events: none;
+  /* background-image 主渲染，兼容 Edge/旧浏览器 */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 .side-slideshow__slide.is-active {
   opacity: 1;
   pointer-events: auto;
 }
+/* 隐藏 img 标签（仅作 SEO/无 CSS 降级），背景图已主渲染 */
 .side-slideshow__slide img {
-  width: 100%; height: 100%;
-  object-fit: cover; display: block;
-  transition: transform 6s ease;
+  display: none !important;
 }
-.side-slideshow__slide.is-active img {
-  transform: scale(1.06);
+.side-slideshow__slide.is-active {
+  animation: ssZoom 6s ease forwards;
+}
+@keyframes ssZoom {
+  from { background-size: 100% auto; }
+  to { background-size: 106% auto; }
 }
 .side-slideshow__caption {
   position: absolute; left: 0; right: 0; bottom: 0;
@@ -911,7 +923,7 @@ html.no-js .reveal { opacity: 1; transform: none; }
   .site-brand { font-size: 16px; }
   .site-brand__bio { display: none; }
   .side-recent { display: none; }
-  /* v1.5.2：移动端幻灯片改为页头下方全宽横幅展示 */
+  /* v1.5.3：移动端幻灯片改为页头下方全宽横幅展示 */
   .side-slideshow {
     display: block;
     flex: 0 0 100%;
@@ -923,9 +935,8 @@ html.no-js .reveal { opacity: 1; transform: none; }
     border-top: 0;
     box-shadow: none;
   }
-  .side-slideshow__viewport {
-    aspect-ratio: 21 / 9;
-    min-height: 100px;
+  .side-slideshow__viewport::before {
+    padding-top: 42.86%; /* 21:9 */
   }
   .side-slideshow__dots {
     padding: 5px 0;
