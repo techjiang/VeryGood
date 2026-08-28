@@ -449,16 +449,15 @@ window.addEventListener('scroll', requestSpy, { passive: true });
     vgCheckAndRestoreFooter();
   }
 
-  /* ---------- 图片链接幻灯片（v1.5.1） ---------- */
+  /* ---------- 图片链接幻灯片（v1.5.3 重写，Edge 全兼容） ---------- */
   var slideshow = doc.getElementById('slideshow');
   if (slideshow) {
-    var ssConfig = window.__VG_SLIDESHOW__ || {};
-    var ssSlides = slideshow.querySelectorAll('.side-slideshow__slide');
+    var ssSlides = slideshow.querySelectorAll('.side-slideshow__item');
     var ssDots = slideshow.querySelectorAll('.side-slideshow__dot');
     var ssCount = ssSlides.length;
     var ssIndex = 0;
     var ssTimer = null;
-    var ssInterval = ssConfig.interval || 4000;
+    var ssInterval = 4000;
 
     function ssGo(i) {
       if (!ssCount) return;
@@ -486,7 +485,7 @@ window.addEventListener('scroll', requestSpy, { passive: true });
     ssDots.forEach(function(dot) {
       dot.addEventListener('click', function() {
         ssGo(parseInt(dot.getAttribute('data-index'), 10));
-        ssStart(); /* 重置计时器 */
+        ssStart();
       });
     });
 
